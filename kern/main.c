@@ -28,7 +28,7 @@ int main(void) {
 	}
 
 	for (int y = 0; y != VGA13_HEIGHT; ++y) {
-		vga13_setrow(y, 0, VGA13_WIDTH, rowBuf);
+		vga13_setRow(y, rowBuf);
 	}
 
 

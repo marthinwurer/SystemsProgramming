@@ -19,7 +19,7 @@ int vga13_clear(uint8_t color) {
 	}
 
 	for (int row = 0; row != VGA13_HEIGHT; ++row) {
-		vga13_setrow(row, 0, VGA13_WIDTH, rowBuf);
+		vga13_setRow(row, rowBuf);
 	}
 
 	return E_SUCCESS;
@@ -46,12 +46,7 @@ int vga13_getColumns(unsigned row, unsigned from, unsigned to, uint8_t *buf) {
 	return E_SUCCESS;
 }
 
-int vga13_init(void) {
-	vga13_clear(VGA_COLOR_BLACK);
-	return E_SUCCESS;
-}
-
-int vga13_getpixel(unsigned x, unsigned y, uint8_t *pixelVar) {
+int vga13_getPixel(unsigned x, unsigned y, uint8_t *pixelVar) {
 	if (BOUNDS_CHECK(x, y)) {
 		// error invalid bounds for x or y
 		return E_VGA13_BOUNDS;
@@ -65,7 +60,16 @@ int vga13_getpixel(unsigned x, unsigned y, uint8_t *pixelVar) {
 	return E_SUCCESS;
 }
 
-int vga13_setpixel(unsigned x, unsigned y, uint8_t color) {
+int vga13_getRow(unsigned row, uint8_t *buf) {
+	return vga13_getColumns(row, 0, VGA13_WIDTH, buf);	
+}
+
+int vga13_init(void) {
+	vga13_clear(VGA_COLOR_BLACK);
+	return E_SUCCESS;
+}
+
+int vga13_setPixel(unsigned x, unsigned y, uint8_t color) {
 	if (BOUNDS_CHECK(x, y)) {
 		return E_VGA13_BOUNDS;
 	}
@@ -74,12 +78,7 @@ int vga13_setpixel(unsigned x, unsigned y, uint8_t color) {
 	return E_SUCCESS;
 }
 
-int vga13_getrow(unsigned row, unsigned col, unsigned cols, uint8_t *buf) {
-
-	
-}
-
-int vga13_setrow(unsigned row, unsigned col, unsigned cols, uint8_t *buf) {
+int vga13_setColumns(unsigned row, unsigned col, unsigned cols, uint8_t *buf) {
 	
 	if (BOUNDS_CHECK(col, row) || cols > VGA13_WIDTH) {
 		return E_VGA13_BOUNDS;
@@ -95,5 +94,9 @@ int vga13_setrow(unsigned row, unsigned col, unsigned cols, uint8_t *buf) {
 	}
 
 	return E_SUCCESS;
+}
+
+int vga13_setRow(unsigned row, uint8_t *buf) {
+	return vga13_setColumns(row, 0, VGA13_WIDTH, buf);
 }
 
