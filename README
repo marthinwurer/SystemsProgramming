@@ -5,3 +5,53 @@ Please don't touch this unless you're working on build infrastructure, it is jus
 DSL group info:
 username:  *2 (we're team 2)
 password: the game is afoot
+
+## Makefile for Jenkins Config
+
+jenkins: usb.image
+
+```
+runqemu: usb.image
+qemu-system-x86_64 -nographic usb.image -vnc :5 -serial pty
+```
+
+## Pipeline for Jenkins
+
+```
+pipeline {
+    agent any
+    stages {
+        stage('Pull'){
+            steps{
+                 git credentialsId: 'pri', url: 'ssh://git@lin.nathancastlecloud.net:23/sysprog/build-test.git'
+            }
+        }
+        stage('Build'){
+            steps {
+                sh 'make jenkins'
+            }
+        }
+        stage('Deploy'){
+            steps {
+                sh 'make runqemu'
+            }
+        }
+    }
+}
+```
+
+## General Jenkins Config Info
+
+Configured in Docker. To run a command in the container:
+
+```
+docker exec -u root gigantic_bose !command_here!
+```
+
+Installed packages (needed for our build to work in the runner):
+
+* apt-get install make
+* apt-get install gcc
+* apt-get install qemu
+
+
