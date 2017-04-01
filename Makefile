@@ -114,10 +114,10 @@ OBJECTS = $(S_OBJ) $(C_OBJ)
 IMAGE_FILES := $(BUILD_DIR)/baseline/bootstrap.b \
                $(BUILD_DIR)/prog.b
 
-$(BUILD_DIR)/usb.image: $(IMAGE_FILES) BuildImage #prog.dis 
+$(BUILD_DIR)/usb.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
 	$(BUILDIMAGE) -d usb -o $@ -b $(IMAGE_FILES) 0x10000
 
-$(BUILD_DIR)/floppy.image: $(IMAGE_FILES) BuildImage #prog.dis 
+$(BUILD_DIR)/floppy.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
 	$(BUILDIMAGE) -d floppy -o $@ -b $(IMAGE_FILES) 0x10000
 
 $(BUILD_DIR)/prog.out: $(OBJECTS)
@@ -137,7 +137,7 @@ $(BUILD_DIR)/prog.b: $(BUILD_DIR)/prog.o
 # as for the standalone binaries.
 #
 
-BuildImage:
+$(BUILDIMAGE):
 	cd $(BUILDIMAGE_DIR) && $(MAKE)
 
 Offsets:	Offsets.c
