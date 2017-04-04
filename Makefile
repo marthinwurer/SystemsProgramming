@@ -74,8 +74,8 @@ $(BUILD_DIR)/floppy.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis
 # as for the standalone binaries.
 #
 
-BuildImage:
-	cd $(BUILDIMAGE_DIR) && $(MAKE)
+$(BUILDIMAGE):
+	$(MAKE) -C $(BUILDIMAGE_DIR)
 
 
 #
