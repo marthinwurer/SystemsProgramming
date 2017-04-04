@@ -12,7 +12,7 @@
 
 int vga13_clear(uint8_t color);
 
-int vga13_getColumns(unsigned row, unsigned col, unsigned bufsize, uint8_t *buf);
+int vga13_getColumns(unsigned row, unsigned col, unsigned bufsize, uint8_t buf[]);
 
 int vga13_getPixel(unsigned x, unsigned y, uint8_t *pixelVar);
 
@@ -20,7 +20,7 @@ int vga13_getRow(unsigned row, uint8_t buf[]);
 
 int vga13_init(void);
 
-int vga13_setColumns(unsigned row, unsigned from, unsigned to, uint8_t *buf);
+int vga13_setColumns(unsigned row, unsigned col, unsigned bufsize, uint8_t buf[]);
 
 int vga13_setPixel(unsigned x, unsigned y, uint8_t color);
 

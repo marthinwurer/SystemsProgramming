@@ -25,12 +25,9 @@ int vga13_clear(uint8_t color) {
 	return E_SUCCESS;
 }
 
-int vga13_getColumns(unsigned row, unsigned from, unsigned to, uint8_t *buf) {
-	int columnCount = to - from;
-	// 0 <= row < VGA13_HEIGHT
-	// 0 <= from < VGA13_WIDTH
-	// from <= to <= VGA13_WIDTH
-	if (BOUNDS_CHECK(from, row) || columnCount < 0 || to > VGA13_WIDTH) {
+int vga13_getColumns(unsigned row, unsigned col, unsigned bufsize, uint8_t buf[]) {
+
+	if (BOUNDS_CHECK(col, row) || (col + bufsize) > VGA13_WIDTH) {
 		return E_VGA13_BOUNDS;
 	}
 
@@ -38,8 +35,8 @@ int vga13_getColumns(unsigned row, unsigned from, unsigned to, uint8_t *buf) {
 		return E_VGA13_ARGNULL;
 	}
 
-	int offset = VGA13_offset(from, row);
-	for (int c = 0; c != columnCount; ++c) {
+	int offset = VGA13_offset(col, row);
+	for (unsigned c = 0; c != bufsize; ++c) {
 		buf[c] = framebuffer[offset + c];
 	}
 
@@ -60,7 +57,7 @@ int vga13_getPixel(unsigned x, unsigned y, uint8_t *pixelVar) {
 	return E_SUCCESS;
 }
 
-int vga13_getRow(unsigned row, uint8_t *buf) {
+int vga13_getRow(unsigned row, uint8_t buf[]) {
 	return vga13_getColumns(row, 0, VGA13_WIDTH, buf);	
 }
 
@@ -78,9 +75,9 @@ int vga13_setPixel(unsigned x, unsigned y, uint8_t color) {
 	return E_SUCCESS;
 }
 
-int vga13_setColumns(unsigned row, unsigned col, unsigned cols, uint8_t *buf) {
+int vga13_setColumns(unsigned row, unsigned col, unsigned bufsize, uint8_t buf[]) {
 	
-	if (BOUNDS_CHECK(col, row) || cols > VGA13_WIDTH) {
+	if (BOUNDS_CHECK(col, row) || (col + bufsize) > VGA13_WIDTH) {
 		return E_VGA13_BOUNDS;
 	}
 
@@ -89,14 +86,14 @@ int vga13_setColumns(unsigned row, unsigned col, unsigned cols, uint8_t *buf) {
 	}
 	
 	int offset = VGA13_offset(col, row);
-	for (int c = 0; c != cols; ++c) {
+	for (unsigned c = 0; c != bufsize; ++c) {
 		framebuffer[offset + c] = buf[c];
 	}
 
 	return E_SUCCESS;
 }
 
-int vga13_setRow(unsigned row, uint8_t *buf) {
+int vga13_setRow(unsigned row, uint8_t buf[]) {
 	return vga13_setColumns(row, 0, VGA13_WIDTH, buf);
 }
 
