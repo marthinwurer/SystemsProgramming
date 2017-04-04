@@ -7,4 +7,4 @@ BuildImage:	BuildImage.c
 	$(CC) -o BuildImage BuildImage.c
 
 clean:
-    rm -f BuildImage
+	rm -f BuildImage
