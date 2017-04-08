@@ -32,7 +32,7 @@ $(BUILD_DIR)/%.s: %.c $(MARKER)
 
 # Preprocess the assembly source
 $(BUILD_DIR)/%.s: %.S $(MARKER)
-	$(CPP) $(CPPFLAGS) -o $@ $<
+	$(CPP) $(CPPFLAGS) $(USER_OPTIONS) -o $@ $<
 
 # Compile assembly source to object code
 $(BUILD_DIR)/%.o: %.S $(MARKER)
@@ -46,7 +46,7 @@ $(BUILD_DIR)/%.b: %.s $(MARKER)
 
 # Compile C source to object code
 $(BUILD_DIR)/%.o: %.c $(MARKER)
-	$(CC) -MD $(CPPFLAGS) $(CFLAGS) -o $@ -c $<
+	$(CC) -MD $(CPPFLAGS) $(USER_OPTIONS) $(CFLAGS) -o $@ -c $<
 
 
 #

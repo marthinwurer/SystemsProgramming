@@ -401,16 +401,6 @@ boot_sig:
 switch:
 	cli
 
-#ifdef BOOT_ENABLE_VGA13
-
-	;; Set VGA mode 0x13 via bios
-	;; this must be done before entering protected mode
-	mov $0x00, %ah
-	mov $0x13, %al
-	int $0x10
-
-#endif
-
 	movb	$0x80, %al	/* disable NMIs */
 	outb	%al, $0x70
 

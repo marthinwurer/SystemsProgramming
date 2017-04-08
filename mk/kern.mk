@@ -4,7 +4,7 @@
 U_C_OBJ := main.o vga13/vga13.o
 U_C_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_C_OBJ))
 
-U_S_OBJ :=
+U_S_OBJ := realmode.o
 U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 
 
@@ -15,7 +15,7 @@ BOOT_OBJ := $(addprefix $(BUILD_DIR)/kern/baseline/,$(BOOT_OBJ))
 
 # Assembly language object/source files
 
-S_OBJ := startup.o isr_stubs.o 
+S_OBJ := startup.o isr_stubs.o
 S_OBJ := $(addprefix $(BUILD_DIR)/kern/baseline/,$(S_OBJ))
 
 # C object/source files
@@ -28,7 +28,7 @@ C_OBJ := $(addprefix $(BUILD_DIR)/kern/baseline/,$(C_OBJ))
 KERN_OBJECTS = $(S_OBJ) $(C_OBJ) $(U_C_OBJ) $(U_S_OBJ)
 
 $(BUILD_DIR)/prog.out: $(KERN_OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJECTS)
+	$(LD) $(LDFLAGS) -o $@ $+
 
 $(BUILD_DIR)/prog.o: $(KERN_OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ -Ttext 0x10000 $+ $(U_LIBS)
