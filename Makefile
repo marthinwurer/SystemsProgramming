@@ -17,10 +17,13 @@ all: $(BUILD_DIR)/usb.image
 # Project makefiles
 # Include 'em here
 
-PROJECTS := kern
+PROJECTS := kern libc
 
+
+include mk/libc.mk
 # The kernel and baseline
 include mk/kern.mk
+
 
 
 

@@ -38,7 +38,7 @@
 ** address specified in INT32_BASE
 */
 __init_int32:
-	enter $0,$0
+	//enter $0,$0
 	movl $reloc, %esi
 	movl $INT32_BASE, %edi
 	movl $(__int32_end - reloc), %ecx
@@ -46,7 +46,7 @@ __init_int32:
 	cld
 	rep movsb
 	
-	leave
+	//leave
 	ret
 
 testmsg:
@@ -133,7 +133,7 @@ p_mode32: .code32
 	lgdt	REBASE(gdt32_ptr)			// restore 32bit GDT
 	lidt	REBASE(idt32_ptr)			// restore 32bit IDT
 	movl	REBASE(stack32_ptr), %esp	// restore 32bit stack pointer
-	movl	STACK16, %esi				// set copy source to 16bit stack
+	movl	$STACK16, %esi				// set copy source to 16bit stack
 	leal	0x28(%esp), %edi			// use position of regs pointer on stack
 	movl	(%edi), %edi				// use regs pointer in edi as copy dest
 	movl	$REGS16_SIZE, %ecx			// set copy size to size of struct
