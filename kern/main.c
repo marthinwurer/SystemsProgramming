@@ -20,163 +20,97 @@
 #include <kern/vesa/vbe.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
-//static VBEInfo *info = (VBEInfo*)0x500;
+
+static VBEModeInfo bestRes;
+static VBEModeInfo temp;
 
 
+static uint16_t MODELIST[100];
 
 #define physAddr(segment, offset) ((segment * 0x10) + offset)
 
-// void dumpRegs(regs16_t *regs) {
-// 	c_printf("di: %x    si: %x     bp: %x    sp: %x\n", regs->di, regs->si, regs->bp, regs->sp);
-// 	c_printf("bx: %x\n", regs->bx);
-// 	c_printf("dx: %x\n", regs->dx);
-// 	c_printf("cx: %x\n", regs->cx);
-// 	c_printf("ax: %x\n", regs->ax);
-// 	c_printf("gs: %x fs: %x es: %x ds: %x\n", regs->gs, regs->fs, regs->es, regs->ds);
-// 	c_printf("eflags: %x\n", regs->eflags);
-// }
+#define vbePtr(ptr) (((ptr >> 16) * 0x10) + (ptr & 0xFFFF))
+
 
 
 int main(void) {
 
 	c_clearscreen();
 
-	__init_interrupts();
-
 	__init_int32();
-
-
-	// regs16_t regs;
-	// memset(&regs, 0, sizeof(regs16_t));
-
-	// regs.ax = 0x4F00;
-	// regs.di = 0x500;
-
-	// dumpRegs(&regs);
-
-	// c_puts("\nPerforming __int32\n\n");
-
-	// __int32(0x10, &regs);
-
-	// dumpRegs(&regs);
-
-
-	// info->signature[0] = 'V';
-	// info->signature[1] = 'B';
-	// info->signature[2] = 'E';
-	// info->signature[3] = '2';
-	
-
-	// regs16_t regs;
-	// regs.es = 0;
-	// regs.di = info;
-	// regs.ax = 0x4F00;
-	// __int32(0x10, &regs);
 
 	VBEInfo info;
 	uint16_t vbeResult;
 	int result = vbe_getInfo(&info, &vbeResult);
 
+
 	if (result) {
-	// if (regs.ax == 0x4F) {
-		c_printf("Failed to get VBEInfo (%x)\n", vbeResult);
+		c_printf("vbe_getInfo failed (%x)\n", vbeResult);
 	} else {
 		c_printf("vbe_getInfo success (%x)\n", vbeResult);
 		c_printf("Version: %x\n", info.version);
 		c_printf("Video Memory: %d 64KB blocks\n", info.videoMemory);
-		c_printf("OEM: %s (0x%x)\n", (const char *)info.oem, info.oem);
-		c_printf("Vendor: %s (0x%x)\n", (const char *)info.vendor, info.vendor);
+		c_printf("OEM: %s (0x%x)\n", (const char *)vbePtr(info.oem), info.oem);
+		c_printf("Vendor: %s (0x%x)\n", (const char *)vbePtr(info.vendor), info.vendor);
 		
 		//c_printf("Supported Modes:\n");
 		uint16_t segment = info.videoModes >> 16;
 		uint16_t offset = info.videoModes & 0xFFFF;
 		uint16_t *modes = (uint16_t*)physAddr(segment, offset);
+		c_printf("%x = %x:%x = %x\n", info.videoModes, segment, offset, modes);
 
 		int modeCount = 0;
-		for (uint16_t *curMode = modes; *curMode != 0xFFFF; ++curMode) {
-			//c_printf(" [%x] * 0x%x\n", curMode, *curMode);
-			modeCount++;
+		for (int i = 0; i != 100; ++i) {
+			uint16_t mode = modes[i];
+			if (mode == 0xFFFF) {
+				modeCount = i;
+				break;
+			}
+
+			MODELIST[i] = mode;
 		}
+
+		c_puts("Searching for highest resolution...");
+		memset(&bestRes, 0, sizeof(VBEModeInfo));
+
+		for (int i = 0; i != modeCount; ++i) {
+			uint16_t mode = MODELIST[i];
+			
+			if (vbe_getModeInfo(mode, &temp, NULL) == VBE_SUCCESS) {
+				//c_printf("%dx%d ", temp.width, temp.height);
+				if (temp.width >= bestRes.width && temp.height >= bestRes.height && temp.bpp >= bestRes.bpp) {
+					memcpy(&bestRes, &temp, sizeof(VBEModeInfo));
+				}
+			}
+
+		}
+
+		c_puts("Done\n");
 
 		c_printf("Available Modes: %d\n", modeCount);
 
-		c_puts("Getting info for first available mode...");
-		VBEModeInfo modeInfo;
-		if (vbe_getModeInfo(*modes, &modeInfo, NULL)) {
-			c_puts("Failed\n");
-		} else {
-			c_puts("Success\n");
-			c_printf("Width: %d\n", modeInfo.width);
-			c_printf("Height: %d\n", modeInfo.height);
-			c_printf("bpp: %d\n", modeInfo.bpp);
-			c_printf("Framebuffer: 0x%x\n", modeInfo.framebuffer);
+		c_puts("Best Mode:\n");
+		c_printf("    Width: %d\n", bestRes.width);
+		c_printf("    Height: %d\n", bestRes.height);
+		c_printf("    bpp: %d\n", bestRes.bpp);
+		c_printf("    Framebuffer: 0x%x\n", bestRes.framebuffer);
 
-			//vbe_setMode(*modes, NULL);
+		
+
+		uint16_t currentMode;
+		if (vbe_currentMode(&currentMode, NULL) == VBE_SUCCESS) {
+			c_printf("Current Mode: %x\n", currentMode);
+
+			vbe_getModeInfo(currentMode, &temp, NULL);
+			c_printf("    Width: %d\n", temp.width);
+			c_printf("    Height: %d\n", temp.height);
+			c_printf("    bpp: %d\n", temp.bpp);
+			c_printf("    Framebuffer: 0x%x\n", temp.framebuffer);
 		}
 
-		// while (*modes != 0xFFFF) {
-		// 	c_printf(" * 0x%x\n", *modes);
-		// 	++modes;
-		// }
 	}
-
-
-	// //set VGA mode 0x13 using BIOS function
-	// regs16_t regs;
-	// regs.ax = 0x13;
-	// __int32(0x10, &regs);
-
-	// c_puts("WHORES");
-
-	// vga13_init();
-
-	// uint8_t rowBuf[VGA13_WIDTH];
-	// uint8_t color = 0;
-	// for (int i = 0; i != VGA13_WIDTH; ++i) {
-	// 	rowBuf[i] = color++;
-	// }
-
-	// for (int y = 0; y != VGA13_HEIGHT; ++y) {
-	// 	vga13_setRow(y, rowBuf);
-	// }
-
-	// regs.ax = 0;
-	// __int32(0x16, &regs);
-
-	// regs.ax = 3;
-	// __int32(0x10, &regs);
-
-
-// #define RECT_WIDTH 128
-// #define RECT_HEIGHT 64
-// #define RECT_X 100
-// #define RECT_Y 60
-
-// 	uint8_t rowBuf[RECT_WIDTH];
-// 	for (int i = 0; i < RECT_WIDTH; ++i) {
-// 		rowBuf[i] = VGA_COLOR_MAGENTA;
-// 	}
-
-// 	for (int i = 0; i < RECT_HEIGHT; ++i) {
-// 		vga13_setrow(RECT_Y + i, RECT_X, RECT_WIDTH, rowBuf);
-// 	}
-
-
-	// uint8_t color = 0;
-
-	// for (int y = 0; y < VGA13_HEIGHT; ++y) {
-	// 	for (int x = 0; x < VGA13_WIDTH; ++x) {
-	// 		vga13_setpixel(x, y, color++);
-	// 	}
-	// }
 
 	return 0;
 }
-
-// #include <baseline/c_io.h>
-
-// int main( void ) {
-// 	c_puts( "Hello, world!\n" );
-// 	return( 0 );
-// }

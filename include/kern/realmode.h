@@ -1,6 +1,7 @@
 #ifndef _KERN_REALMODE_H
 #define _KERN_REALMODE_H
 
+#include <stdint.h>
 
 struct regs16_s {
 	uint16_t di;

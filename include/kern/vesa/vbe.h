@@ -18,7 +18,7 @@
 #define VBE_MODE_FLAG_CLEAR 0x8000     // bit 15
 
 // vbe module uses physical address 0x500 when calling BIOS functions
-#define VBE_BLOCK_ADDRESS 0x500
+#define VBE_BLOCK_ADDRESS 0x3000
 
 // Constant stored in %ah when performing int 10h
 
@@ -53,7 +53,7 @@ int vbe_init(void);
 // Get the current VBE mode. If successful, the mode number is stored in
 // modeVar.
 //
-int vbe_currentMode(uint16_t *modeVar);
+int vbe_currentMode(uint16_t *modeVar, uint16_t *vbeResult);
 
 int vbe_getInfo(VBEInfo *info, uint16_t *vbeResult);
 

@@ -12,12 +12,13 @@
 
 	.global __init_int32, __int32
 
+#include <baseline/bootstrap.h>
 
 // sizeof the regs16_t type, 13 16-bit registers = 26 bytes
 #define REGS16_SIZE 26
 
-// location to real mode program (overwrites the bootloader)
-#define INT32_BASE 0x7C00
+// location to real mode program
+#define INT32_BASE 0x3500
 #define REBASE(x) (((x) - reloc) + INT32_BASE)
 #define GDTENTRY(x) (x << 3)
 #define CODE32 GDTENTRY(1)
@@ -60,12 +61,10 @@ testmsg:
 ** routine using the int instruction.
 */
 __int32:
-	// Clear interrupts
-	cli
-	pusha
+	cli                                 // Clear interrupts
+	pusha                               // save GP registers (restore em later)
+	// Jump to the relocated code in low memory
 	jmp INT32_BASE
-// the following is relocated to the bootloader by __init_int32, 
-// hence the reloc label
 reloc:
 	movl	%esp, REBASE(stack32_ptr)	// save 32bit stack pointer
 	sidt	REBASE(idt32_ptr)			// save 32bit idt register
@@ -104,7 +103,6 @@ r_mode16:
 	pop		%es							// load es
 	pop		%ds							// load ds
 	sti									// enable interrupts
-//ib:	int $0
 	.byte	0xCD						// int instruction byte
 ib: .byte	0x0						// int instruction operand
 	cli									// disable interrupts
@@ -120,7 +118,7 @@ ib: .byte	0x0						// int instruction operand
 	movw	$0x2028, %bx				// master 32, slave 40
 	call	resetpic					// restore the pic's to pmode settings
 	movl	%cr0, %eax					// get cr0 to enable PE bit
-	inc		%eax						// enable PE bit
+	orl		$1, %eax					// enable PE bit
 	movl	%eax, %cr0					// set cr0 to result
 	ljmpl	$CODE32, $REBASE(p_mode32)	// switch to 32bit selector
 p_mode32: .code32
@@ -139,6 +137,23 @@ p_mode32: .code32
 	movl	$REGS16_SIZE, %ecx			// set copy size to size of struct
 	cld									// clear director flag, copy forward
 	rep movsb							// do the copy (16bit stack to 32bit stack)
+	/* 
+	** Now we need to fix the selectors according to the bootstrap GDT.
+	** The example code that __int32 is based off of uses a different GDT
+	** than the one set in the baseline code.
+	**
+	** The code here should be identical to the code in the _start routine
+	** in baseline/startup.S
+	*/
+	jmp		$GDT_CODE, $REBASE(fixselectors)
+fixselectors:
+	movw	$GDT_DATA, %ax	/* GDT entry #3 - data segment */
+	movw	%ax, %ds	/* for all four data segment registers */
+	movw	%ax, %es
+	movw	%ax, %fs
+	movw	%ax, %gs
+	movw	$GDT_STACK, %ax	/* entry #4 is the stack segment */
+	movw	%ax, %ss
 	popa								// restore gp regs
 	sti									// enable interrupts
 	ret									// return to caller

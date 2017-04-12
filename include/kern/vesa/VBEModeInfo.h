@@ -27,6 +27,8 @@ struct VBEModeInfo_s {
 	uint8_t reserved0;
 	uint8_t redMask;
 	uint8_t redPosition;
+	uint8_t greenMask;
+	uint8_t greenPosition;
 	uint8_t blueMask;
 	uint8_t bluePosition;
 	uint8_t reservedMask;
