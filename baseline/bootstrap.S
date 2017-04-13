@@ -393,10 +393,14 @@ boot_sig:
 **
 ** This code configures the GDT, enters protected mode, and then
 ** transfers to the OS entry point.
+**
+** EDIT:
+** Also changes the vga mode to 0x13
 */
 
 switch:
 	cli
+
 	movb	$0x80, %al	/* disable NMIs */
 	outb	%al, $0x70
 
