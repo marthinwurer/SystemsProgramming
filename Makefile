@@ -17,7 +17,7 @@ all: $(BUILD_DIR)/usb.image
 # Project makefiles
 # Include 'em here
 
-PROJECTS := kern
+PROJECTS := kern baseline
 
 # The kernel and baseline
 include mk/kern.mk
@@ -55,7 +55,7 @@ $(BUILD_DIR)/%.o: %.c $(MARKER)
 # Default target:  usb.image
 #
 
-IMAGE_FILES := $(BUILD_DIR)/kern/baseline/bootstrap.b \
+IMAGE_FILES := $(BUILD_DIR)/baseline/bootstrap.b \
                $(BUILD_DIR)/prog.b
 
 $(BUILD_DIR)/usb.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
