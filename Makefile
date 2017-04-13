@@ -19,8 +19,9 @@ all: $(BUILD_DIR)/usb.image
 
 PROJECTS := kern baseline libc
 
-
+# C Standard library for kernel and userspace
 include mk/libc.mk
+
 # The kernel and baseline
 include mk/kern.mk
 

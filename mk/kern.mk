@@ -1,10 +1,10 @@
 # mk/kern.mk
 # Makefile for the kern and baseline folders
 
-U_C_OBJ := vga13/vga13.o
+U_C_OBJ := vga13/vga13.o vesa/vbe.o
 U_C_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_C_OBJ))
 
-U_S_OBJ :=
+U_S_OBJ := realmode.o
 U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 
 
