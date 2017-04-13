@@ -29,7 +29,7 @@ WARNFLAGS := -Wall -Wextra -pedantic
 
 CFLAGS = -m32 -std=c99 -fno-stack-protector -fno-builtin $(WARNFLAGS) $(WERROR)
 
-CPPFLAGS = -nostdinc -I$(INC_DIR)
+CPPFLAGS = -nostdinc -I$(INC_DIR) $(USER_OPTIONS)
 
 ASFLAGS = --32
 
@@ -45,4 +45,4 @@ LDFLAGS = -melf_i386
 #	BOOT_ENABLE_VGA13	bootstrap will enter VGA Mode 0x13 before entering
 #                       protected mode
 #
-USER_OPTIONS = -DCLEAR_BSS_SEGMENT -DBOOT_ENABLE_VGA13
+USER_OPTIONS = -DCLEAR_BSS_SEGMENT -DISR_DEBUGGING_CODE -DSP_OS_CONFIG -DDUMP_QUEUES

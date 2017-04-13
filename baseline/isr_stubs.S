@@ -1,5 +1,5 @@
 /*
-** SCCS ID:	@(#)isr_stubs.S	1.7	3/17/15
+** SCCS ID:	@(#)isr_stubs.S	1.8	4/13/17
 **
 ** File:	isr_stubs.S
 **
@@ -15,6 +15,11 @@
 **	their own stub which pushes the interrupt number on the stack.
 **	This makes it possible for a common ISR to determine which
 **	interrupted occurred.
+**
+** Modifications for 20165:
+**
+**      Switch to OS stack after doing context save
+**      print time, PID, and PPID as part of debugging output
 */
 	.arch	i386
 
@@ -97,6 +102,22 @@ isr_save:
 */
 	movl	52(%esp),%eax	// get vector number and error code
 	movl	56(%esp),%ebx
+
+/*
+** MOD for 20165 CSCI452
+*/
+	.globl	_current
+	.globl	_system_esp
+
+	movl	_current, %edx	// save context pointer for the current proc
+	movl	%esp, (%edx)	// (must be the first PCB field!)
+
+		// INHERENTLY NON-REENTRANT!!!
+	movl	_system_esp, %esp	// switch to the OS stack
+/*
+** END MOD for 20165 CSCI452
+*/
+
 	pushl	%ebx		// put them on the top of the stack ...
 	pushl	%eax		// ... as parameters for the ISR
 
@@ -113,6 +134,15 @@ isr_save:
 
 __isr_restore:
 
+/*
+** MOD for 20165 CSCI452
+*/
+	movl	_current, %ebx	// return to user stack
+	movl	(%ebx), %esp	// ESP now points to context save area
+/*
+** END MOD for 20165 CSCI452
+*/
+
 #ifdef ISR_DEBUGGING_CODE
 /*
 ** DEBUGGING CODE PART 1
@@ -124,11 +154,44 @@ __isr_restore:
 ** By default, it prints out the CPU context being restored; it
 ** relies on the standard save sequence (see above).
 */
+
+/*
+** MOD for 20165 CSCI452
+*/
+        /*
+        ** In addition to the basic context information, print
+        ** the current system time and the PID and PPID of the
+        ** process whose context is being restored.
+        **
+        ** THE movl CONSTANTS MUST BE CHANGED IF THE LOCATION
+        ** OF EITHER FIELD IN THE PCB CHANGES!
+        */
+
+        .globl  _now
+
+	xorl	%eax, %eax
+        movw    18(%ebx), %ax   // PPID
+        pushl   %eax
+        movw    16(%ebx), %ax   // PID
+        pushl   %eax
+        pushl   _now		// current system time
+/*
+** END MOD for 20165 CSCI452
+*/
+
 	pushl	$fmt
 	pushl	$1
 	pushl	$0
 	call	c_printf_at
-	addl	$12,%esp
+
+/*
+** MOD for 20165 CSCI452
+*/
+	addl	$24,%esp	// now six things to remove
+/*
+** END MOD for 20165 CSCI452
+*/
+
 /*
 ** END OF DEBUGGING CODE PART 1
 */
@@ -150,7 +213,14 @@ __isr_restore:
 /*
 ** DEBUGGING CODE PART 2
 */
-fmt:	.ascii	" ss=%08x  gs=%08x  fs=%08x  es=%08x  ds=%08x\n"
+/*
+** MOD for 20165 CSCI452
+*/
+fmt:	.ascii	"time %08x pid %08x ppid %08x\n"
+	.ascii	" ss=%08x  gs=%08x  fs=%08x  es=%08x  ds=%08x\n"
+/*
+** MOD for 20165 CSCI452
+*/
 	.ascii	"edi=%08x esi=%08x ebp=%08x esp=%08x ebx=%08x\n"
 	.ascii	"edx=%08x ecx=%08x eax=%08x vec=%08x cod=%08x\n"
 	.string	"eip=%08x  cs=%08x efl=%08x\n"

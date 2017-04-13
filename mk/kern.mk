@@ -1,7 +1,7 @@
 # mk/kern.mk
 # Makefile for the kern and baseline folders
 
-U_C_OBJ := main.o vga13/vga13.o
+U_C_OBJ := vga13/vga13.o
 U_C_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_C_OBJ))
 
 U_S_OBJ :=
@@ -11,17 +11,32 @@ U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 # Binary/source file for system bootstrap code
 
 BOOT_OBJ := bootstrap.b
-BOOT_OBJ := $(addprefix $(BUILD_DIR)/kern/baseline/,$(BOOT_OBJ))
+BOOT_OBJ := $(addprefix $(BUILD_DIR)/baseline/,$(BOOT_OBJ))
 
 # Assembly language object/source files
 
-S_OBJ := startup.o isr_stubs.o 
-S_OBJ := $(addprefix $(BUILD_DIR)/kern/baseline/,$(S_OBJ))
+S_OBJ := startup.o \
+         isr_stubs.o \
+		 klibs.o \
+		 ulibs.o 
+S_OBJ := $(addprefix $(BUILD_DIR)/baseline/,$(S_OBJ))
 
 # C object/source files
 
-C_OBJ := c_io.o support.o
-C_OBJ := $(addprefix $(BUILD_DIR)/kern/baseline/,$(C_OBJ))
+C_OBJ := c_io.o \
+         support.o \
+		 clock.o \
+		 klibc.o \
+		 process.o \
+		 queue.o \
+		 scheduler.o \
+		 sio.o \
+		 stack.o \
+		 syscall.o \
+		 system.o \
+		 ulibc.o \
+		 user.o
+C_OBJ := $(addprefix $(BUILD_DIR)/baseline/,$(C_OBJ))
 
 # Collections of files
 

@@ -1,0 +1,8 @@
+The Offsets program dumps out the byte offsets to get from the beginning
+of the major structs used in the baseline to each of their fields.
+This is helpful when you need to access a field from assembly language.
+
+Offsets is not currently set up to compile automatically because we don't
+have the 32-bit sys/cdefs.h header file on our 64-bit Ubuntu systems.
+I think installing gcc-multilib will fix this, but I haven't had a chance
+to try it out.

@@ -18,7 +18,7 @@
 #include <baseline/c_io.h>
 #include <baseline/startup.h>
 #include <baseline/support.h>
-#include <baseline/x86arch.h>
+#include <x86arch.h>
 
 /*
 ** Video parameters, and state variables

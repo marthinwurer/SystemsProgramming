@@ -77,6 +77,10 @@ $(BUILD_DIR)/floppy.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis
 $(BUILDIMAGE):
 	$(MAKE) -C $(BUILDIMAGE_DIR)
 
+export INC_DIR
+$(OFFSETS):
+	$(MAKE) -C $(OFFSETS_DIR)
+
 
 #
 # Clean and realclean
