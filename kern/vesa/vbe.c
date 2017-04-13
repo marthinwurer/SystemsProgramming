@@ -39,12 +39,6 @@ int vbe_getInfo(VBEInfo *info, uint16_t *vbeResult) {
 		// success
 		// copy block structure to argument
 		memcpy(info, block, sizeof(VBEInfo));
-		// uint16_t *videoModes = ((block->videoModes >> 16) * 0x10) + (block->videoModes & 0xFFFF);
-		
-		// if (videoModes > (uint16_t*)VBE_BLOCK_ADDRESS && videoModes < (uint16_t*)(VBE_BLOCK_ADDRESS + sizeof(VBEInfo))) {
-		// 	int diff = videoModes - (uint16_t*)VBE_BLOCK_ADDRESS;
-		// 	info->videoModes = (void*)info + diff;
-		// }
 		errorcode = VBE_SUCCESS;
 	}
 
@@ -58,6 +52,7 @@ int vbe_getInfo(VBEInfo *info, uint16_t *vbeResult) {
 
 int vbe_getModeInfo(uint16_t mode, VBEModeInfo *modeInfo, uint16_t *vbeResult) {
 
+	// Check for NULL pointers
 	if (modeInfo == NULL) {
 		return VBE_ARGNULL;
 	}
@@ -73,7 +68,6 @@ int vbe_getModeInfo(uint16_t mode, VBEModeInfo *modeInfo, uint16_t *vbeResult) {
 
 	if (__performVBEFunction(VBE_FUNCTION_GETMODEINFO, &regs)) {
 		memcpy(modeInfo, block, sizeof(VBEModeInfo));
-		
 		errorcode = VBE_SUCCESS;
 	}
 
@@ -135,5 +129,5 @@ int __performVBEFunction(uint16_t function, regs16_t *regs) {
 	regs->ax = VBE_AX | function;
 	__int32(0x10, regs);
 
-	return regs->ax == VBE_RETURN_FUNCTION_SUPPORTED;
+	return regs->ax == VBE_RETURN_FUNCTION_SUPPORTED | VBE_RETURN_FUNCTION_SUCCESS;
 }

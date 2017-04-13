@@ -59,6 +59,32 @@ testmsg:
 **  __int32 support function
 ** Temporarily changes back to real mode to execute a BIOS service
 ** routine using the int instruction.
+**
+** Process:
+**  1. Disable interrupts
+**  2. Save IDT, GDT and stack pointers
+**  3. Load 16-bit GDT
+**  4. Copy arguments to the 16bit stack
+**  5. Switch to a 16-bit code selector
+**  6. Disable PE bit in %cr0
+**  7. Enter realmode
+**  8. Clear %ax, %ds and %ss
+**  9. Load 16-bit IDT
+**  10. Set PIC to Master 0x8 and Slave 0x70
+**  11. Load all registers from 16-bit stack (regs argument)
+**  12. Enable interrupts
+**  13. Perform int instruction
+**  14. Disable interrupts
+**  15. Save GP regs, segment regs and eflags to stack
+**  16. Restore PIC
+**  17. Enable PE bit in %cr0
+**  18. Reenter protected mode with a 32-bit selector, reset selectors
+**  19. Restore IDT, GDT and stack pointers (from #2)
+**  20. Copy 16-bit stack to 32-bit stack
+**  21. Set selectors according to the GDT setup in the bootstrap
+**  22. Restore GP regs
+**  23. Enable interrupts
+**  24. Return to caller
 */
 __int32:
 	cli                                 // Clear interrupts
@@ -143,7 +169,8 @@ p_mode32: .code32
 	** than the one set in the baseline code.
 	**
 	** The code here should be identical to the code in the _start routine
-	** in baseline/startup.S
+	** in baseline/startup.S otherwise a GPF will occur after returning to the
+	** caller
 	*/
 	jmp		$GDT_CODE, $REBASE(fixselectors)
 fixselectors:

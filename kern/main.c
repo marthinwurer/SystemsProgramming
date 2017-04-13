@@ -31,7 +31,7 @@ static uint16_t MODELIST[100];
 
 #define physAddr(segment, offset) ((segment * 0x10) + offset)
 
-#define vbePtr(ptr) (((ptr >> 16) * 0x10) + (ptr & 0xFFFF))
+//#define vbePtr(ptr) (((ptr >> 16) * 0x10) + (ptr & 0xFFFF))
 
 
 
@@ -52,8 +52,8 @@ int main(void) {
 		c_printf("vbe_getInfo success (%x)\n", vbeResult);
 		c_printf("Version: %x\n", info.version);
 		c_printf("Video Memory: %d 64KB blocks\n", info.videoMemory);
-		c_printf("OEM: %s (0x%x)\n", (const char *)vbePtr(info.oem), info.oem);
-		c_printf("Vendor: %s (0x%x)\n", (const char *)vbePtr(info.vendor), info.vendor);
+		c_printf("OEM: %s (0x%x)\n", (const char *)vbe_ptr(info.oem), info.oem);
+		c_printf("Vendor: %s (0x%x)\n", (const char *)vbe_ptr(info.vendor), info.vendor);
 		
 		//c_printf("Supported Modes:\n");
 		uint16_t segment = info.videoModes >> 16;
