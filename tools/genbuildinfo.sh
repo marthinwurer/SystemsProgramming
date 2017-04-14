@@ -38,7 +38,9 @@ else
         config=()
         readconfig
         if [ "$config[0]" != "$curBranch" ] || [ "$config[1]" != "$curCommit" ]; then
-            config[0]=0
+            config[0]="$curBranch"
+            config[1]="$curCommit"
+            config[2]=0
             writeconfig
         fi
     else
