@@ -27,7 +27,7 @@ include mk/kern.mk
 
 # realprog
 include mk/realprog.mk
-
+BUILDINFO_DEFINES := $(shell $(GENBUILDINFO))
 
 # transformation rules
 
@@ -37,11 +37,11 @@ $(BUILD_DIR)/%.s: %.c $(MARKER)
 
 # Preprocess the assembly source
 $(BUILD_DIR)/%.s: %.S $(MARKER)
-	$(CPP) $(CPPFLAGS) $(USER_OPTIONS) -o $@ $<
+	$(CPP) $(CPPFLAGS) $(USER_OPTIONS) $(BUILDINFO_DEFINES) -o $@ $<
 
 # Compile assembly source to object code
 $(BUILD_DIR)/%.o: %.S $(MARKER)
-	$(CPP) -MD $(CPPFLAGS) $(USER_OPTIONS) -o $(BUILD_DIR)/$*.s $<
+	$(CPP) -MD $(CPPFLAGS) $(USER_OPTIONS) $(BUILDINFO_DEFINES) -o $(BUILD_DIR)/$*.s $<
 	$(AS) $(ASFLAGS) -o $@ $(BUILD_DIR)/$*.s -a=$(BUILD_DIR)/$*.lst
 	$(RM) -f $*.s
 
