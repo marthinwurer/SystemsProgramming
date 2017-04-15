@@ -26,8 +26,6 @@ include mk/libc.mk
 include mk/kern.mk
 
 
-
-
 # transformation rules
 
 # Compile the c source to assembly
@@ -40,7 +38,7 @@ $(BUILD_DIR)/%.s: %.S $(MARKER)
 
 # Compile assembly source to object code
 $(BUILD_DIR)/%.o: %.S $(MARKER)
-	$(CPP) -MD $(CPPFLAGS) -o $(BUILD_DIR)/$*.s $<
+	$(CPP) -MD $(CPPFLAGS) $(USER_OPTIONS) -o $(BUILD_DIR)/$*.s $<
 	$(AS) $(ASFLAGS) -o $@ $(BUILD_DIR)/$*.s -a=$(BUILD_DIR)/$*.lst
 	$(RM) -f $*.s
 
