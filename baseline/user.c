@@ -865,6 +865,11 @@ int32_t init( void *arg ) {
 	}
 	swritech( '+' );
 
+	cwrites("~~~ Dan's code is executing: ~~~\n");
+
+	cwrites("~~~ Dan's code has executed: ~~~\n");
+	
+
 #ifdef SPAWN_A
 	pid = spawn( user_a, 0, P_HIGH );
 	if( pid < 0 ) {
