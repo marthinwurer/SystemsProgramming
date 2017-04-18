@@ -88,6 +88,9 @@ static void __default_expected_handler( int vector, int code ){
 		*/
 		__panic( "Unexpected \"expected\" interrupt!" );
 	}
+
+	// suppress warnings
+	(void) code;
 }
 
 /*
@@ -107,6 +110,10 @@ static void __default_mystery_handler( int vector, int code ){
 #ifdef REPORT_MYSTERY_INTS
 	c_printf( "\nMystery interrupt!\nVector=0x%02x, code=%d\n",
 		  vector, code );
+#else
+	// suppress warnings
+	(void) vector;
+	(void) code;
 #endif
 
 	__outb( PIC_MASTER_CMD_PORT, PIC_EOI );
@@ -163,7 +170,7 @@ static void set_idt_entry( int entry, void ( *handler )( void ) ){
 
 	g->offset_15_0 = (int)handler & 0xffff;
 	g->segment_selector = 0x0010;
-	g->flags = IDT_PRESENT | IDT_DPL_0 | IDT_INT32_GATE;
+	g->flags = (short) IDT_PRESENT | IDT_DPL_0 | IDT_INT32_GATE;
 	g->offset_31_16 = (int)handler >> 16 & 0xffff;
 }
 

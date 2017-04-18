@@ -1,2 +1,11 @@
 build
 includes.mk
+BuildImage
+
+# screw eclipse
+.project
+.cproject
+.settings/
+
+# vim is a thing
+*.swp

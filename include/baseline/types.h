@@ -43,7 +43,7 @@ typedef unsigned int	uint32_t;
 // specialized type names
 
 typedef uint32_t	time_t;
-typedef uint16_t	pid_t;
+typedef int16_t	pid_t;
 
 // status types
 
