@@ -20,8 +20,6 @@
 
 #include <baseline/bootstrap.h>
 
-.globl _early
-
 /*
 ** Configuration options - define in Makefile
 **

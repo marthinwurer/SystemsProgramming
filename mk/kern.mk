@@ -7,6 +7,8 @@ U_C_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_C_OBJ))
 U_S_OBJ := realmode.o
 U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 
+EARLY_OBJ := _early.o realmode.o main.o
+EARLY_OBJ := $(addprefix $(BUILD_DIR)/kern/early/,$(EARLY_OBJ))
 
 # Binary/source file for system bootstrap code
 
@@ -50,6 +52,12 @@ $(BUILD_DIR)/prog.o: $(KERN_OBJECTS) $(LIBK)
 
 $(BUILD_DIR)/prog.b: $(BUILD_DIR)/prog.o
 	$(LD) $(LDFLAGS) -o $@ -s --oformat binary -Ttext 0x10000 $<
+
+$(BUILD_DIR)/earlyprog.o: $(EARLY_OBJ)
+	$(LD) $(LDFLAGS) -o $@ -Ttext 0x3000 -e _early $+
+
+$(BUILD_DIR)/earlyprog.b: $(BUILD_DIR)/earlyprog.o
+	$(LD) $(LDFLAGS) -o $@ -s --oformat binary -e _early -Ttext 0x3000 $<
 
 # the -MD flags create dependency files when compiling, so we include them
 # here (the - ignores errors if the file does not exist)
