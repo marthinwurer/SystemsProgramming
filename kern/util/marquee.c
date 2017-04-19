@@ -4,7 +4,7 @@
 
 static char marqueeStr[MARQUEE_STRING_MAX];
 static unsigned marqueeStrLen = 0;
-static unsigned marqueePos = 40;
+static unsigned marqueePos = 0;
 
 static unsigned marqueeRow = 0;
 static unsigned marqueeCol = 0;

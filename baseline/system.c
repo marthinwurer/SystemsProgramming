@@ -30,6 +30,9 @@
 // need the exit() and do_exit() prototypes
 #include <baseline/ulib.h>
 
+#include <kern/realmode.h>
+#include <kern/vesa/vbe.h>
+
 /*
 ** PRIVATE DEFINITIONS
 */
@@ -144,6 +147,8 @@ void _init( void ) {
 
 	__init_interrupts();	// IDT and PIC initialization
 
+	__init_int32(); // initialize realmode utility
+
 	/*
 	** Console I/O system.
 	*/
@@ -152,6 +157,19 @@ void _init( void ) {
 	c_io_init_isr();
 	c_setscroll( 0, 7, 99, 99 );
 	c_puts_at( 0, 6, "================================================================================" );
+
+	// regs16_t regs;
+	// regs.ax = 0;
+	// __int32(0x16, &regs);
+
+	VBEInfo info;
+	if (vbe_getInfo(&info, NULL) == VBE_SUCCESS) {
+		c_printf("Version: %x\n", info.version);
+		c_printf("Video Memory: %d 64KB blocks\n", info.videoMemory);
+		c_printf("OEM: %s (0x%x)\n", (const char *)vbe_ptr(info.oem), info.oem);
+		c_printf("Vendor: %s (0x%x)\n", (const char *)vbe_ptr(info.vendor), info.vendor);
+	}
+	__asm("hlt");
 
 	/*
 	** 20165-SPECIFIC CODE STARTS HERE
@@ -166,7 +184,7 @@ void _init( void ) {
 
 	c_puts( "System initialization starting\n" );
 	c_puts( "------------------------------\n" );
-//	__delay( 200 );  // about 5 seconds
+	//__delay( 200 );  // about 5 seconds
 
 	c_puts( "Module init: " );
 

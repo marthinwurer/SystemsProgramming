@@ -31,6 +31,8 @@
 #define	GDT_CODE	0x0010		/* All of memory, R/E */
 #define	GDT_DATA	0x0018		/* All of memory, R/W */
 #define	GDT_STACK	0x0020		/* All of memory, R/W */
+#define GDT_CODE16	0x0028
+#define GDT_DATA16	0x0030
 
 // GDT used by the early initialization routine
 #define EARLY_GDT_SEGMENT 0x02D1

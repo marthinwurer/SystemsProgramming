@@ -555,6 +555,22 @@ data16_seg:
 	.byte   0x0F
 	.byte   0x00
 
+code16_seg:
+	.word   0xFFFF
+	.word   0x0000
+	.byte   0x00 
+	.byte   0x9A
+	.byte   0x0F
+	.byte   0x00
+
+data16_seg:
+	.word   0xFFFF
+	.word   0x0000
+	.byte   0x00
+	.byte   0x92
+	.byte   0x0F
+	.byte   0x00
+
 end_gdt:
 gdt_len = end_gdt - start_gdt
 

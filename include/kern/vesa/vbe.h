@@ -24,7 +24,7 @@
 #define VBE_MODE_FLAG_CLEAR 0x8000     // bit 15
 
 // physical address of where to store VBEInfo and VBEModeInfo structs
-#define VBE_BLOCK_ADDRESS 0x3000
+#define VBE_BLOCK_ADDRESS 0x3200
 
 // Constant stored in %ah when performing int 10h
 
