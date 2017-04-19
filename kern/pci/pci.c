@@ -24,8 +24,8 @@ uint16_t pci_get_vendor(uint8_t bus, uint8_t slot) {
 	uint16_t vendor, device;
 	/* try and read the first configuration register. Since there are no */
 	/* vendors that == 0xFFFF, it must be a non-existent device. */
-	if ((vendor = pci_cfg_read(bus,slot,0,0)) != 0xFFFF) {
-		device = pci_cfg_read(bus,slot,0,2);
+	if ((vendor = pci_cfg_read(bus,slot,0,PCI_VENDOR)) != 0xFFFF) {
+		device = pci_cfg_read(bus,slot,0,PCI_DEVICE);
 		c_printf(" --- HIT! vendor: 0x%04x, device: 0x%04x\n", vendor, device);
 	}
 	else {
@@ -37,8 +37,8 @@ uint16_t pci_get_vendor(uint8_t bus, uint8_t slot) {
 int16_t pci_get_slot(uint16_t vendor, uint16_t device) {
 	// Check 32 slots then give up
 	for (int slot = 0; slot < 32; slot++) {
-		if (pci_cfg_read(bus,slot,0,0) != vendor) {
-			if(pci_cfg_read(bus,slot,0,2) == device) {
+		if (pci_cfg_read(0, slot, 0, PCI_VENDOR) != vendor) {
+			if(pci_cfg_read(0, slot, 0, PCI_DEVICE) == device) {
 				return slot;
 			}
 		}

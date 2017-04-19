@@ -1,6 +1,8 @@
 #ifndef _KERN_PCI_PCI_H
 #define _KERN_PCI_PCI_H
 
+#include <baseline/common.h>
+
 // PCI Configuration offsets
 #define PCI_VENDOR 0x00
 #define PCI_DEVICE 0x02
