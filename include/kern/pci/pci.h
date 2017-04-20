@@ -33,6 +33,11 @@
 
 // TODO: macros for the length of each of these
 
+// typedef struct bus_slot_struct {
+// 	uint8_t bus;
+// 	uint8_t slot;
+// } bus_slot_t;
+
 /**
  * pci_cfg_read, pci_cfg_read_word, pci_cfg_read_byte
  *
@@ -57,19 +62,19 @@ uint8_t pci_cfg_read_byte(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offse
 uint16_t pci_get_vendor(uint8_t bus, uint8_t slot);
 
 /**
- * pci_get_slot
+ * pci_get_device
  * 
- * Gets the pci slot for a specified vendor and device
- * @return -1 on failure, otherwise pci slot number
+ * Gets the pci bus and slot for a specified vendor and device
+ * @return negative on failure, otherwise positive
  * 
  */
-int16_t pci_get_slot(uint16_t vendor, uint16_t device);
+int32_t pci_get_device(uint8_t* bus_ret, uint8_t* slot_ret, uint16_t vendor, uint16_t device);
 
 /**
  * pci_enumerate
  * 
  * Prints out devices on the PCI bus
  */
-void pci_enumerate(uint8_t bus, uint8_t max_entries);
+void pci_enumerate(uint8_t max_bus, uint8_t max_slot);
 
 #endif

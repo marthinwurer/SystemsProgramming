@@ -1,4 +1,5 @@
 #include <kern/pci/pci.h>
+#include <baseline/c_io.h>
 
 uint32_t pci_cfg_read(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
 	uint32_t address;
@@ -40,28 +41,30 @@ uint16_t pci_get_vendor(uint8_t bus, uint8_t slot) {
 	return (vendor);
 }
 
-int16_t pci_get_slot(uint16_t vendor, uint16_t device) {
-	// Check 32 slots then give up
-	for (int slot = 0; slot < 32; slot++) {
-		if(pci_cfg_read_word(0, slot, 0, PCI_VENDOR) == vendor) {
-			if(pci_cfg_read_word(0, slot, 0, PCI_DEVICE) == device) {
-				return slot;
+int32_t pci_get_device(uint8_t* bus_ret, uint8_t* slot_ret, uint16_t vendor, uint16_t device) {
+	for (uint8_t bus = 0; bus < 8; bus++) {
+		for (uint8_t slot = 0; slot < 32; slot++) {
+			if(pci_cfg_read_word(bus, slot, 0, PCI_VENDOR) == vendor) {
+				if(pci_cfg_read_word(bus, slot, 0, PCI_DEVICE) == device) {
+					*bus_ret = bus;
+					*slot_ret = slot;
+					return 0;
+				}
 			}
 		}
 	}
 	return -1;
-	// c_printf(" --- HIT! vendor: 0x%04x, device: 0x%04x\n", vendor, device);
-	// printf("Checking PCI, bus=%d, slot=%d", 0, slot);
-	// pci_get_vendor(0, slot);
 }
 
-void pci_enumerate(uint8_t bus, uint8_t max_entries) {
+void pci_enumerate(uint8_t max_bus, uint8_t max_slot) {
 	// uint16_t vendor, device;
 	uint32_t vendor, device;
-	for (int slot = 0; slot < max_entries; slot++) {
-		if ((vendor = pci_cfg_read_word(bus, slot, 0, PCI_VENDOR)) != 0xFFFF) {
-			device = pci_cfg_read_word(bus, slot, 0, PCI_DEVICE);
-			c_printf("PCI slot: %d, vendor: 0x%04x, device: 0x%04x\n", slot, vendor, device);
+	for (int bus = 0; bus < max_bus; bus++) {
+		for (int slot = 0; slot < max_slot; slot++) {
+			if ((vendor = pci_cfg_read_word(bus, slot, 0, PCI_VENDOR)) != 0xFFFF) {
+				device = pci_cfg_read_word(bus, slot, 0, PCI_DEVICE);
+				c_printf("PCI bus: %d, slot: %d, vendor: 0x%04x, device: 0x%04x\n", bus, slot, vendor, device);
+			}
 		}
 	}
 }
