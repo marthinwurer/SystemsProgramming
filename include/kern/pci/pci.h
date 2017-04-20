@@ -34,13 +34,19 @@
 // TODO: macros for the length of each of these
 
 /**
- * pci_cfg_read
+ * pci_cfg_read, pci_cfg_read_word, pci_cfg_read_byte
+ *
+ * You can only read 32-bits at a time, so each function extracts the needed
+ * data out. Could make it more efficient by using the same calls and getting
+ * multiple data points out of a single 32-bit structure, but this is waaay
+ * simpler.
  * 
  * http://wiki.osdev.org/PCI#Configuration_Space
  * 
  */
-uint16_t pci_cfg_read(uint8_t bus, uint8_t slot,
-							uint8_t func, uint8_t offset);
+uint32_t pci_cfg_read(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+uint16_t pci_cfg_read_word(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+uint8_t pci_cfg_read_byte(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
 
 /**
  * pci_get_vendor
@@ -64,6 +70,6 @@ int16_t pci_get_slot(uint16_t vendor, uint16_t device);
  * 
  * Prints out devices on the PCI bus
  */
-void pci_enumerate(uint8_t bus);
+void pci_enumerate(uint8_t bus, uint8_t max_entries);
 
 #endif
