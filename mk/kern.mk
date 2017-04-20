@@ -7,7 +7,7 @@ U_C_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_C_OBJ))
 U_S_OBJ := realmode.o
 U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 
-EARLY_OBJ := _early.o realmode.o main.o
+EARLY_OBJ := _early.o realmode.o main.o gdt_init.o
 EARLY_OBJ := $(addprefix $(BUILD_DIR)/kern/early/,$(EARLY_OBJ))
 
 # Binary/source file for system bootstrap code

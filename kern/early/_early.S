@@ -39,22 +39,26 @@ _early:
 	// call main
 	call	main
 
+	// initialize the kernel GDT
+	call	gdt_init
+
+	// Load the IDT and GDT registers
+	lidt	idt_48
+	lgdt	gdt_48
 
 	/*
 	** Early initialization complete!
 	** Continue on to the kernel
 	*/
+	ljmp	$GDT_CODE, $TARGET_ADDRESS
 
-	movl	$start_gdt, %esi
+	/*movl	$start_gdt, %esi
 	movl	$GDT_ADDRESS, %edi
 	movl	$(end_gdt - start_gdt), %ecx
 	cld
-	rep movsb
+	rep movsb*/
 
-	lidt	idt_48
-	lgdt	gdt_48
-
-	ljmp	$GDT_CODE, $TARGET_ADDRESS
+	
 
 
 /*
@@ -68,38 +72,4 @@ idt_48:
 	.word	0x0800		/* 256 interrupts */
 	.quad	IDT_ADDRESS
 
-start_gdt:
-	.word	0,0,0,0		/* first GDT entry is always null */
 
-linear_seg:	/* limit FFFFF, base 0, R/W data seg, 32-bit 4K */
-	.word	0xFFFF	/* limit[15:0] */
-	.word	0x0000	/* base[15:0] */
-	.byte	0x00	/* base[23:16] */
-	.byte	0x92	/* access byte */
-	.byte	0xCF	/* granularity */
-	.byte	0x00	/* base[31:24] */
-
-code_seg:	/* limit FFFFF, base 0, R/E code seg, 32-bit 4K */
-	.word	0xFFFF
-	.word	0x0000
-	.byte	0x00
-	.byte	0x9A	/* 1 00 1 1010: present, prio 0, C/D, R/E code */
-	.byte	0xCF	/* 1 1 00 1111: 4K, 32-bit, 0, 0, limit[19:16] */
-	.byte	0x00
-
-data_seg:	/* limit FFFFF, base 0, R/W data seg, 32-bit 4K */
-	.word	0xFFFF
-	.word	0x0000
-	.byte	0x00
-	.byte	0x92	/* 1 00 1 0010: present, prio 0, C/D, R/W data */
-	.byte	0xCF
-	.byte	0x00
-
-stack_seg:	/* limit FFFFF, base 0, R/W data seg, 32-bit 4K */
-	.word	0xFFFF
-	.word	0x0000
-	.byte	0x00
-	.byte	0x92
-	.byte	0xCF
-	.byte	0x00
-end_gdt:
