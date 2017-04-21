@@ -2,7 +2,8 @@
  * memory_map.h
  */
 
-#pragma once
+#ifndef _KERN_MEMORY_MAP_H
+#define _KERN_MEMORY_MAP_H
 
 #include <stdint.h>
 
@@ -20,11 +21,4 @@ struct memory_map_s{
 
 typedef struct memory_map_s memory_map_entry;
 
-
-
-/**
- * Does a BIOS interrupt and gets the memory map.
- * returns a pointer to the first item in the map.
- * Size is overwritten with the number of memory map entries.
- */
-memory_map_entry * get_memory_map(uint32_t * size);
+#endif

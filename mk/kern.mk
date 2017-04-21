@@ -13,7 +13,8 @@
 KERN_OBJ := early/_early.o \
             early/realmode.o \
             early/main.o \
-            early/gdt_init.o
+            early/gdt_init.o \
+            early/memory_map_setup.o
 
 KERN_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_OBJ))
 
