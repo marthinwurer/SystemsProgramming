@@ -54,7 +54,8 @@ typedef enum e_stat {
 	E_NO_CHAR = -6, E_NO_CHILD = -5, E_BAD_CHAN = -4,
 	E_NO_PROCESS = -3, E_NO_PERM = -2, E_FAILURE = -1,
 	E_SUCCESS = 0,
-
+    
+    E_NOT_IMPLEMENTED = -50,
 	// used only within the OS
 	E_NO_QNODES, E_EMPTY_QUEUE
 

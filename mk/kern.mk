@@ -7,6 +7,8 @@ U_C_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_C_OBJ))
 U_S_OBJ := realmode.o
 U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 
+KERN_IO_OBJ := io/router.o  io/init.o 
+KERN_IO_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_IO_OBJ))
 
 # Binary/source file for system bootstrap code
 
@@ -40,7 +42,7 @@ C_OBJ := $(addprefix $(BUILD_DIR)/baseline/,$(C_OBJ))
 
 # Collections of files
 
-KERN_OBJECTS = $(S_OBJ) $(C_OBJ) $(U_C_OBJ) $(U_S_OBJ)
+KERN_OBJECTS = $(S_OBJ) $(C_OBJ) $(U_C_OBJ) $(U_S_OBJ) $(KERN_IO_OBJ)
 
 $(BUILD_DIR)/prog.out: $(KERN_OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $+
