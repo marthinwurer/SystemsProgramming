@@ -446,7 +446,7 @@ switch:
 
 	.byte	0x66	/* 32-bit mode prefix */
 	.code32
-	ljmp	$EARLY_GDT_CODE32, $RMTEXT_ADDRESS
+	ljmp	$EARLY_GDT_CODE32, $TARGET_ADDRESS
 	.code16
 
 /*

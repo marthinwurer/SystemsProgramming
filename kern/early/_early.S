@@ -14,7 +14,9 @@
 	.arch i386
 	.code32
 
-	.globl main, init_int32
+	.globl main, init_int32, c_io_init, c_puts
+
+	.globl _start
 
 	.globl  begtext, _early
 	.text
@@ -33,12 +35,15 @@ _early:
 	movl	$TARGET_STACK, %ebp
 	movl	%ebp, %esp
 
-	// initialize the int32 function
-	call	init_int32
+	// initialize c_io
+	call	c_io_init
+	
+	pushl	$enterMsg
+	call	c_puts
 
 	// call main
 	call	main
-
+	
 	// initialize the kernel GDT
 	call	gdt_init
 
@@ -46,11 +51,14 @@ _early:
 	lidt	idt_48
 	lgdt	gdt_48
 
+	pushl	$leaveMsg
+	call	c_puts
+
 	/*
 	** Early initialization complete!
 	** Continue on to the kernel
 	*/
-	ljmp	$GDT_CODE, $TARGET_ADDRESS
+	ljmp	$GDT_CODE, $_start
 
 	/*movl	$start_gdt, %esi
 	movl	$GDT_ADDRESS, %edi
@@ -58,6 +66,11 @@ _early:
 	cld
 	rep movsb*/
 
+enterMsg:
+	.asciz "=== Entered early init ===\n"
+
+leaveMsg:
+	.asciz "=== Leaving early init ===\n"
 	
 
 

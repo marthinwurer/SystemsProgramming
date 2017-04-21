@@ -14,9 +14,7 @@
 //
 int main(void) {
 
-	regs16_t regs;
-	regs.ax = 0;
-	int32(0x16, &regs);
+	
 
 	return 0;
 

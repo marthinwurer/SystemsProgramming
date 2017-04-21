@@ -707,7 +707,9 @@ void c_io_init( void ){
 	curr_y = min_y;
 	curr_x = min_x;
 	__c_setcursor();
+}
 
+void c_io_init_isr(void) {
 	/*
 	** Set up the interrupt handler for the keyboard
 	*/

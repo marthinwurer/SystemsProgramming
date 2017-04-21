@@ -30,10 +30,10 @@
 /*
 ** A symbol for locating the beginning of the code.
 */
-	.globl begtext
+	//.globl begtext
 
 	.text
-begtext:
+//begtext:
 
 /*
 ** The entry point.

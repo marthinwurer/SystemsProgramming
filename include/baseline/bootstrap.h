@@ -62,21 +62,11 @@
 
 
 /*
-** Early initialization routine (0000:3000 - 0000:35FF)
-*/
-
-#define EARLY_SEGMENT 0x300
-#define EARLY_ADDRESS 0x3000
-
-/*
 ** realprog address (0000:2E00 - 0000:2FFF)
 */
 
-#define REALPROG_SEGMENT 0x02E0
-#define REALPROG_ADDRESS 0x2E00
-
-#define REALPROG_STACK_ADDRESS 0x2DE6
-
+#define REALPROG_SEGMENT 0x0300
+#define REALPROG_ADDRESS 0x3000
 
 /*
 ** Real Mode Program(s) Text Area (0000:3000 - 0x7c00)

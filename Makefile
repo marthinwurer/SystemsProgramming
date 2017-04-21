@@ -25,6 +25,9 @@ include mk/libc.mk
 # The kernel and baseline
 include mk/kern.mk
 
+# realprog
+include mk/realprog.mk
+
 
 # transformation rules
 
@@ -61,9 +64,9 @@ $(BUILD_DIR)/%.o: %.c $(MARKER)
 #
 
 IMAGE_BOOTSTRAP := $(BUILD_DIR)/baseline/bootstrap.b
-IMAGE_FILES := $(BUILD_DIR)/earlyprog.b \
+IMAGE_FILES := $(BUILD_DIR)/realprog/prog.b \
                $(BUILD_DIR)/prog.b
-IMAGE_SETUP := $(BUILD_DIR)/earlyprog.b 0x3000 \
+IMAGE_SETUP := $(BUILD_DIR)/realprog/prog.b 0x3000 \
                $(BUILD_DIR)/prog.b 0x10000
 
 $(BUILD_DIR)/usb.image: $(IMAGE_BOOTSTRAP) $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
