@@ -32,6 +32,7 @@ typedef enum io_obj_type {
     IO_OBJ_FILE,
     IO_OBJ_MIDDLEWARE,
     IO_OBJ_MESSAGE,
-    IO_OBJ_MOUNT
+    IO_OBJ_MOUNT,
+    IO_OBJ_UNKNOWN
 } IO_OBJ_TYPE, *P_IO_OBJ_TYPE;
 

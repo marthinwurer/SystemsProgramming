@@ -56,6 +56,8 @@ typedef enum e_stat {
 	E_SUCCESS = 0,
     
     E_NOT_IMPLEMENTED = -50,
+    E_BAD_TYPE = -51,
+    E_NO_MORE_HANDLES = -52,
 	// used only within the OS
 	E_NO_QNODES, E_EMPTY_QUEUE
 
