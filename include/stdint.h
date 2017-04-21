@@ -11,4 +11,7 @@ typedef short int16_t;
 typedef int int32_t;
 typedef long int64_t;
 
+typedef unsigned int uintptr_t; // for pointer math
+
+
 #endif

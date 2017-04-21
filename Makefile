@@ -25,6 +25,9 @@ include mk/libc.mk
 # The kernel and baseline
 include mk/kern.mk
 
+# realprog
+include mk/realprog.mk
+
 
 # transformation rules
 
@@ -48,7 +51,10 @@ $(BUILD_DIR)/%.b: %.s $(MARKER)
 
 # Compile C source to object code
 $(BUILD_DIR)/%.o: %.c $(MARKER)
-	$(CC) -MD $(CPPFLAGS) $(USER_OPTIONS) $(CFLAGS) -o $@ -c $<
+	$(CC) -MD $(CPPFLAGS) $(USER_OPTIONS) -m32 $(CFLAGS) -o $@ -c $<
+
+#$(BUILD_DIR)/%.16.o: %.16.c $(MARKER)
+#	$(CC) -MD $(CPPFLAGS) $(USER_OPTIONS) -m16 -s $(CFLAGS) -o $@ -c $<
 
 
 #
@@ -57,11 +63,14 @@ $(BUILD_DIR)/%.o: %.c $(MARKER)
 # Default target:  usb.image
 #
 
-IMAGE_FILES := $(BUILD_DIR)/baseline/bootstrap.b \
+IMAGE_BOOTSTRAP := $(BUILD_DIR)/baseline/bootstrap.b
+IMAGE_FILES := $(BUILD_DIR)/realprog/prog.b \
                $(BUILD_DIR)/prog.b
+IMAGE_SETUP := $(BUILD_DIR)/realprog/prog.b 0x3000 \
+               $(BUILD_DIR)/prog.b 0x10000
 
-$(BUILD_DIR)/usb.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
-	$(BUILDIMAGE) -d usb -o $@ -b $(IMAGE_FILES) 0x10000
+$(BUILD_DIR)/usb.image: $(IMAGE_BOOTSTRAP) $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
+	$(BUILDIMAGE) -d usb -o $@ -b $(IMAGE_BOOTSTRAP) $(IMAGE_SETUP)
 
 $(BUILD_DIR)/floppy.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
 	$(BUILDIMAGE) -d floppy -o $@ -b $(IMAGE_FILES) 0x10000

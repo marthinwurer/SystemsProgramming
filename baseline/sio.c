@@ -119,6 +119,12 @@ queue_t _reading;
 */
 
 static void _sio_isr( int vector, int code ) {
+
+	// get rid of warnings
+	(void) vector;
+	(void) code;
+
+
 	pcb_t *pcb;
 	int eir, lsr, msr;
 	int ch;
@@ -620,7 +626,7 @@ int _sio_puts( char *buffer ) {
 */
 
 void _sio_dump( void ) {
-	int n;
+	uint32_t n;
 	char *ptr;
 
 	c_printf( "SIO buffers:  in %d ot %d\n", _incount, _outcount );
