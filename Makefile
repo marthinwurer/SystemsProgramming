@@ -17,7 +17,7 @@ all: $(BUILD_DIR)/usb.image
 # Project makefiles
 # Include 'em here
 
-PROJECTS := kern baseline libc
+PROJECTS := kern baseline libc realprog
 
 # C Standard library for kernel and userspace
 include mk/libc.mk

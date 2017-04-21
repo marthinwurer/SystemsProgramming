@@ -13,7 +13,9 @@ U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 KERN_OBJ := early/_early.o \
             early/realmode.o \
             early/main.o \
-            early/gdt_init.o
+            early/gdt_init.o \
+            util/marquee.o \
+            vesa/vbe.o
 
 KERN_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_OBJ))
 

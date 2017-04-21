@@ -1,6 +1,6 @@
 
 #include <kern/vesa/vbe.h>
-#include <kern/realmode.h>
+#include <kern/early/realmode.h>
 
 #include <string.h>
 
@@ -30,7 +30,7 @@ int vbe_getInfo(VBEInfo *info, uint16_t *vbeResult) {
 
 	regs16_t regs;
 	regs.es = 0;
-	regs.di = VBE_BLOCK_ADDRESS;
+	regs.edi = VBE_BLOCK_ADDRESS;
 
 	int errorcode = VBE_ERROR;
 	
@@ -43,7 +43,7 @@ int vbe_getInfo(VBEInfo *info, uint16_t *vbeResult) {
 	}
 
 	if (vbeResult != NULL) {
-		*vbeResult = regs.ax;
+		*vbeResult = regs.eax;
 	}
 
 	return errorcode;
@@ -61,8 +61,8 @@ int vbe_getModeInfo(uint16_t mode, VBEModeInfo *modeInfo, uint16_t *vbeResult) {
 
 	regs16_t regs;
 	regs.es = 0;
-	regs.di = VBE_BLOCK_ADDRESS;
-	regs.cx = mode;
+	regs.edi = VBE_BLOCK_ADDRESS;
+	regs.ecx = mode;
 
 	int errorcode = VBE_ERROR;
 
@@ -72,7 +72,7 @@ int vbe_getModeInfo(uint16_t mode, VBEModeInfo *modeInfo, uint16_t *vbeResult) {
 	}
 
 	if (vbeResult != NULL) {
-		*vbeResult = regs.ax;
+		*vbeResult = regs.eax;
 	}
 
 
@@ -84,14 +84,14 @@ int vbe_setMode(uint16_t mode, uint16_t *vbeResult) {
 	int errorcode = VBE_ERROR;
 
 	regs16_t regs;
-	regs.bx = mode;
+	regs.ebx = mode;
 
 	if (__performVBEFunction(VBE_FUNCTION_SETMODE, &regs)) {
 		errorcode = VBE_SUCCESS;
 	}
 
 	if (vbeResult != NULL) {
-		*vbeResult = regs.ax;
+		*vbeResult = regs.eax;
 	}
 
 
@@ -109,12 +109,12 @@ int vbe_currentMode(uint16_t *modeVar, uint16_t *vbeResult) {
 	regs16_t regs;
 	
 	if (__performVBEFunction(VBE_FUNCTION_CURRENTMODE, &regs)) {
-		*modeVar = regs.bx;
+		*modeVar = regs.ebx;
 		errorcode = VBE_SUCCESS;
 	}
 
 	if (vbeResult != NULL) {
-		*vbeResult = regs.ax;
+		*vbeResult = regs.eax;
 	}
 
 	return errorcode;
@@ -126,8 +126,8 @@ int vbe_currentMode(uint16_t *modeVar, uint16_t *vbeResult) {
 // static helper functions
 
 int __performVBEFunction(uint16_t function, regs16_t *regs) {
-	regs->ax = VBE_AX | function;
-	__int32(0x10, regs);
+	regs->eax = VBE_AX | function;
+	int32(0x10, regs);
 
-	return regs->ax == (VBE_RETURN_FUNCTION_SUPPORTED | VBE_RETURN_FUNCTION_SUCCESS);
+	return regs->eax == (VBE_RETURN_FUNCTION_SUPPORTED | VBE_RETURN_FUNCTION_SUCCESS);
 }
