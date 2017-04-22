@@ -21,51 +21,6 @@ typedef struct _ioentry {
     pid_t           owner;
 } _io_object_entry;
 
-typedef struct _io_message {
-    IOHANDLE        handle;
-    char*           path;
-    void*           filesystem; //PIO_FILESYSTEM
-    void*           device; //PIO_DEVICE
-    char*           buffer;
-    int32_t         length;
-    status_t        status;
-} IO_MESSAGE, *PIO_MESSAGE;
-
-typedef struct _io_filesystem {
-    IOHANDLE        handle;
-    char*           name;
-    int32_t         created;
-    status_t        (*execute)(PIO_MESSAGE msg);
-    status_t        (*init)();
-    status_t        (*finalize)();
-} IO_FILESYSTEM, *PIO_FILESYSTEM;
-
-typedef struct _io_device {
-    IOHANDLE        handle;
-    char*           name;
-    int32_t         created;
-    status_t        (*read)(int offset, PBSIZE length, void* buffer);
-    status_t        (*write)(int offset, PBSIZE length, void* buffer);
-    status_t        (*finalize)();
-} IO_DEVICE, *PIO_DEVICE;
-
-typedef struct _io_mount {
-    IOHANDLE        handle;
-    char*           name;
-    char*           path;
-    int32_t         created;
-    IOHANDLE        filesystem;
-    IOHANDLE        device;
-} IO_MOUNT, *PIO_MOUNT;
-
-typedef struct _io_middleware {
-    IOHANDLE        handle;
-    char*           name;
-    int32_t         created;
-    status_t        (*execute)(PIO_MESSAGE msg);
-} IO_MIDDLEWARE, *PIO_MIDDLEWARE;
-
-
 /** Private State **/
 
 static IO_FILESYSTEM filesystems[IO_OBJ_COUNT];
@@ -152,9 +107,9 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
     if (path[0] == "\\"){
         ++path; //gets to base path excluding leading slash
     }
-    int32_t index = strpos(path, '\\', 0);
+    unsigned int index = strpos(path, '\\', 0);
     //iterate through entries in mount table
-    for (unsigned int entryi = 0; entryi < mounts_max; entryi++){
+    for (int entryi = 0; entryi < mounts_max; entryi++){
         if (strlen(mounts[entryi].path) != index){
             continue;
         }
@@ -163,8 +118,8 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
                 break;
             }
         }
-        filesystem = &mounts[entryi].filesystem;
-        device = &mounts[entryi].device;
+        *filesystem = mounts[entryi].filesystem;
+        *device = mounts[entryi].device;
         return E_SUCCESS;
     }
         //on match, extract handles
@@ -175,17 +130,17 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
 
 status_t IO_INIT(){
     for (int i = 0; i < IO_OBJ_COUNT; i++){
-        filesystems[i] = (IO_FILESYSTEM){{-1}};
-        devices[i] = (IO_DEVICE){{-1}};
-        mounts[i] = (IO_MOUNT){{-1}};
-        middlewares[i] = (IO_MIDDLEWARE){{-1}};
+        filesystems[i] = _io_fs_init_null();
+        devices[i] = _io_dv_init_null();
+        mounts[i] = _io_mp_init_null();
+        middlewares[i] = _io_md_init_null();
         for (int j =0; j < 5; j++){
-            messages[i + j] = (IO_MESSAGE){{-1}};
+            messages[i + j] = _io_msg_init_null();
         }
     }
 
     for (int i = 0; i < 100; i++){
-        HANDLE_TABLE[i] = (struct _ioentry){{-1}};
+        HANDLE_TABLE[i] = (struct _ioentry){-1, IO_OBJ_UNKNOWN, 0, NULL, 0};
     }
     has_initted = 1; //true
     return E_SUCCESS;
@@ -214,65 +169,31 @@ status_t IO_PROTOTYPE(IO_OBJ_TYPE type, PIOHANDLE out_handle){
     switch (type) {
         case IO_OBJ_FILESYSTEM:
             //construct object
-            filesystems[table_index] = (IO_FILESYSTEM) {
-                .handle = handle,
-                .name = NULL,
-                .created = NULL, //current time
-                .execute = NULL,
-                .init = NULL,
-                .finalize = NULL
-            };
+            filesystems[table_index] = _io_fs_init_handle(handle);
             //update handle table
             HANDLE_TABLE[handle].object = &filesystems[table_index];
             break;
         case IO_OBJ_DEVICE:
             //construct object
-            devices[table_index] = (IO_DEVICE) {
-                .handle = handle,
-                .name = NULL,
-                .created = NULL,
-                .read = NULL,
-                .write = NULL,
-                .finalize = NULL
-            };
+            devices[table_index] = _io_dv_init_handle(handle);
             //update handle table
             HANDLE_TABLE[handle].object = &devices[table_index];
             break;
         case IO_OBJ_MIDDLEWARE:
             //construct object
-            middlewares[table_index] = (IO_MIDDLEWARE) {
-                .handle = handle,
-                .name = NULL,
-                .created = NULL,
-                .execute = NULL
-            };
+            middlewares[table_index] = _io_md_init_handle(handle);
             //update handle table
             HANDLE_TABLE[handle].object = &middlewares[table_index];
             break;
         case IO_OBJ_MESSAGE:
             //construct object
-            messages[table_index] = (IO_MESSAGE) {
-                .handle = handle,
-                .path = NULL, //char*
-                .filesystem = NULL, //PIO_FILESYSTEM
-                .device = NULL, //PIO_DEVICE
-                .buffer = NULL, //byte*
-                .length = NULL, //int32_t
-                .status = E_NOT_IMPLEMENTED //status_t
-            };
+            messages[table_index] = _io_msg_init_handle(handle);
             //update handle table
             HANDLE_TABLE[handle].object = &messages[table_index];
             break;
         case IO_OBJ_MOUNT:
             //construct object
-            mounts[table_index] = (IO_MOUNT) {
-                .handle = handle,
-                .name = NULL, //char*
-                .path = NULL, //char*
-                .created = NULL, //int32_t
-                .filesystem = NULL, //IOHANDLE
-                .device = NULL //IOHANDLE
-            };
+            mounts[table_index] = _io_mp_init_handle(handle);
             //update handle table
             HANDLE_TABLE[handle].object = &mounts[table_index];
             break;
@@ -284,7 +205,39 @@ status_t IO_PROTOTYPE(IO_OBJ_TYPE type, PIOHANDLE out_handle){
 }
 
 status_t IO_UPDATE(IOHANDLE handle, IOPROP property, void* value, PBSIZE length){
-    return E_NOT_IMPLEMENTED;
+    //verify handle
+    if (handle < 0 || handle > IO_HANDLE_MAX) {
+        return E_BAD_HANDLE;
+    }
+    struct _ioentry* handle_entry = &HANDLE_TABLE[handle];
+    if (handle_entry->handle != handle){
+        return E_BAD_HANDLE;
+    }
+    if (handle_entry->locked != 0){
+        return E_LOCKED;
+    }
+    status_t result;
+    switch (handle_entry->type){
+        case IO_OBJ_FILESYSTEM:
+            result = _io_fs_setprop(handle_entry->object, property, value, *length);
+            break;
+        case IO_OBJ_MOUNT:
+            result = _io_mp_setprop(handle_entry->object, property, value, *length);
+            break;
+        case IO_OBJ_DEVICE:
+            result = _io_dv_setprop(handle_entry->object, property, value, *length);
+            break;
+        case IO_OBJ_MESSAGE:
+            result = _io_msg_setprop(handle_entry->object, property, value, *length);
+            break;
+        case IO_OBJ_MIDDLEWARE:
+            result =_io_md_setprop(handle_entry->object, property, value, *length);
+            break;
+        default:
+            result = E_NOT_IMPLEMENTED;
+            break;
+    }
+    return result;
 }
 
 status_t IO_DELETE(IOHANDLE handle){
@@ -302,58 +255,22 @@ status_t IO_DELETE(IOHANDLE handle){
     switch (object_type) {
         case IO_OBJ_MESSAGE: ;
             PIO_MESSAGE p_o_m = handle_entry->object;
-            *p_o_m = (IO_MESSAGE) {
-                .handle = -1,
-                .path = NULL, //char*
-                .filesystem = NULL, //PIO_FILESYSTEM
-                .device = NULL, //PIO_DEVICE
-                .buffer = NULL, //byte*
-                .length = NULL, //int32_t
-                .status = E_NOT_IMPLEMENTED //status_t
-            };
-            break;
+            *p_o_m = _io_msg_init_null();
         case IO_OBJ_FILESYSTEM: ;
             PIO_FILESYSTEM p_o_f = handle_entry->object;
-            *p_o_f = (IO_FILESYSTEM) {
-                .handle = -1,
-                .name = NULL,
-                .created = NULL, //current time
-                .execute = NULL,
-                .init = NULL,
-                .finalize = NULL
-            };
+            *p_o_f = _io_fs_init_null();
             break;
         case IO_OBJ_DEVICE: ;
             PIO_DEVICE p_o_d = handle_entry->object;
-            *p_o_d = (IO_DEVICE) {
-                .handle = -1,
-                .name = NULL,
-                .created = NULL,
-                .read = NULL,
-                .write = NULL,
-                .finalize = NULL
-            };
+            *p_o_d = _io_dv_init_null();
             break;
         case IO_OBJ_MOUNT: ;
             PIO_MOUNT p_o_o = handle_entry->object;
-            *p_o_o = (IO_MOUNT) {
-                .handle = -1,
-                .name = NULL, //char*
-                .path = NULL, //char*
-                .created = NULL, //int32_t
-                .filesystem = NULL, //IOHANDLE
-                .device = NULL //IOHANDLE
-            };
+            *p_o_o = _io_mp_init_null();
             break;
         case IO_OBJ_MIDDLEWARE: ;//standard doesn't like assignments after label...
             PIO_MIDDLEWARE p_o_i = handle_entry->object;
-            *p_o_i = (IO_MIDDLEWARE) {
-                .handle = -1,
-                .name = NULL,
-                .created = NULL,
-                .execute = NULL
-            };
-
+            *p_o_i = _io_md_init_null();
             break;
         default:
             return E_BAD_ARG;
@@ -380,9 +297,12 @@ status_t IO_EXECUTE(IOHANDLE handle){
         return E_BAD_HANDLE;
     }
     //associate file system & device
-    PIOHANDLE fs;
-    PIOHANDLE dev;
+    PIOHANDLE fs = NULL;
+    PIOHANDLE dev = NULL;
     status_t stat = match_path(handle, fs, dev);
+    if (stat != E_SUCCESS){
+        return stat;
+    }
     PIO_MESSAGE pmessage = handle_entry->object;
     pmessage->device = dev;
     pmessage->filesystem = fs;

@@ -64,6 +64,8 @@ typedef enum e_stat {
     E_BAD_ARG = -56, //Bad argument provided to IO function
     E_NO_MATCH = -57, //No Match for Path in IO operation
     E_CANCELED = -58, //IO Operation In Progress Canceled by Middleware
+    E_LOCKED = -59,
+    E_BAD_PTR = -60,
 	// used only within the OS
 	E_NO_QNODES, E_EMPTY_QUEUE
 

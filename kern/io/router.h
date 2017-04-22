@@ -4,7 +4,13 @@
  * @summary: I/O Manager Public definitions
  **/
 #include <baseline/common.h>
+#include <string.h>
 #include "io_types.h"
+#include "filesystem.h"
+#include "middleware.h"
+#include "device.h"
+#include "mount.h"
+#include "message.h"
 
 /**
  * @summary: allocates space for an object and returns handle

@@ -3,7 +3,7 @@
  * @summary: common definition for types used by the I/O subsystem
  * @author: Nathan C. Castle
  * */
-
+#pragma once
 typedef int IOHANDLE, *PIOHANDLE; //handle to an open file
 typedef int BSIZE, *PBSIZE; //buffer size, bytes
 
@@ -18,11 +18,14 @@ typedef enum _file_prop {
     IOPROP_LENGTH_CONTENT,
     IOPROP_CURSOR_POSITION,
     IOPROP_NAME,
-    IOPROP_MOUNTED_FS, //filesystem for use with mounts
-    IOPROP_MOUNTED_DEVICE, //device for use with mounts
-    IOPROP_FS_EXEC,
-    IOPROP_FS_INIT,
-    IOPROP_FS_FINALIZE
+    IOPROP_FILESYSTEM, //filesystem for use with mounts
+    IOPROP_DEVICE, //device for use with mounts
+    IOPROP_EXECUTE,
+    IOPROP_INIT,
+    IOPROP_READ,
+    IOPROP_WRITE,
+    IOPROP_FINALIZE,
+    IOPROP_BUFFER
 } IOPROP, *PIOPROP;
 
 typedef enum io_obj_type {
