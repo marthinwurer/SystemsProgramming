@@ -31,13 +31,6 @@
 #define PCI_DATA 0xE1
 #define PCI_POWER_MANAGEMENT_CSR 0xE2
 
-// TODO: macros for the length of each of these
-
-// typedef struct bus_slot_struct {
-// 	uint8_t bus;
-// 	uint8_t slot;
-// } bus_slot_t;
-
 /**
  * pci_cfg_read, pci_cfg_read_word, pci_cfg_read_byte
  *

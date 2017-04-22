@@ -50,13 +50,15 @@
 #define NET_INTEL_QEMU_NIC 0x100E
 #define NET_INTEL_DSL_NIC 0x1229
 
-uint32_t intel_csr_read32(uint32_t csr_addr, uint32_t offset);
-uint16_t intel_csr_read16(uint32_t csr_addr, uint32_t offset);
-uint8_t intel_csr_read8(uint32_t csr_addr, uint32_t offset);
+void intel_nic_init();
 
-void intel_csr_write32(uint32_t csr_addr, uint32_t offset, uint32_t data);
-void intel_csr_write16(uint32_t csr_addr, uint32_t offset, uint16_t data);
-void intel_csr_write8(uint32_t csr_addr, uint32_t offset, uint8_t data);
+uint32_t intel_csr_read32(uint8_t offset);
+uint16_t intel_csr_read16(uint8_t offset);
+uint8_t intel_csr_read8(uint8_t offset);
+
+void intel_csr_write32(uint8_t offset, uint32_t data);
+void intel_csr_write16(uint8_t offset, uint16_t data);
+void intel_csr_write8(uint8_t offset, uint8_t data);
 
 #endif
 

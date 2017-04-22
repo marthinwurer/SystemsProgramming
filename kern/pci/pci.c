@@ -1,5 +1,6 @@
 #include <kern/pci/pci.h>
 #include <baseline/c_io.h>
+#include <baseline/startup.h>
 
 uint32_t pci_cfg_read(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
 	uint32_t address;
