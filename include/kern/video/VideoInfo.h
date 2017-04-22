@@ -1,17 +1,25 @@
 #ifndef _KERN_VIDEO_VIDEOINFO_H
 #define _KERN_VIDEO_VIDEOINFO_H
 
+#define VIDEO_INFO_SIZE 512
 
-typedef struct VideoInfo_s {
-	uint16_t vbeVersion;
-	uint16_t softwareRev;
-	uint16_t videoMemory;
-	uint32_t capabilities;
-	uint16_t modes[40];
-	char oem[128];
-	char vendor[128];
-	char productName[128];
-	char productRev[128];
+
+struct VideoInfo_s {
+	uint16_t vbeVersion;            // VBE version, usually 0x300 (VBE 3.0)
+	uint16_t softwareRev;           // Software revision
+	uint16_t videoMemory;           // Video memory in 64 KB blocks
+	uint32_t capabilities;          // bitfield for video card capabilities
+	uint32_t modeCount;             // number of available VBE modes
+	uint16_t *modes;                // Ptr in buf to VBE mode list
+	char *oem;                      // string containing the oem
+	char *vendor;
+	char *productName;
+	char *productRev;
+};
+
+typedef union VideoInfo_u {
+	struct VideoInfo_s info;
+	uint8_t buf[VIDEO_INFO_SIZE];
 } VideoInfo;
 
 

@@ -30,6 +30,8 @@
 // need the exit() and do_exit() prototypes
 #include <baseline/ulib.h>
 
+#include <kern/video/video.h>
+
 /*
 ** PRIVATE DEFINITIONS
 */
@@ -154,6 +156,8 @@ void _init( void ) {
 	c_io_init_isr();
 	c_setscroll( 0, 7, 99, 99 );
 	c_puts_at( 0, 6, "================================================================================" );
+
+	video_dumpInfo(VIDEO_INFO);
 
 	/*
 	** 20165-SPECIFIC CODE STARTS HERE

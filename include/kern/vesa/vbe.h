@@ -55,6 +55,10 @@
 #define vbe_ptr(ptr) (((ptr >> 16) * 0x10) + (ptr & 0xFFFF))
 
 
+// The list of video modes returned by vbe_getInfo is terminated
+// with this constant
+#define VBE_MODELIST_TERMINATOR 0xFFFF
+
 //
 // Initializes the VBE module. Currently unused.
 //
