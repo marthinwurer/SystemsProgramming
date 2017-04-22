@@ -124,6 +124,20 @@ status_t grab_table_space(IO_OBJ_TYPE type, int32_t* result){
 }
 
 /**
+ * @summary: invokes a filter by index; filter is passed the handle to the IO_MESSAGE
+ * @pre-condition: handle is valid and refers to an IO_MESSAGE
+ * */
+status_t call_filter(IOHANDLE handle, int32_t index){
+    if (index > middlewares_max){
+        return E_OUT_OF_BOUNDS;
+    }
+    PIO_MIDDLEWARE filter= &middlewares[index];
+    if (filter->handle < 0){
+        return E_OUT_OF_BOUNDS;
+    }
+    return filter->execute(handle);
+}
+/**
  *
  * @summary: matches an IO Message's path with the filesystem or device matching the mount
  * @pre-condition: handle is already verified and refers to a valid IO Message
@@ -369,14 +383,18 @@ status_t IO_EXECUTE(IOHANDLE handle){
     PIOHANDLE fs;
     PIOHANDLE dev;
     status_t stat = match_path(handle, fs, dev);
-    ((IO_MESSAGE*)(handle_entry->object))->device = dev;
-    ((IO_MESSAGE*)(handle_entry->object))->filesystem = fs;
+    IO_MESSAGE* pmessage = handle_entry->object;
+    pmessage->device = dev;
+    pmessage->filesystem = fs;
     //call all filters
     int32_t index = 0;
-    //while (call_filter(handle, index) == E_SUCCESS){
-    //    index++;
-    //    //check status here
-    //}
+    while (call_filter(handle, index) == E_SUCCESS){
+        index++;
+        //check status here
+        if (pmessage->status == E_CANCELED){
+            return E_CANCELED;
+        }
+    }
     
     //call filesystem
 

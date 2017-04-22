@@ -60,9 +60,10 @@ typedef enum e_stat {
     E_NO_MORE_HANDLES = -52,
     E_BAD_HANDLE = -53,
     E_NO_DATA = -54,
-    E_OUT_OF_BOUNDS = -55,
-    E_BAD_ARG = -56,
-    E_NO_MATCH = -57,
+    E_OUT_OF_BOUNDS = -55, //Provided index out of range
+    E_BAD_ARG = -56, //Bad argument provided to IO function
+    E_NO_MATCH = -57, //No Match for Path in IO operation
+    E_CANCELED = -58, //IO Operation In Progress Canceled by Middleware
 	// used only within the OS
 	E_NO_QNODES, E_EMPTY_QUEUE
 
