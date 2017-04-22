@@ -383,7 +383,7 @@ status_t IO_EXECUTE(IOHANDLE handle){
     PIOHANDLE fs;
     PIOHANDLE dev;
     status_t stat = match_path(handle, fs, dev);
-    IO_MESSAGE* pmessage = handle_entry->object;
+    PIO_MESSAGE pmessage = handle_entry->object;
     pmessage->device = dev;
     pmessage->filesystem = fs;
     //call all filters
@@ -396,10 +396,9 @@ status_t IO_EXECUTE(IOHANDLE handle){
         }
     }
     
-    //call filesystem
-
-    //return results
-    return E_NOT_IMPLEMENTED;
+    //call filesystem & return result
+    PIO_FILESYSTEM pfs = HANDLE_TABLE[*fs].object;
+    return pfs->execute(pmessage);
 }
 
 status_t IO_ENUMERATE(IO_OBJ_TYPE type, int index, PIOHANDLE object){
