@@ -51,7 +51,7 @@ status_t grab_handle(PIOHANDLE handle){
     .type = IO_OBJ_UNKNOWN,
     .locked = 0, //false
     .object = NULL,
-    .owner = NULL
+    .owner = 0
     };
     *handle = proto_handle;
     return E_SUCCESS;
@@ -62,7 +62,7 @@ status_t grab_handle(PIOHANDLE handle){
  * @pre-condition: handle is valid and refers to an IO_MESSAGE
  * */
 status_t call_filter(IOHANDLE handle, int32_t index){
-    IOHANDLE middleware_handle = NULL;
+    IOHANDLE middleware_handle = -1;
     status_t stat = _io_md_iterate(&middleware_handle, index);
     if (stat != E_SUCCESS) { return stat; }
     PIO_MIDDLEWARE filter= HANDLE_TABLE[middleware_handle].object;
