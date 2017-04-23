@@ -2,7 +2,7 @@
 #define _KERN_VIDEO_FB_FB_H
 
 #include <kern/video/fb/VideoFb.h>
-#include <kern/video/fb/VideoCol.h>
+#include <kern/video/color/VideoCol.h>
 
 
 int fb_init(VideoFb *fb);

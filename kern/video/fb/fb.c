@@ -1,5 +1,5 @@
 
-#include <kern/video/fb.h>
+#include <kern/video/fb/fb.h>
 #include <kern/video/err.h>
 
 

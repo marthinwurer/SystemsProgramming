@@ -7,6 +7,8 @@ KERN_OBJ := early/_early.o \
             early/gdt_init.o \
             util/marquee.o \
             vesa/vbe.o \
+            video/color/color.o \
+            video/fb/fb.o \
             video/video.o
 
 KERN_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_OBJ))

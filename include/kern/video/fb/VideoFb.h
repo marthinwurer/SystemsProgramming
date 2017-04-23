@@ -1,7 +1,7 @@
 #ifndef _KERN_VIDEO_FB_VIDEOFB_H
 #define _KERN_VIDEO_FB_VIDEOFB_H
 
-#include <kern/video/fb/VideoComp.h>
+#include <kern/video/color/VideoColorSpace.h>
 
 #include <stdint.h>
 
