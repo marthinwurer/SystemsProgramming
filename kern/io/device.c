@@ -1,5 +1,11 @@
 #include "device.h"
 
+#define _MC_IO_DV_CNT 5
+
+static int _io_dev_count = _MC_IO_DV_CNT;
+static int _io_dev_next = 0;
+static IO_DEVICE _IO_DV_TABLE[_MC_IO_DV_CNT];
+
 status_t _io_dv_setprop(PIO_DEVICE dv, IOPROP prop, void* value, int32_t length){
     //verify length
     if (length < 0){
@@ -51,4 +57,36 @@ IO_DEVICE _io_dv_init_handle(IOHANDLE handle){
         .write = NULL,
         .finalize = NULL
     };
+}
+
+status_t _io_init_devices() {
+    for (int i = 0; i < _io_dev_count; i++){
+        _IO_DV_TABLE[i] = _io_dv_init_null();
+    }
+    return E_SUCCESS;
+}
+
+status_t _io_grab_next_device(PIO_DEVICE* out_p_device){
+    int cursor = _io_dev_next;
+    while (_IO_DV_TABLE[cursor].handle != -1){
+        cursor = (cursor + 1) % _io_dev_count;
+        if (cursor == _io_dev_next){ //we've tried everything; no more space
+            return E_OUT_OF_OBJECTS;
+        }
+    }
+    _io_dev_next = (cursor + 1) % _io_dev_count;
+    *out_p_device = &_IO_DV_TABLE[cursor];
+    (*out_p_device)->handle = 0;
+    return E_SUCCESS;
+}
+
+status_t _io_dv_iterate(PIOHANDLE out, int index) {
+    if (index >= _io_dev_count){
+        return E_OUT_OF_BOUNDS;
+    }
+    if (index < 0) {
+        return E_OUT_OF_BOUNDS;
+    }
+    *out = _IO_DV_TABLE[index].handle;
+    return E_SUCCESS;
 }

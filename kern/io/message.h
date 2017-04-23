@@ -15,3 +15,9 @@ status_t _io_msg_setprop(PIO_MESSAGE msg, IOPROP prop, void* value, int32_t blen
 IO_MESSAGE _io_msg_init_null(void);
 
 IO_MESSAGE _io_msg_init_handle(IOHANDLE handle);
+
+status_t _io_init_messages(void);
+
+status_t _io_grab_next_message(PIO_MESSAGE* out_p_message);
+
+status_t _io_msg_iterate(PIOHANDLE out, int index);

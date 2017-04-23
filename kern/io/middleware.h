@@ -13,3 +13,8 @@ IO_MIDDLEWARE _io_md_init_null(void);
 
 IO_MIDDLEWARE _io_md_init_handle(IOHANDLE handle);
 
+status_t _io_init_middlewares(void);
+
+status_t _io_grab_next_middleware(PIO_MIDDLEWARE* out_p_middleware);
+
+status_t _io_md_iterate(PIOHANDLE out, int index);

@@ -66,6 +66,7 @@ typedef enum e_stat {
     E_CANCELED = -58, //IO Operation In Progress Canceled by Middleware
     E_LOCKED = -59,
     E_BAD_PTR = -60,
+    E_OUT_OF_OBJECTS = -61, //no more objects available for allocation
 	// used only within the OS
 	E_NO_QNODES, E_EMPTY_QUEUE
 

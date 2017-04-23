@@ -23,23 +23,6 @@ typedef struct _ioentry {
 
 /** Private State **/
 
-static IO_FILESYSTEM filesystems[IO_OBJ_COUNT];
-static IO_DEVICE     devices[IO_OBJ_COUNT];
-static IO_MOUNT      mounts[IO_OBJ_COUNT];
-static IO_MIDDLEWARE middlewares[IO_OBJ_COUNT];
-static IO_MESSAGE    messages[5 * IO_OBJ_COUNT]; //can only have 50 open messages
-
-static short filesystems_next = 0;
-static short filesystems_max = IO_OBJ_COUNT -1;
-static short devices_next = 0;
-static short devices_max = IO_OBJ_COUNT -1;
-static short mounts_next = 0;
-static short mounts_max = IO_OBJ_COUNT -1;
-static short middlewares_next = 0;
-static short middlewares_max = IO_OBJ_COUNT -1;
-static short messages_next = 0;
-static short messages_max = 5 * IO_OBJ_COUNT - 1;
-
 static int32_t IO_HANDLE_NEXT = 0;
 static int32_t IO_HANDLE_MAX = 99;
 static _io_object_entry HANDLE_TABLE[100];
@@ -74,22 +57,15 @@ status_t grab_handle(PIOHANDLE handle){
     return E_SUCCESS;
 }
 
-status_t grab_table_space(IO_OBJ_TYPE type, int32_t* result){
-    return 0; //TODO - don't do this
-}
-
 /**
  * @summary: invokes a filter by index; filter is passed the handle to the IO_MESSAGE
  * @pre-condition: handle is valid and refers to an IO_MESSAGE
  * */
 status_t call_filter(IOHANDLE handle, int32_t index){
-    if (index > middlewares_max){
-        return E_OUT_OF_BOUNDS;
-    }
-    PIO_MIDDLEWARE filter= &middlewares[index];
-    if (filter->handle < 0){
-        return E_OUT_OF_BOUNDS;
-    }
+    IOHANDLE middleware_handle = NULL;
+    status_t stat = _io_md_iterate(&middleware_handle, index);
+    if (stat != E_SUCCESS) { return stat; }
+    PIO_MIDDLEWARE filter= HANDLE_TABLE[middleware_handle].object;
     PIO_MESSAGE pm = HANDLE_TABLE[handle].object;
     return filter->execute(pm);
 }
@@ -110,39 +86,42 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
     }
     unsigned int index = strpos(path, '\\', 0);
     //iterate through entries in mount table
-    for (int entryi = 0; entryi < mounts_max; entryi++){
-        if (strlen(mounts[entryi].path) != index){
-            continue;
-        }
-        for (unsigned int i=0; i < index; i++){
-            if (mounts[entryi].path[i] != path[i]){
-                break;
+    int iter_val = 0;
+    IOHANDLE mount_handle = -1;
+    int mismatch = 0;
+    while (_io_mp_iterate(&mount_handle, iter_val) == E_SUCCESS) {
+        char* mountpath = ((PIO_MOUNT)HANDLE_TABLE[mount_handle].object)->path;
+        if (strlen(mountpath) == index) {
+            for (unsigned int i=0; i < index; i++){
+                if (mountpath[i] != path[i]){
+                    mismatch++;
+                }
+            }
+            if (mismatch == 0){
+                *filesystem = ((PIO_MOUNT)HANDLE_TABLE[mount_handle].object)->filesystem;
+                *device = ((PIO_MOUNT)HANDLE_TABLE[mount_handle].object)->device;
+                return E_SUCCESS;
             }
         }
-        *filesystem = mounts[entryi].filesystem;
-        *device = mounts[entryi].device;
-        return E_SUCCESS;
+        iter_val++;
+        mismatch = 0;
     }
-        //on match, extract handles
-        //return
     return E_NO_MATCH;
 }
 /** Public Functions **/
 
 status_t IO_INIT(){
-    for (int i = 0; i < IO_OBJ_COUNT; i++){
-        filesystems[i] = _io_fs_init_null();
-        devices[i] = _io_dv_init_null();
-        mounts[i] = _io_mp_init_null();
-        middlewares[i] = _io_md_init_null();
-        for (int j =0; j < 5; j++){
-            messages[i + j] = _io_msg_init_null();
-        }
-    }
-
-    for (int i = 0; i < 100; i++){
-        HANDLE_TABLE[i] = (struct _ioentry){-1, IO_OBJ_UNKNOWN, 0, NULL, 0};
-    }
+    status_t stat = E_SUCCESS;
+    stat = _io_init_filesystems();
+    if (stat != E_SUCCESS) { return stat; }
+    stat = _io_init_devices();
+    if (stat != E_SUCCESS) { return stat; }
+    stat = _io_init_messages();
+    if (stat != E_SUCCESS) { return stat; }
+    stat = _io_init_middlewares();
+    if (stat != E_SUCCESS) { return stat; }
+    stat = _io_init_mounts();
+    if (stat != E_SUCCESS) { return stat; }
     has_initted = 1; //true
     return E_SUCCESS;
 }
@@ -158,45 +137,54 @@ status_t IO_PROTOTYPE(IO_OBJ_TYPE type, PIOHANDLE out_handle){
     if (stat != E_SUCCESS) {
         return stat;
     }
-    //set up the table entry
-    int32_t table_index;
-    stat = grab_table_space(type, &table_index);
-    if (stat != E_SUCCESS){
-        return stat;
-    }
     //set up the handle
     HANDLE_TABLE[handle].type = type; 
     //set up the object
     switch (type) {
-        case IO_OBJ_FILESYSTEM:
+        case IO_OBJ_FILESYSTEM: ;
             //construct object
-            filesystems[table_index] = _io_fs_init_handle(handle);
+            PIO_FILESYSTEM pfs = NULL;
+            stat = _io_grab_next_filesystem(&pfs);
+            if (stat != E_SUCCESS) { return stat; }
+            *pfs = _io_fs_init_handle(handle);
             //update handle table
-            HANDLE_TABLE[handle].object = &filesystems[table_index];
+            HANDLE_TABLE[handle].object = pfs;
             break;
-        case IO_OBJ_DEVICE:
+        case IO_OBJ_DEVICE: ;
             //construct object
-            devices[table_index] = _io_dv_init_handle(handle);
+            PIO_DEVICE pdv = NULL;
+            stat = _io_grab_next_device(&pdv);
+            if (stat != E_SUCCESS) { return stat; }
+            *pdv = _io_dv_init_handle(handle);
             //update handle table
-            HANDLE_TABLE[handle].object = &devices[table_index];
+            HANDLE_TABLE[handle].object = pdv;
             break;
-        case IO_OBJ_MIDDLEWARE:
+        case IO_OBJ_MIDDLEWARE: ;
             //construct object
-            middlewares[table_index] = _io_md_init_handle(handle);
+            PIO_MIDDLEWARE pmd = NULL;
+            stat = _io_grab_next_middleware(&pmd);
+            if (stat != E_SUCCESS) { return stat; }
+            *pmd = _io_md_init_handle(handle);
             //update handle table
-            HANDLE_TABLE[handle].object = &middlewares[table_index];
+            HANDLE_TABLE[handle].object = pmd;
             break;
-        case IO_OBJ_MESSAGE:
+        case IO_OBJ_MESSAGE: ;
             //construct object
-            messages[table_index] = _io_msg_init_handle(handle);
+            PIO_MESSAGE pms = NULL;
+            stat = _io_grab_next_message(&pms);
+            if (stat != E_SUCCESS) { return stat; }
+            *pms = _io_msg_init_handle(handle);
             //update handle table
-            HANDLE_TABLE[handle].object = &messages[table_index];
+            HANDLE_TABLE[handle].object = pms;
             break;
-        case IO_OBJ_MOUNT:
+        case IO_OBJ_MOUNT: ;
             //construct object
-            mounts[table_index] = _io_mp_init_handle(handle);
+            PIO_MOUNT pmp = NULL;
+            stat = _io_grab_next_mount(&pmp);
+            if (stat != E_SUCCESS) { return stat; }
+            *pmp = _io_mp_init_handle(handle);
             //update handle table
-            HANDLE_TABLE[handle].object = &mounts[table_index];
+            HANDLE_TABLE[handle].object = pmp;
             break;
         default:
             return E_BAD_TYPE;
@@ -323,57 +311,30 @@ status_t IO_EXECUTE(IOHANDLE handle){
 }
 
 status_t IO_ENUMERATE(IO_OBJ_TYPE type, int index, PIOHANDLE object){
+    IOHANDLE result = -1;
+    status_t stat = E_SUCCESS;
     switch (type){
         case IO_OBJ_FILESYSTEM:
-            if (index > filesystems_max || index < 0){
-                return E_OUT_OF_BOUNDS;
-            }
-            if (filesystems[index].handle < 0){
-                return E_NO_DATA;
-            }
-            *object = filesystems[index].handle;
+            stat = _io_fs_iterate(&result, index);
             break;
         case IO_OBJ_MIDDLEWARE:
-            if (index > middlewares_max || index < 0) {
-                return E_OUT_OF_BOUNDS;
-            }
-            if (middlewares[index].handle < 0) {
-                return E_NO_DATA;
-            }
-            *object = middlewares[index].handle;
+            stat = _io_md_iterate(&result, index);
             break;
         case IO_OBJ_MOUNT:
-            if (index > mounts_max || index < 0) {
-                return E_OUT_OF_BOUNDS;
-            }
-            if (mounts[index].handle < 0) {
-                return E_NO_DATA;
-            }
-            *object = mounts[index].handle;
+            stat = _io_mp_iterate(&result, index);
             break;
         case IO_OBJ_DEVICE:
-            if (index > devices_max || index < 0){
-                return E_OUT_OF_BOUNDS;
-            }
-            if (devices[index].handle < 0){
-                return E_NO_DATA;
-            }
-            *object = devices[index].handle;
+            stat = _io_dv_iterate(&result, index);
             break;
         case IO_OBJ_MESSAGE:
-            if (index > messages_max || index < 0){
-                return E_OUT_OF_BOUNDS;
-            }
-            if (messages[index].handle < 0){
-                return E_NO_DATA;
-            }
-            *object = messages[index].handle;
+            stat = _io_msg_iterate(&result, index);
             break;
         default:
             return E_NOT_IMPLEMENTED;
             break;
     }
-    return E_SUCCESS;
+    *object = result;
+    return stat;
 }
 status_t IO_LOCK(IOHANDLE handle){
     _io_object_entry* t = &HANDLE_TABLE[handle];

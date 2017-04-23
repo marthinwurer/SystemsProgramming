@@ -14,3 +14,9 @@ status_t _io_dv_setprop(PIO_DEVICE dv, IOPROP prop, void* value, int32_t length)
 IO_DEVICE _io_dv_init_null(void);
 
 IO_DEVICE _io_dv_init_handle(IOHANDLE handle);
+
+status_t _io_init_devices(void);
+
+status_t _io_grab_next_device(PIO_DEVICE* out_p_device);
+
+status_t _io_dv_iterate(PIOHANDLE out, int index);
