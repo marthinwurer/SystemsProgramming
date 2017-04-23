@@ -18,17 +18,12 @@ int main(void) {
 
 	c_puts("Obtaining VBE Controller information\n");
 	VBEInfo info;
-	if (vbe_getInfo(&info, NULL) == VBE_SUCCESS) {
+	uint16_t vbeResult;
+	if (vbe_getInfo(&info, &vbeResult) == VBE_SUCCESS) {
 		video_convertVBEInfo(&info, (VideoInfo*)VIDEO_INFO);
-		
-		//c_printf("%d\n", i);
-		//c_printf("%x %x %x %x %x", VIDEO_INFO.info.modes, VIDEO_INFO.info.oem, VIDEO_INFO.info.vendor, VIDEO_INFO.info.productName, VIDEO_INFO.info.productRev);
-		// c_printf(" * Version: %x\n", info.version);
-		// c_printf(" * Revision: %d\n", info.softwareRev);
-		// c_printf(" * Video Memory: %d 64KB blocks\n", info.videoMemory);
-		// c_printf(" * OEM: %s (0x%x)\n", (const char *)vbe_ptr(info.oem), info.oem);
-		// c_printf(" * Vendor: %s (0x%x)\n", (const char *)vbe_ptr(info.vendor), info.vendor);
-		// c_printf(" * Product: %s (0x%x)\n", (const char *)vbe_ptr(info.productName), info.productName);
+	} else {
+		c_printf("[ERROR] vbe_getInfo failed. %AX: %x\n", vbeResult);
+		return 1;
 	}
 	//__asm("hlt");
 
