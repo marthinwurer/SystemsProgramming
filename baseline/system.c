@@ -24,6 +24,9 @@
 #include <baseline/sio.h>
 #include <baseline/scheduler.h>
 
+// memory map stuff
+#include <kern/memory/memory_map.h>
+
 // need init() address
 #include <baseline/user.h>
 
@@ -150,6 +153,13 @@ void _init( void ) {
 
 	c_io_init();
 	c_io_init_isr();
+
+
+	disp_memory_map();
+		c_getchar();
+
+
+
 	c_setscroll( 0, 7, 99, 99 );
 	c_puts_at( 0, 6, "================================================================================" );
 
@@ -177,6 +187,8 @@ void _init( void ) {
 	_sio_init();		// serial i/o
 	_sys_init();		// syscalls
 	_clk_init();		// clock
+
+
 
 	c_puts( "\nModule initialization complete\n" );
 	c_puts( "------------------------------\n" );

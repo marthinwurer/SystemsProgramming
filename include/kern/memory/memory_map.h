@@ -21,4 +21,6 @@ struct memory_map_s{
 
 typedef struct memory_map_s memory_map_entry;
 
+void disp_memory_map(void);
+
 #endif

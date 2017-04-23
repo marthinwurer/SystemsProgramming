@@ -21,7 +21,7 @@ void get_memory_map(void){
 		registers.edx = 0x0534D4150;
 		registers.edi += sizeof(memory_map_entry); // reserve the first slot for the count
 
-		__int(0x15, &registers);
+		int32(0x15, &registers);
 
 		num++;
 
@@ -31,9 +31,4 @@ void get_memory_map(void){
 	}while (registers.ebx != 0);
 
 	start->base_l = num;
-
-
-
-
-
 }

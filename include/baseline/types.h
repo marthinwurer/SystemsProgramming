@@ -14,6 +14,7 @@
 #define _TYPES_H_
 
 #include "common.h"
+#include <stdint.h>
 
 /*
 ** General (C and/or assembly) definitions
@@ -30,15 +31,15 @@
 */
 
 // size-specific integer types
-
-typedef char		int8_t;
-typedef unsigned char	uint8_t;
-
-typedef short		int16_t;
-typedef unsigned short	uint16_t;
-
-typedef int		int32_t;
-typedef unsigned int	uint32_t;
+//
+//typedef char		int8_t;
+//typedef unsigned char	uint8_t;
+//
+//typedef short		int16_t;
+//typedef unsigned short	uint16_t;
+//
+//typedef int		int32_t;
+//typedef unsigned int	uint32_t;
 
 // specialized type names
 
