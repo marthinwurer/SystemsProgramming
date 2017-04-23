@@ -4,6 +4,8 @@
  * @author: Nathan C. Castle
  * */
 #pragma once
+#include <string.h>
+#include <baseline/common.h>
 typedef int IOHANDLE, *PIOHANDLE; //handle to an open file
 typedef int BSIZE, *PBSIZE; //buffer size, bytes
 

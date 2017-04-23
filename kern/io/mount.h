@@ -1,6 +1,4 @@
 #include "io_types.h"
-#include <baseline/common.h>
-#include <string.h>
 
 typedef struct _io_mount {
     IOHANDLE        handle;

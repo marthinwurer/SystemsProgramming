@@ -3,8 +3,6 @@
  * @author: Nathan C. Castle
  * @summary: I/O Manager Public definitions
  **/
-#include <baseline/common.h>
-#include <string.h>
 #include "io_types.h"
 #include "filesystem.h"
 #include "middleware.h"

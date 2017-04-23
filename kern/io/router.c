@@ -49,7 +49,7 @@ static short     has_initted = 0; //false
 
 status_t grab_handle(PIOHANDLE handle){
     int32_t proto_handle = IO_HANDLE_NEXT;
-    while( HANDLE_TABLE[proto_handle].handle != NULL){
+    while(HANDLE_TABLE[proto_handle].handle != -1){
         proto_handle++;
         if (proto_handle > IO_HANDLE_MAX){
             proto_handle = 0;
@@ -90,7 +90,8 @@ status_t call_filter(IOHANDLE handle, int32_t index){
     if (filter->handle < 0){
         return E_OUT_OF_BOUNDS;
     }
-    return filter->execute(handle);
+    PIO_MESSAGE pm = HANDLE_TABLE[handle].object;
+    return filter->execute(pm);
 }
 /**
  *
@@ -104,7 +105,7 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
     struct _ioentry* obj = &HANDLE_TABLE[handle];
     PIO_MESSAGE msgpath = obj->object;
     char* path = msgpath->path;
-    if (path[0] == "\\"){
+    if (path[0] == '\\'){
         ++path; //gets to base path excluding leading slash
     }
     unsigned int index = strpos(path, '\\', 0);
