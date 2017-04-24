@@ -4,7 +4,7 @@
  * \brief Definition of the File-Oriented I/O API.
  *        This is intended for consumption by user-mode apps
  */
-
+#pragma once
 #include <baseline/common.h>
 #include "../io/io_types.h"
 
@@ -13,10 +13,10 @@
  * \param path [in] path to the file being opened. Must be fully qualified path starting at root.
  * \param strat [in] defines the policy for handling situations where the path points to a 
  *        nonexisting file. (e.g. create, create recursive, fail)
- * \param out [out] If successful, the provided IOHANDLE is updated with a handle to the opened
+ * \param out [out] If successful, the provided FILEHANDLE is updated with a handle to the opened
  *        or created file.
  */
-status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PIOHANDLE out);
+status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out);
 
 /**
  * \brief Reads file contents into the provided output buffer
@@ -28,7 +28,7 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PIOHANDLE out);
  * \param plength [in] max number of bytes to read. [out] number of bytes read
  * \param out [out] buffer in which read data is stored
  */
-status_t IoFileRead (IOHANDLE file, BSIZE offset, PBSIZE plength, void* out);
+status_t IoFileRead (FILEHANDLE file, BSIZE offset, PBSIZE plength, void* out);
 
 /**
  * \brief Writes the contents of a buffer to a file
@@ -40,17 +40,17 @@ status_t IoFileRead (IOHANDLE file, BSIZE offset, PBSIZE plength, void* out);
  * \param plength [in] size of input buffer in bytes. [out] number of bytes successfully written.
  * \param in [in] data buffer to be written
  */
-status_t IoFileWrite (IOHANDLE file, BSIZE offset, PBSIZE plength, void* in);
+status_t IoFileWrite (FILEHANDLE file, BSIZE offset, PBSIZE plength, void* in);
 
 /**
  * \brief Advances (or rewinds) file cursor
- * \pre IOHANDLE file must be a valid handle returned by IoFileOpen
+ * \pre FILEHANDLE file must be a valid handle returned by IoFileOpen
  * \param file [in] identifies the file whose cursor is to be advanced
  * \param offset [in] byte offset to adjust cursor by
  * \post cursor = cursor + offset
  * \param poffset [out] new file cursor value
  */
-status_t IoFileSeek (IOHANDLE file, BSIZE offset, PBSIZE poffset);
+status_t IoFileSeek (FILEHANDLE file, BSIZE offset, PBSIZE poffset);
 
 /**
  * \brief Reads a file's metadata
@@ -60,28 +60,28 @@ status_t IoFileSeek (IOHANDLE file, BSIZE offset, PBSIZE poffset);
  * \param plength [in] byte size of output buffer. [out] number of bytes in answer
  * \param out [out] output buffer; not updated if buffer length is less than bytes in answer
  */
-status_t IoFileQuery (IOHANDLE file, IOPROP property, PBSIZE plength, void* out);
+status_t IoFileQuery (FILEHANDLE file, IOPROP property, PBSIZE plength, void* out);
 
 /**
  * \brief Writes a file's metadata
- * \pre IOHANDLE file must be a valid handle returned by IoFileOpen
+ * \pre FILEHANDLE file must be a valid handle returned by IoFileOpen
  * \param file [in] identifies the file whose metadata is to be written
  * \param property [in] identifies the property to write
  * \param plength [in] byte size of the input buffer. [out] Number of bytes written.
  * \param in [in] input buffer
  */
-status_t IoFileSet (IOHANDLE file, IOPROP property, PBSIZE plength, void* in);
+status_t IoFileSet (FILEHANDLE file, IOPROP property, PBSIZE plength, void* in);
 
 /**
  * \brief deletes a file
- * \pre IOHANDLE file must be a valid handle returned by IoFileOpen
+ * \pre FILEHANDLE file must be a valid handle returned by IoFileOpen
  * \param file identifies file to delete
  */
-status_t IoFileDelete (IOHANDLE file);
+status_t IoFileDelete (FILEHANDLE file);
 
 /**
  * \brief Gets the child of a directory by index; supports sorting
- * \pre IOHANDLE file must be a valid handle returned by IoFileOpen
+ * \pre FILEHANDLE file must be a valid handle returned by IoFileOpen
  * \param file [in] identifies the parent for whom children will be returned
  * \param property [in] identifies the property to sort by
  * \param sort [in] identifies the sort direction (e.g. ascending vs descending)
@@ -89,11 +89,11 @@ status_t IoFileDelete (IOHANDLE file);
  * \param plength [in] defines size of output buffer in bytes. [out] number of bytes in answer
  * \param out [out] string path to file; null if plength is less than the size of the path.
  */
-status_t IoFileNextChild (IOHANDLE file, IOPROP property, IOSORT sort, int index, PBSIZE plength, char* out);
+status_t IoFileNextChild (FILEHANDLE file, IOPROP property, IOSORT sort, int index, PBSIZE plength, char* out);
 
 /**
  * \brief closes a file
  * \param file File to close
  * \post file handle is invalidated and made available for reuse. Callers should discard it without delay.
  */
-status_t IoFileClose (IOHANDLE file);
+status_t IoFileClose (FILEHANDLE file);

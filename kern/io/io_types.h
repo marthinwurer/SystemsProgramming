@@ -6,7 +6,8 @@
 #pragma once
 #include <string.h>
 #include <baseline/common.h>
-typedef int IOHANDLE, *PIOHANDLE; //handle to an open file
+typedef int IOHANDLE, *PIOHANDLE; //handle to I/O objects
+typedef int FILEHANDLE, *PFILEHANDLE; //handle to open files
 typedef int BSIZE, *PBSIZE; //buffer size, bytes
 
 typedef enum _file_prop {
@@ -41,3 +42,14 @@ typedef enum io_obj_type {
     IO_OBJ_UNKNOWN
 } IO_OBJ_TYPE, *P_IO_OBJ_TYPE;
 
+typedef enum _io_sort {
+    IO_SORT_ASC,
+    IO_SORT_DSC,
+    IO_SORT_RND
+} IOSORT, *PIOSORT;
+
+typedef enum _io_create_policy {
+    IO_CP_CREATE,
+    IO_CP_CREATERECURSIVE,
+    IO_CP_FAIL
+} IOCREATEPOLICY, *PIOCREATEPOLICY;
