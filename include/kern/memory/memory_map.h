@@ -9,7 +9,7 @@
 
 #define MY_MM_ADDRESS 0x3800
 
-struct memory_map_s{
+struct memory_map__32_s{
 	uint32_t base_l;
 	uint32_t base_h;
 	uint32_t length_l;
@@ -18,8 +18,32 @@ struct memory_map_s{
 	uint32_t extended;
 }__attribute__((packed));
 
+struct memory_map__64_s{
+	uint64_t base;
+	uint64_t length;
+	uint32_t type;
+	uint32_t extended;
+}__attribute__((packed));
 
-typedef struct memory_map_s memory_map_entry;
+struct mm_entry_s{
+	union{
+		struct{
+			uint64_t base;
+			uint64_t length;
+		}__attribute__((packed));
+		struct{
+			uint32_t base_l;
+			uint32_t base_h;
+			uint32_t length_l;
+			uint32_t length_h;
+		}__attribute__((packed));
+	};
+	uint32_t type;
+	uint32_t extended;
+}__attribute__((packed));
+
+
+typedef struct mm_entry_s memory_map_entry;
 
 void disp_memory_map(void);
 
