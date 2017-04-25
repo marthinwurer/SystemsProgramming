@@ -174,6 +174,27 @@ void * get_next_page(void){
 }
 
 
+/**
+ * Frees a page of memory. if the address is not aligned, then it will fail.
+ *
+ * prarams:
+ * address - the address of the page to free
+ *
+ * returns:
+ * 		0 on success, -1 if the address is not aligned.
+ */
+int free_page(void * address){
+
+	// check alignment
+	if ( (uintptr_t) address & ALIGN_MASK){
+		return -1;
+	}
+
+	set_pat((uintptr_t) address, 0);
+	return 0;
+}
+
+
 
 
 

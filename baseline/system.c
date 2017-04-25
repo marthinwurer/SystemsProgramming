@@ -158,7 +158,12 @@ void _init( void ) {
 	disp_memory_map();
 	setup_page_availibility_table();
 
+//	void * address = get_next_page();
+//
+//	c_printf("First Page:%x\n", address );
+//	c_printf("Next Page:%x\n",free_page(address));
 //	c_printf("Next Page:%x\n", get_next_page() );
+
 //
 //	__panic("lololol");
 //		c_getchar();

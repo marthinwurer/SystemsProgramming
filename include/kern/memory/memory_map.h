@@ -13,6 +13,7 @@
 #define KB 			0x400
 #define PAGE_SIZE	(4 * KB)
 #define MAX_MEM		0xFFFFFFFF
+#define ALIGN_MASK	0x00000FFF
 
 #define	FREE_TYPE		1
 #define	RESERVED_TYPE	2
@@ -62,6 +63,18 @@ void setup_page_availibility_table(void);
  * Get a pointer to the next page in memory that is free, and mark it as in use.
  */
 void * get_next_page(void);
+
+/**
+ * Frees a page of memory. if the address is not aligned, then it will fail.
+ *
+ * prarams:
+ * address - the address of the page to free
+ *
+ * returns:
+ * 		0 on success, -1 if the address is not aligned.
+ */
+int free_page(void * address);
+
 
 
 
