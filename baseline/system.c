@@ -156,7 +156,12 @@ void _init( void ) {
 
 
 	disp_memory_map();
-		c_getchar();
+	setup_page_availibility_table();
+
+//	c_printf("Next Page:%x\n", get_next_page() );
+//
+//	__panic("lololol");
+//		c_getchar();
 
 
 
