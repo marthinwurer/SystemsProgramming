@@ -13,8 +13,8 @@
 //
 typedef struct VideoFb_s {
 	uint32_t location; // physical address of the framebuffer
-	uint16_t width;
-	uint16_t height;
+	uint16_t width;    // number of pixels in one row
+	uint16_t height;   // number of rows
 	uint16_t pitch;
 	uint8_t bpp;
 	VideoColorSpace colorspace;
