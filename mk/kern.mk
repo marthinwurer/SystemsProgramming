@@ -6,6 +6,7 @@ KERN_OBJ := early/_early.o \
             early/main.o \
             early/gdt_init.o \
             util/marquee.o \
+            vesa/edid.o \
             vesa/vbe.o \
             video/color/color.o \
             video/fb/fb.o \
