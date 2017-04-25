@@ -23,6 +23,8 @@
  * 
  */
 
+#define MAC_LENGTH_BYTES 6
+
 // Constants to control EEPROM
 enum eeprom_lo_control {
 	EESK = 0x01, // Serial clock
@@ -59,7 +61,7 @@ enum eeprom_opcodes {
 // Stores info about network interface
 struct nic_info {
 	struct csr * csr;
-	uint8_t mac[6];
+	uint8_t mac[MAC_LENGTH_BYTES];
 	uint16_t eeprom_count;
 	uint16_t eeprom[256]; // biggest eeprom will be 256 16-bit words
 };
@@ -82,28 +84,43 @@ struct csr {
 };
 
 enum cb_commands {
+	// common
 	cb_el = 0x8000, // end list (end of CBL, stop executing CBs)
 	cb_s = 0x4000, // suspend
 	cb_i = 0x2000, // generate interrupt when CB finishes
+
+	// IA configuration
+	cb_ia_cmd = 0x0001, // individual address setup
+
+	// transmit
 	cb_sf = 0x0008, // simplified mode - all transmit data in TCB, TBD addr field must equal all 1's
-	cb_tx = 0x0004 // transmit
+	cb_tx_cmd = 0x0004 // transmit
 };
 
-#define UCODE_SIZE			134
 // Command Block
 struct cb {
 	uint16_t status;
 	uint16_t command;
 	uint32_t link;
-	struct {
-		uint32_t tbd_array;
-		uint16_t tcb_byte_count;
-		uint8_t threshold;
-		uint8_t tbd_count;
-	} tcb;
-	uint32_t data1;
-	uint32_t data2;
-	uint32_t data3;
+	union {
+		uint8_t mac_addr[MAC_LENGTH_BYTES];
+		struct {
+			uint32_t tbd_array;
+			uint16_t tcb_byte_count;
+			uint8_t threshold;
+			uint8_t tbd_count;
+			struct {
+				// uint8_t preamble[7]; // ethernet clock sync preamble
+				// uint8_t sfd; // start of frame delimeter
+				uint8_t dst_mac[MAC_LENGTH_BYTES];
+				uint8_t src_mac[MAC_LENGTH_BYTES];
+				uint16_t ethertype; // under 1500 is payload length, above is type of payload header
+				uint8_t data[0x40]; // 46-1500 bytes
+			} eth_header;
+		} tcb;
+	} u;
+};
+
 
 	// union {
 	// 	u8 iaaddr[ETH_ALEN];
@@ -126,7 +143,6 @@ struct cb {
 	// struct cb *next, *prev;
 	// dma_addr_t dma_addr;
 	// struct sk_buff *skb;
-};
 
 // Vendor and device constants
 #define NET_INTEL_VENDOR 0x8086
