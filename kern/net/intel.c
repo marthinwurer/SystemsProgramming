@@ -1,9 +1,10 @@
 #include <kern/net/intel.h>
 #include <kern/pci/pci.h>
 
-#include <baseline/ulib.h>
-#include <baseline/c_io.h>
-#include <string.h>
+#include <baseline/ulib.h> //sleep
+#include <baseline/c_io.h> //c_printf
+#include <string.h> //memcpy
+#include <baseline/support.h> //__install_isr
 
 #define TRUE 1
 #define FALSE 0
@@ -101,6 +102,51 @@ static void eeprom_load(struct nic_info *nic) {
 	}
 }
 
+void intel_nic_handler(int vector, int code) {
+	(void) vector; (void) code;
+	c_printf("received interrupt for Intel NIC\n");
+	uint8_t stat_ack = mem_read8(&_nic.csr->scb.stat_ack);
+
+	// Check status bits and acknowledge them
+
+}
+
+void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length) {
+	struct cb* cb = dumb_malloc(sizeof(struct cb));
+	(void) dst_hw_addr;
+	(void) data;
+	(void) length;
+	// 
+	// fill 'er up with juicy bits
+	// 
+
+	execute_command(cb);
+}
+
+void execute_command(struct cb* cb) {
+	(void) cb;
+	if(_nic.csr->scb.status & (cu_lpq_active | cu_hqp_active)) { // CU active
+		// Add pointer to new CB to tail of CBL
+
+	}
+	else if(_nic.csr->scb.status & cu_idle) { // CU idle
+		// CU start
+
+	}
+	else if(_nic.csr->scb.status & cu_suspended) { // CU suspended
+		// Add pointer to new CB to tail of CBL, then CU resume
+
+	}
+	else {
+		// ?!?!? Famous last words, "this can never happen"
+	}
+	// Craft a beautiful Command Block
+	// Check where we should put this command block 
+	// --- keep a pointer to the last CB for chaining if CU is running
+	// --- Run CU Resume if CU is idle
+	// --- if CU is active put CB ptr into gen_ptr and run CU Start
+}
+
 void intel_nic_init() {
 	uint8_t bus, slot;
 	// Try to find DSL card first, followed by QEMU card, then give up
@@ -116,13 +162,6 @@ void intel_nic_init() {
 	}
 
 	_nic.csr = (struct csr *) pci_cfg_read(bus, slot, 0, PCI_CSR_MEM_MAPPED_BASE_ADDR_REG);
-	// c_printf("Intel NIC Control Status Register Base Addr = 0x%08x\n", (uint32_t) _nic.csr);
-
-	// c_printf("status: 0x%02x\n", _nic.csr->scb.status);
-	// c_printf("stat_ack: 0x%02x\n", _nic.csr->scb.stat_ack);
-	// c_printf("command: 0x%02x\n", _nic.csr->scb.command);
-	// c_printf("interrupt_mask: 0x%02x\n", _nic.csr->scb.interrupt_mask);
-	// c_printf("gen_ptr: 0x%08x\n", _nic.csr->scb.gen_ptr);
 
 	c_printf("Loading data from EEPROM. . .\n");
 	eeprom_load(&_nic);
@@ -133,7 +172,6 @@ void intel_nic_init() {
 	_nic.mac[3] = (uint8_t) (_nic.eeprom[1] >> 8);
 	_nic.mac[4] = (uint8_t) (_nic.eeprom[2] & 0x00FF);
 	_nic.mac[5] = (uint8_t) (_nic.eeprom[2] >> 8);
-
 	c_printf("MAC Address: ");
 	print_mac_addr(_nic.mac);
 	c_printf("\n");
@@ -147,46 +185,7 @@ void intel_nic_init() {
 	uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
 	uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
 	c_printf("interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
-	// kernal is saying "Vector=0x2B, code=0"
-	// __install_isr in support.h to register for interrupts
-
-//            CPU0       CPU1       CPU2       CPU3
-//   0:         42          0          0          0   IO-APIC-edge      timer
-//   1:      42697      38409      39171      46003   IO-APIC-edge      i8042
-//   4:          1          1          1          1   IO-APIC-edge
-//   5:          1          0          0          0   IO-APIC-edge      parport0
-//   6:          1          1          0          1   IO-APIC-edge      floppy
-//   8:          0          0          0          1   IO-APIC-edge      rtc0
-//   9:          1          2          0          0   IO-APIC-fasteoi   acpi
-//  12:      12756      12612      12378      16536   IO-APIC-edge      i8042
-//  14:        371        439        416        381   IO-APIC-edge      ata_piix
-//  15:          0          0          0          0   IO-APIC-edge      ata_piix
-//  16:          0          0          0          0   IO-APIC-fasteoi   uhci_hcd:usb5
-//  17:      53283          2          1          4   IO-APIC-fasteoi   eth0
-//  18:          0          0          0          0   IO-APIC-fasteoi   uhci_hcd:usb4
-//  19:      74032      56997      12174      12063   IO-APIC-fasteoi   ata_piix, uhci_hcd:usb3
-//  23:     218523     215667     429660     417697   IO-APIC-fasteoi   ehci_hcd:usb1, uhci_hcd:usb2
-//  40:          0          0          0          0   PCI-MSI-edge      PCIe PME, pciehp
-//  41:     229105     229339     231454     258760   PCI-MSI-edge      i915
-//  42:        130        125        117        129   PCI-MSI-edge      snd_hda_intel
-//  43:         10         13    1454272          8   PCI-MSI-edge      eth1
-// NMI:        487        525        628        554   Non-maskable interrupts
-// LOC:    1793063    1761470    2732230    2796986   Local timer interrupts
-// SPU:          0          0          0          0   Spurious interrupts
-// PMI:        487        525        628        554   Performance monitoring interrupts
-// IWI:      62260      61982      70539      66209   IRQ work interrupts
-// RTR:          0          0          0          0   APIC ICR read retries
-// RES:     290726     264945     284115     260913   Rescheduling interrupts
-// CAL:       6765       6328       7112       5811   Function call interrupts
-// TLB:     181867     189643     232487     247662   TLB shootdowns
-// TRM:          0          0          0          0   Thermal event interrupts
-// THR:          0          0          0          0   Threshold APIC interrupts
-// MCE:          0          0          0          0   Machine check exceptions
-// MCP:        356        356        356        356   Machine check polls
-// ERR:          0
-// MIS:          0
-// /proc/interrupts (END)
-
+	__install_isr(interrupt_line + 0x20, intel_nic_handler);
 
 	// struct cb* cb_ia = (struct cb*) dumb_malloc(sizeof(struct cb));
 	// cb_ia->command = cb_ia_cmd;
@@ -213,7 +212,7 @@ void intel_nic_init() {
 	cbl_ptr->u.tcb.eth_header.dst_mac[5] = 0x08;
 	memcpy(cbl_ptr->u.tcb.eth_header.src_mac, _nic.mac, MAC_LENGTH_BYTES);
 
-	cbl_ptr->u.tcb.eth_header.ethertype = 0x40;
+	cbl_ptr->u.tcb.eth_header.ethertype_lo = 0x40;
 
 	cbl_ptr->u.tcb.eth_header.data[0x00] = 'h';
 	cbl_ptr->u.tcb.eth_header.data[0x01] = 'e';
@@ -281,22 +280,22 @@ void intel_nic_init() {
 	cbl_ptr->u.tcb.eth_header.data[0x3F] = 0x42;
 
 	// give the cbl addr to the CU and start
-
 	c_printf("Putting CBL pointer into gen_ptr...\n");
 	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cbl_ptr);
 	c_printf("calling CU Start on CBL...\n");
 	mem_write8(&_nic.csr->scb.command, cuc_start);
 	c_printf("flushing output...\n");
 	write_flush(&_nic);
-	// c_printf("sleeping...\n");
-	// sleep(2000); // allow stuff to send before memory gets trashed
 
 	// 
 	// 
 	// TODO:
-	// o Test transmitting data
-	// o Write cleaner function to write data
-	// o Get interrupts working
+	// o Merge memory stuff in from master
+	// o Finish writing ISR
+	// o Write send_packet function
+	// o Write execute_command function
+	// o Figure out what should stay static in intel.c and if some internal stuff should be removed from intel.h
+	// o Keep pointers to command blocks, implement proper chaining and CU resume
 	// o configure receive buffers
 	// o enable receiving data
 	// o Write routine to output configure command blocks

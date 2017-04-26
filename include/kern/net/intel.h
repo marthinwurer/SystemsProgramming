@@ -13,6 +13,7 @@
  * ---- Defintions ----
  * CSR := Control Status Register
  * SCB := System Control Block
+ * CB := Command Block
  * CBL := Command Block List
  * RFA := Receive Frame Area
  * CU := Command Unit
@@ -24,6 +25,18 @@
  */
 
 #define MAC_LENGTH_BYTES 6
+#define NET_INTEL_VENDOR 0x8086
+#define NET_INTEL_QEMU_NIC 0x100E
+#define NET_INTEL_DSL_NIC 0x1229
+
+// Stores info about network interface
+struct nic_info {
+	struct csr * csr;
+	uint8_t mac[MAC_LENGTH_BYTES];
+	uint16_t eeprom_count;
+	uint16_t eeprom[256]; // biggest eeprom will be 256 16-bit words
+	struct cb* cbl_tail;
+};
 
 // Constants to control EEPROM
 enum eeprom_lo_control {
@@ -31,6 +44,17 @@ enum eeprom_lo_control {
 	EECS = 0x02, // Chip select
 	EEDI = 0x04, // Serial data in
 	EEDO = 0x08  // Serial data out
+};
+
+enum scb_status {
+	cu_idle = 0x00,
+	cu_suspended = 0x40,
+	cu_lpq_active = 0x80,
+	cu_hqp_active = 0xC0,
+	ru_idle = 0x00,
+	ru_suspended = 0x01,
+	ru_no_resources = 0x02,
+	ru_ready = 0x04
 };
 
 enum scb_control {
@@ -58,13 +82,6 @@ enum eeprom_opcodes {
 	op_ewen  = 0x13, // Erase/write enable
 };
 
-// Stores info about network interface
-struct nic_info {
-	struct csr * csr;
-	uint8_t mac[MAC_LENGTH_BYTES];
-	uint16_t eeprom_count;
-	uint16_t eeprom[256]; // biggest eeprom will be 256 16-bit words
-};
 
 // MMIO Control Status Register
 struct csr {
@@ -114,7 +131,8 @@ struct cb {
 				// uint8_t sfd; // start of frame delimeter
 				uint8_t dst_mac[MAC_LENGTH_BYTES];
 				uint8_t src_mac[MAC_LENGTH_BYTES];
-				uint16_t ethertype; // under 1500 is payload length, above is type of payload header
+				uint8_t ethertype_hi; // under 1500 is payload length, above is type of payload header
+				uint8_t ethertype_lo;
 				uint8_t data[0x40]; // 46-1500 bytes
 			} eth_header;
 		} tcb;
@@ -145,18 +163,13 @@ struct cb {
 	// struct sk_buff *skb;
 
 // Vendor and device constants
-#define NET_INTEL_VENDOR 0x8086
-#define NET_INTEL_QEMU_NIC 0x100E
-#define NET_INTEL_DSL_NIC 0x1229
+
+void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length);
+void execute_command(struct cb* cb);
 
 void intel_nic_init();
 
 void print_mac_addr(uint8_t mac[]);
-// uint32_t detect_eeprom();
-// uint16_t eeprom_read(uint8_t addr);
-// uint32_t read_mac_addr(uint8_t* mac[]);
-
-
 
 uint32_t mem_read32(void* addr);
 uint16_t mem_read16(void* addr);
