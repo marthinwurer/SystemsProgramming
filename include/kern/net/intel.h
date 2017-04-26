@@ -32,6 +32,8 @@
 #define NET_INTEL_QEMU_NIC 0x100E
 #define NET_INTEL_DSL_NIC 0x1229
 
+#define NET_INTEL_INT_VECTOR 0x2B
+
 // Stores info about network interface
 struct nic_info {
 	struct csr * csr;
@@ -48,6 +50,15 @@ enum eeprom_lo_control {
 	EECS = 0x02, // Chip select
 	EEDI = 0x04, // Serial data in
 	EEDO = 0x08  // Serial data out
+};
+
+enum scb_stat_ack {
+	ack_cs_tno = 0x80, // CU finished executing CB with interrupt bit set
+	ack_fr = 0x40, // finished receiving
+	ack_cna = 0x20, // CU left active state
+	ack_rnr = 0x10, // RU leaves ready state
+	ack_mdi = 0x08, // mdi read/write cycle compelte
+	ack_swi = 0x04 // SW interrupt
 };
 
 enum scb_status {

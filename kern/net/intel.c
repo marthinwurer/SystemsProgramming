@@ -100,23 +100,49 @@ static void eeprom_load(struct nic_info *nic) {
 
 	/* The checksum, stored in the last word, is calculated such that
 	 * the sum of words should be 0xBABA */
-	if((0xBABA - checksum) != nic->eeprom[nic->eeprom_count - 1]) {
-		c_printf("~~~ EEPROM corrupt ~~~\n");
-	}
+	// if((0xBABA - checksum) != nic->eeprom[nic->eeprom_count - 1]) {
+	// 	c_printf("~~~ EEPROM corrupt ~~~\n");
+	// }
 }
 
-void intel_nic_handler(int vector, int code) {
+static void intel_nic_handler(int vector, int code) {
 	(void) vector; (void) code;
-	c_printf("INTERRUPT (v=%02x, c=%02x) -- Intel NIC, ");
+	c_printf("INTERRUPT(v=0x%02x, c=0x%02x) -- Intel NIC, ", vector, code);
 	uint8_t stat_ack = mem_read8(&_nic.csr->scb.stat_ack);
-	c_printf("stat_ack: 0x%02x\n", stat_ack);
+	c_printf("stat_ack=0x%02x\n", stat_ack);
 
-	// mem_write8(&_nic.csr->scb.stat_ack, 0x00);
+	if(stat_ack & ack_cs_tno) c_printf("<<< ack_cs_tno bit set >>>\n");
+	if(stat_ack & ack_fr) c_printf("<<< ack_fr bit set >>>\n");
+	if(stat_ack & ack_cna) c_printf("<<< ack_cna bit set >>>\n");
+	if(stat_ack & ack_rnr) c_printf("<<< ack_rnr bit set >>>\n");
+	if(stat_ack & ack_mdi) c_printf("<<< ack_mdi bit set >>>\n");
+	if(stat_ack & ack_swi) c_printf("<<< ack_swi bit set >>>\n");
+
 	// Check status bits and acknowledge them
+	mem_write8(&_nic.csr->scb.stat_ack, 0x00);
 
-	__outb(PIC_MASTER_CMD_PORT, PIC_EOI); // slave because we are above 0x20
-	__outb(PIC_SLAVE_CMD_PORT, PIC_EOI); // slave because we are above 0x20
+	// if(vector >= 0x20 && vector < 0x30) {
+	// 	__outb(PIC_MASTER_CMD_PORT, PIC_EOI);
+	// 	if(vector > 0x27) {
+	// 		__outb(PIC_SLAVE_CMD_PORT, PIC_EOI);
+	// 	}
+	// }
+	// __outb(PIC_MASTER_CMD_PORT, PIC_EOI); // slave because we are above 0x20
+	// __outb(PIC_SLAVE_CMD_PORT, PIC_EOI); // slave because we are above 0x20
 }
+
+// static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
+// 	c_printf("TODO: initialize CBL\n");
+
+// 	// c_printf("Initializing CB ring\n");
+// 	// struct cb* first = (struct cb*) dumb_malloc(sizeof(struct cb));
+// 	// struct cb* prev = first;
+// 	// for(uint32_t i = 0; i < TOTAL_CB; i++) {
+// 	// 	prev->link = (uint32_t) dumb_malloc(sizeof(struct cb));
+// 	// 	prev = (struct cb*) prev->link;
+// 	// }
+// 	// prev->link = (uint32_t) first; // complete the circle
+// }
 
 void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length) {
 	struct cb* cb = (struct cb*) dumb_malloc(sizeof(struct cb));
@@ -169,18 +195,6 @@ void intel_nic_init() {
 		return;
 	}
 
-	// c_printf("wait a few seconds to read PCI info... ");
-	// int number = 0;
-	// for (int i = 0; i < 1000000; ++i)
-	// {
-	// 	if(i % 100000) {
-	// 		c_printf(">");
-	// 	}
-	// 	number += 5;
-	// 	/* code */
-	// }
-	// c_printf("done waiting.\n");
-
 	_nic.csr = (struct csr *) pci_cfg_read(bus, slot, 0, PCI_CSR_MEM_MAPPED_BASE_ADDR_REG);
 
 	c_printf("CSR MMIO base addr: 0x%08x\n", (uint32_t) _nic.csr);
@@ -207,14 +221,19 @@ void intel_nic_init() {
 	mem_write8(&_nic.csr->scb.command, cuc_load_cu_base);
 	write_flush(&_nic);
 
+	// 
 	// connect interrupt handler
-	// uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
-	// uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
-	// c_printf("interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
+	// 
+	uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
+	uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
+	c_printf("interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
 	// __install_isr(interrupt_line + 0x20, intel_nic_handler);
-	__install_isr(0x0B + 0x20, intel_nic_handler);
+	__install_isr(NET_INTEL_INT_VECTOR, intel_nic_handler);
 
 
+	// 
+	// Individual Address Config
+	// 
 	// struct cb* cb_ia = (struct cb*) dumb_malloc(sizeof(struct cb));
 	// cb_ia->command = cb_ia_cmd;
 	// cb_ia->link = (uint32_t) cbl_ptr;
@@ -223,9 +242,12 @@ void intel_nic_init() {
 	// print_mac_addr(cb_ia->u.mac_addr);
 
 
-	//
-	// init singly-linked CB ring
-	//
+	// 
+	// Setup the CBL
+	// 
+	// init_cbl(&_nic, TOTAL_CB);
+	
+
 	// c_printf("Initializing CB ring\n");
 	// struct cb* first = (struct cb*) dumb_malloc(sizeof(struct cb));
 	// struct cb* prev = first;
@@ -269,58 +291,9 @@ void intel_nic_init() {
 	cbl_ptr->u.tcb.eth_header.data[0x09] = 'l';
 	cbl_ptr->u.tcb.eth_header.data[0x0A] = 'd';
 	cbl_ptr->u.tcb.eth_header.data[0x0B] = '!';
-	cbl_ptr->u.tcb.eth_header.data[0x0C] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x0D] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x0E] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x0F] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x10] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x11] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x12] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x13] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x14] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x15] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x16] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x17] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x18] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x19] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x1A] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x1B] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x1C] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x1D] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x1E] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x1F] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x20] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x21] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x22] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x23] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x24] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x25] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x26] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x27] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x28] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x29] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x2A] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x2B] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x2C] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x2D] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x2E] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x2F] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x30] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x31] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x32] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x33] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x34] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x35] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x36] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x37] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x38] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x39] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x3A] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x3B] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x3C] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x3D] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x3E] = 0x42;
-	cbl_ptr->u.tcb.eth_header.data[0x3F] = 0x42;
+	for(uint32_t i = 0x0C; i < 0x40; i++) {
+		cbl_ptr->u.tcb.eth_header.data[i] = i - 0x0C;
+	}
 
 	// give the cbl addr to the CU and start
 	c_printf("Putting CBL pointer into gen_ptr...\n");
@@ -344,7 +317,7 @@ void intel_nic_init() {
 	// o Write routine to output configure command blocks
 	// o mutex on doing anything with CB
 	// 
-	// --Merge memory stuff in from master
+	// o Merge memory stuff in from master, HINT MERGE NOT REBASE
 	// 
 
 }
