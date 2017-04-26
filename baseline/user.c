@@ -14,6 +14,8 @@
 
 #include <baseline/user.h>
 
+#include <kern/net/net_test.h>
+
 /*
 ** Support functions
 */
@@ -912,7 +914,6 @@ int32_t idle( void *arg ) {
 
 }
 
-
 /*
 ** Initial process; it starts the other top-level user processes.
 **
@@ -938,10 +939,7 @@ int32_t init( void *arg ) {
 		cwrites( "init, spawn() IDLE failed\n" );
 	}
 	swritech( '+' );
-
-	cwrites("~~~ Dan's code is executing: ~~~\n");
-
-	cwrites("~~~ Dan's code has executed: ~~~\n");
+	net_test_main((void*) 0);
 	
 
 #ifdef SPAWN_A

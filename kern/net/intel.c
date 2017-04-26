@@ -1,6 +1,6 @@
 #include <kern/net/intel.h>
 #include <kern/pci/pci.h>
-#include <kern/memory/memory_map.h> //get_next_page, free_page
+// #include <kern/memory/memory_map.h> //get_next_page, free_page
 
 #include <baseline/ulib.h> //sleep
 #include <baseline/c_io.h> //c_printf
@@ -119,7 +119,8 @@ void intel_nic_handler(int vector, int code) {
 }
 
 void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length) {
-	struct cb* cb = (struct cb*) get_next_page();
+	struct cb* cb = (struct cb*) dumb_malloc(sizeof(struct cb));
+
 	(void) dst_hw_addr;
 	(void) data;
 	(void) length;
@@ -184,8 +185,11 @@ void intel_nic_init() {
 
 	c_printf("CSR MMIO base addr: 0x%08x\n", (uint32_t) _nic.csr);
 
+	if(_nic.csr == 0) {
+		__panic("PCI READ FAILURE");
+	}
 
-	c_printf("Loading data from EEPROM. . .\n");
+	c_printf("Loading data from EEPROM...\n");
 	eeprom_load(&_nic);
 
 	_nic.mac[0] = (uint8_t) (_nic.eeprom[0] & 0x00FF);
@@ -211,7 +215,7 @@ void intel_nic_init() {
 	__install_isr(0x0B + 0x20, intel_nic_handler);
 
 
-	// struct cb* cb_ia = (struct cb*) get_next_page();
+	// struct cb* cb_ia = (struct cb*) dumb_malloc(sizeof(struct cb));
 	// cb_ia->command = cb_ia_cmd;
 	// cb_ia->link = (uint32_t) cbl_ptr;
 	// memcpy(cb_ia->u.mac_addr, _nic.mac, MAC_LENGTH_BYTES);
@@ -223,10 +227,10 @@ void intel_nic_init() {
 	// init singly-linked CB ring
 	//
 	// c_printf("Initializing CB ring\n");
-	// struct cb* first = (struct cb*) get_next_page();
+	// struct cb* first = (struct cb*) dumb_malloc(sizeof(struct cb));
 	// struct cb* prev = first;
 	// for(uint32_t i = 0; i < TOTAL_CB; i++) {
-	// 	prev->link = (uint32_t) get_next_page();
+	// 	prev->link = (uint32_t) dumb_malloc(sizeof(struct cb));
 	// 	prev = (struct cb*) prev->link;
 	// }
 	// prev->link = (uint32_t) first; // complete the circle
@@ -236,7 +240,6 @@ void intel_nic_init() {
 	c_printf("Sending Tx CB\n");
 	// struct cb CB; struct cb* cbl_ptr = &CB;
 	struct cb* cbl_ptr = (struct cb*) dumb_malloc(sizeof(struct cb));
-	// struct cb* cbl_ptr = (struct cb*) get_next_page();
 	cbl_ptr->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
 
 	cbl_ptr->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb

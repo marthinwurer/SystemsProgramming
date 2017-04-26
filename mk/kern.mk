@@ -13,7 +13,11 @@
 KERN_OBJ := early/_early.o \
             early/realmode.o \
             early/main.o \
-            early/gdt_init.o
+            early/gdt_init.o \
+            pci/pci.o \
+            net/intel.o \
+            net/net_test.o \
+            net/udp.o
 
 KERN_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_OBJ))
 
