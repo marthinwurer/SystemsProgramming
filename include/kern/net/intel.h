@@ -24,7 +24,10 @@
  * 
  */
 
+#define TOTAL_CB 0x80
+
 #define MAC_LENGTH_BYTES 6
+
 #define NET_INTEL_VENDOR 0x8086
 #define NET_INTEL_QEMU_NIC 0x100E
 #define NET_INTEL_DSL_NIC 0x1229
@@ -35,7 +38,8 @@ struct nic_info {
 	uint8_t mac[MAC_LENGTH_BYTES];
 	uint16_t eeprom_count;
 	uint16_t eeprom[256]; // biggest eeprom will be 256 16-bit words
-	struct cb* cbl_tail;
+	uint32_t avail_cb;
+	struct cb* next_cb;
 };
 
 // Constants to control EEPROM

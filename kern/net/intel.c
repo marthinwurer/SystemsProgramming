@@ -1,14 +1,17 @@
 #include <kern/net/intel.h>
 #include <kern/pci/pci.h>
+#include <kern/memory/memory_map.h> //get_next_page, free_page
 
 #include <baseline/ulib.h> //sleep
 #include <baseline/c_io.h> //c_printf
 #include <string.h> //memcpy
+#include <x86arch.h> //PIC_EOI, PIC_SLAVE_CMD_PORT
 #include <baseline/support.h> //__install_isr
+#include <baseline/startup.h> //__outb
+
 
 #define TRUE 1
 #define FALSE 0
-
 
 
 // Holds info about the network interface
@@ -88,31 +91,35 @@ static void eeprom_load(struct nic_info *nic) {
 	eeprom_read(nic, &addr_len, 0);
 	nic->eeprom_count = 1 << addr_len;
 
-	for (addr = 0; addr < nic->eeprom_count; addr++) {
+	for(addr = 0; addr < nic->eeprom_count; addr++) {
 		nic->eeprom[addr] = eeprom_read(nic, &addr_len, addr);
-		if (addr < nic->eeprom_count - 1) {
+		if(addr < nic->eeprom_count - 1) {
 			checksum += nic->eeprom[addr];
 		}
 	}
 
 	/* The checksum, stored in the last word, is calculated such that
 	 * the sum of words should be 0xBABA */
-	if ((0xBABA - checksum) != nic->eeprom[nic->eeprom_count - 1]) {
+	if((0xBABA - checksum) != nic->eeprom[nic->eeprom_count - 1]) {
 		c_printf("~~~ EEPROM corrupt ~~~\n");
 	}
 }
 
 void intel_nic_handler(int vector, int code) {
 	(void) vector; (void) code;
-	c_printf("received interrupt for Intel NIC\n");
+	c_printf("INTERRUPT (v=%02x, c=%02x) -- Intel NIC, ");
 	uint8_t stat_ack = mem_read8(&_nic.csr->scb.stat_ack);
+	c_printf("stat_ack: 0x%02x\n", stat_ack);
 
+	// mem_write8(&_nic.csr->scb.stat_ack, 0x00);
 	// Check status bits and acknowledge them
 
+	__outb(PIC_MASTER_CMD_PORT, PIC_EOI); // slave because we are above 0x20
+	__outb(PIC_SLAVE_CMD_PORT, PIC_EOI); // slave because we are above 0x20
 }
 
 void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length) {
-	struct cb* cb = dumb_malloc(sizeof(struct cb));
+	struct cb* cb = (struct cb*) get_next_page();
 	(void) dst_hw_addr;
 	(void) data;
 	(void) length;
@@ -151,17 +158,32 @@ void intel_nic_init() {
 	uint8_t bus, slot;
 	// Try to find DSL card first, followed by QEMU card, then give up
 	if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_DSL_NIC) >= 0) {	
-		c_printf("QEMU Intel NIC found - bus: %d, slot: %d\n", bus, slot);
+		c_printf("DSL Lab Intel NIC found - bus: %d, slot: %d\n", bus, slot);
 	}
 	else if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_QEMU_NIC) >= 0) {
-		c_printf("DSL Lab Intel NIC found - bus: %d, slot: %d\n", bus, slot);
+		c_printf("QEMU Intel NIC found - bus: %d, slot: %d\n", bus, slot);
 	}
 	else {
 		c_printf("Could not find Intel NIC\n");
 		return;
 	}
 
+	// c_printf("wait a few seconds to read PCI info... ");
+	// int number = 0;
+	// for (int i = 0; i < 1000000; ++i)
+	// {
+	// 	if(i % 100000) {
+	// 		c_printf(">");
+	// 	}
+	// 	number += 5;
+	// 	/* code */
+	// }
+	// c_printf("done waiting.\n");
+
 	_nic.csr = (struct csr *) pci_cfg_read(bus, slot, 0, PCI_CSR_MEM_MAPPED_BASE_ADDR_REG);
+
+	c_printf("CSR MMIO base addr: 0x%08x\n", (uint32_t) _nic.csr);
+
 
 	c_printf("Loading data from EEPROM. . .\n");
 	eeprom_load(&_nic);
@@ -182,22 +204,40 @@ void intel_nic_init() {
 	write_flush(&_nic);
 
 	// connect interrupt handler
-	uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
-	uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
-	c_printf("interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
-	__install_isr(interrupt_line + 0x20, intel_nic_handler);
+	// uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
+	// uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
+	// c_printf("interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
+	// __install_isr(interrupt_line + 0x20, intel_nic_handler);
+	__install_isr(0x0B + 0x20, intel_nic_handler);
 
-	// struct cb* cb_ia = (struct cb*) dumb_malloc(sizeof(struct cb));
+
+	// struct cb* cb_ia = (struct cb*) get_next_page();
 	// cb_ia->command = cb_ia_cmd;
 	// cb_ia->link = (uint32_t) cbl_ptr;
 	// memcpy(cb_ia->u.mac_addr, _nic.mac, MAC_LENGTH_BYTES);
 	// c_printf("setting IA to: ");
 	// print_mac_addr(cb_ia->u.mac_addr);
 
+
+	//
+	// init singly-linked CB ring
+	//
+	// c_printf("Initializing CB ring\n");
+	// struct cb* first = (struct cb*) get_next_page();
+	// struct cb* prev = first;
+	// for(uint32_t i = 0; i < TOTAL_CB; i++) {
+	// 	prev->link = (uint32_t) get_next_page();
+	// 	prev = (struct cb*) prev->link;
+	// }
+	// prev->link = (uint32_t) first; // complete the circle
+
+
 	// page 83 of manual
+	c_printf("Sending Tx CB\n");
+	// struct cb CB; struct cb* cbl_ptr = &CB;
 	struct cb* cbl_ptr = (struct cb*) dumb_malloc(sizeof(struct cb));
+	// struct cb* cbl_ptr = (struct cb*) get_next_page();
 	cbl_ptr->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
-	// cbl_ptr->link = 0; Since the EL flag is set, we don't need to specfiy next ptr
 
 	cbl_ptr->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
 	cbl_ptr->u.tcb.tcb_byte_count = 0x48 | 0x8000; // 0x8000 = EOF flag
@@ -286,22 +326,22 @@ void intel_nic_init() {
 	mem_write8(&_nic.csr->scb.command, cuc_start);
 	c_printf("flushing output...\n");
 	write_flush(&_nic);
+	c_printf("Tx CU finished\n");
 
 	// 
 	// 
 	// TODO:
 	// o Keep ring of available CB linked together, set EL flag on last one, but still have the links there
-	// o Merge memory stuff in from master
 	// o Finish writing ISR
 	// o Write send_packet function
 	// o Write execute_command function
 	// o Figure out what should stay static in intel.c and if some internal stuff should be removed from intel.h
-	// o Keep pointers to command blocks, implement proper chaining and CU resume
 	// o configure receive buffers
 	// o enable receiving data
 	// o Write routine to output configure command blocks
 	// o mutex on doing anything with CB
 	// 
+	// --Merge memory stuff in from master
 	// 
 
 }
