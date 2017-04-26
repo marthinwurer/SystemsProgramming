@@ -290,6 +290,7 @@ void intel_nic_init() {
 	// 
 	// 
 	// TODO:
+	// o Keep ring of available CB linked together, set EL flag on last one, but still have the links there
 	// o Merge memory stuff in from master
 	// o Finish writing ISR
 	// o Write send_packet function
@@ -299,6 +300,7 @@ void intel_nic_init() {
 	// o configure receive buffers
 	// o enable receiving data
 	// o Write routine to output configure command blocks
+	// o mutex on doing anything with CB
 	// 
 	// 
 

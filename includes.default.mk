@@ -1,3 +1,4 @@
+
 # Makefile containing the default configuration variables
 # This file is used by the root Makefile if includes.mk does
 # not exist.
@@ -45,4 +46,5 @@ LDFLAGS = -melf_i386
 #	BOOT_ENABLE_VGA13	bootstrap will enter VGA Mode 0x13 before entering
 #                       protected mode
 #
-USER_OPTIONS = -DCLEAR_BSS_SEGMENT -DISR_DEBUGGING_CODE -DSP_OS_CONFIG -DDUMP_QUEUES
+# USER_OPTIONS = -DCLEAR_BSS_SEGMENT -DISR_DEBUGGING_CODE -DSP_OS_CONFIG -DDUMP_QUEUES
+USER_OPTIONS = -DCLEAR_BSS_SEGMENT -DISR_DEBUGGING_CODE -DSP_OS_CONFIG
