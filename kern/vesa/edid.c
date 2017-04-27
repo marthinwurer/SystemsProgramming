@@ -3,6 +3,29 @@
 #include <kern/vesa/edid.h>
 #include <string.h>
 
+const VideoTiming const ESTABLISHED_TIMINGS1[] = {
+	(VideoTiming){ .width = 800, .height = 600, .refresh = 60 },
+	(VideoTiming){ .width = 800, .height = 600, .refresh = 56 },
+	(VideoTiming){ .width = 640, .height = 480, .refresh = 75 },
+	(VideoTiming){ .width = 640, .height = 480, .refresh = 72 },
+	(VideoTiming){ .width = 640, .height = 480, .refresh = 67 },
+	(VideoTiming){ .width = 640, .height = 480, .refresh = 60 },
+	(VideoTiming){ .width = 720, .height = 400, .refresh = 88 },
+	(VideoTiming){ .width = 720, .height = 400, .refresh = 70 }
+};
+
+const VideoTiming const ESTABLISHED_TIMINGS2[] = {
+	(VideoTiming){ .width = 1280, .height = 1024, .refresh = 75 },
+	(VideoTiming){ .width = 1024, .height = 768, .refresh = 75 },
+	(VideoTiming){ .width = 1024, .height = 768, .refresh = 70 },
+	(VideoTiming){ .width = 1024, .height = 768, .refresh = 60 },
+	(VideoTiming){ .width = 1024, .height = 768, .refresh = 87 },
+	(VideoTiming){ .width = 832, .height = 624, .refresh = 75 },
+	(VideoTiming){ .width = 800, .height = 600, .refresh = 75 },
+	(VideoTiming){ .width = 800, .height = 600, .refresh = 72 }
+};
+
+
 int edid_getRecord(EDIDRecord *record) {
 
 /*

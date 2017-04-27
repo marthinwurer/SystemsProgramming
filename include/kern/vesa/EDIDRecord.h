@@ -1,6 +1,8 @@
 #ifndef _KERN_VESA_EDIDRECORD_H
 #define _KERN_VESA_EDIDRECORD_H
 
+#define EDID_STANDARD_TIMING_COUNT 8
+
 
 struct EDIDRecord_s {
 
@@ -47,7 +49,7 @@ struct EDIDRecord_s {
 
 	// Standard Timing Identification
 
-	uint16_t StandardTimings[8];
+	uint16_t StandardTimings[EDID_STANDARD_TIMING_COUNT];
 
 	// Detailed Timing Descriptions
 
