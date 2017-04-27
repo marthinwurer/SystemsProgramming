@@ -8,14 +8,7 @@
 #include <kern/video/VideoMode.h>
 #include <kern/video/err.h>
 
-// location in memory of the VIDEO_INFO global variable
-#define VIDEO_INFO_ADDRESS 0x3800
-
-// memory used by video_init when determining a VBE mode
-#define VIDEO_TEMP_ADDRESS 0x3A00
-
-extern VideoInfo const *VIDEO_INFO;
-
+#include <kern/video/globals.h>
 
 /**
  * @brief Selects and changes to the best available video mode.

@@ -1,6 +1,8 @@
 #ifndef _KERN_VIDEO_VIDEOINFO_H
 #define _KERN_VIDEO_VIDEOINFO_H
 
+#include <stdint.h>
+
 #define VIDEO_INFO_SIZE 512
 
 

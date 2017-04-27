@@ -4,7 +4,6 @@
 #include <stddef.h>
 #include <string.h>
 
-VideoInfo const *VIDEO_INFO = (VideoInfo*)0x3800;
 
 
 int video_init(void) {
