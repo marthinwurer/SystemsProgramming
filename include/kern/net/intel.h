@@ -178,7 +178,7 @@ struct cb {
 	// dma_addr_t dma_addr;
 	// struct sk_buff *skb;
 
-void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length);
+void send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length);
 void intel_nic_init();
 
 #endif

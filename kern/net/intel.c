@@ -18,7 +18,7 @@
 //
 static void* dumb_malloc(uint32_t size);
 static void print_mac_addr(uint8_t mac[]);
-static void dump_eeprom(struct nic_info* nic);
+static void dump_eeprom(struct nic_info* nic) __attribute__((unused));
 static void write_flush(struct nic_info *nic);
 static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t addr);
 static void eeprom_load(struct nic_info *nic);
@@ -27,11 +27,11 @@ static void intel_nic_handler(int vector, int code);
 static void init_cbl(struct nic_info* nic, uint32_t num_cb);
 static void execute_command(struct cb* cb);
 
-static uint32_t mem_read32(void* addr);
-static uint16_t mem_read16(void* addr);
+static uint32_t mem_read32(void* addr) __attribute__((unused));
+static uint16_t mem_read16(void* addr) __attribute__((unused));
 static uint8_t mem_read8(void* addr);
 static void mem_write32(void* addr, uint32_t value);
-static void mem_write16(void* addr, uint16_t value);
+static void mem_write16(void* addr, uint16_t value) __attribute__((unused));
 static void mem_write8(void* addr, uint8_t value);
 
 // Holds info about the network interface
@@ -198,7 +198,8 @@ static void intel_nic_handler(int vector, int code) {
  */
 static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
 	c_printf("TODO: initialize CBL\n");
-
+	(void) nic;
+	(void) num_cb;
 	// TODO finish this
 
 	// c_printf("Initializing CB ring\n");
