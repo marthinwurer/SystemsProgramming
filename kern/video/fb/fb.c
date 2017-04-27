@@ -8,13 +8,13 @@
 
 int fb_init(VideoFb *fb) {
 	(void)fb;
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 }
 
 int fb_clear(VideoFb *fb, VideoCol color) {
 
 	if (fb == NULL) {
-		return EVIDEO_ARGNULL;
+		return E_VIDEO_ARGNULL;
 	}
 
 	uint32_t offset = 0;
@@ -46,17 +46,17 @@ int fb_clear(VideoFb *fb, VideoCol color) {
 	} while (row != rowEnd);
 
 
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 }
 
 int fb_offset(VideoFb *fb, uint32_t *offset, uint16_t x, uint16_t y) {
 	if (fb == NULL || offset == NULL) {
-		return EVIDEO_ARGNULL;
+		return E_VIDEO_ARGNULL;
 	}
 
 	*offset = (y * fb->pitch) + (x * (fb->bpp / 8));
 	
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 }
 
 int fb_putpixel(VideoFb *fb, uint16_t x, uint16_t y, VideoCol color) {
@@ -80,7 +80,7 @@ int fb_putrow(VideoFb *fb, uint16_t row, VideoCol buf[]) {
 int fb_putpixelf(VideoFb *fb, uint32_t offset, VideoCol color) {
 
 	if (fb == NULL) {
-		return EVIDEO_ARGNULL;
+		return E_VIDEO_ARGNULL;
 	}
 
 	uint32_t location = fb->location + offset;
@@ -106,12 +106,12 @@ int fb_putpixelf(VideoFb *fb, uint32_t offset, VideoCol color) {
 	}
 
 
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 }
 
 int fb_putcolsf(VideoFb *fb, uint32_t offset, uint16_t bufsize, VideoCol buf[]) {
 	if (fb == NULL) {
-		return EVIDEO_ARGNULL;
+		return E_VIDEO_ARGNULL;
 	}
 
 	unsigned dcol = fb->bpp / 8;
@@ -121,15 +121,15 @@ int fb_putcolsf(VideoFb *fb, uint32_t offset, uint16_t bufsize, VideoCol buf[]) 
 	}
 
 
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 }
 
 int fb_putrowf(VideoFb *fb, uint32_t offset, VideoCol buf[]) {
 	if (fb == NULL) {
-		return EVIDEO_ARGNULL;
+		return E_VIDEO_ARGNULL;
 	}
 
 	fb_putcolsf(fb, offset, fb->width, buf);
 
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 }

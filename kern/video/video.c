@@ -21,14 +21,15 @@ int video_init(void) {
 		.productRev = NULL
 	};
 
+	
 	memcpy(&VIDEO_INFO->info, &infoStruct, sizeof(infoStruct));
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 }
 
 
 int video_convertVBEInfo(VBEInfo *vbeInfo, VideoInfo *videoInfo) {
 	if (vbeInfo == NULL || videoInfo == NULL) {
-		return EVIDEO_ARGNULL;
+		return E_VIDEO_ARGNULL;
 	}
 
 	videoInfo->info.vbeVersion = vbeInfo->version;
@@ -105,9 +106,25 @@ int video_convertVBEInfo(VBEInfo *vbeInfo, VideoInfo *videoInfo) {
 	#undef MODES_MAX
 	#undef STRINGCOUNT
 
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 
 
+}
+
+int video_convertVBEMode(VBEModeInfo *vbe, VideoMode *mode) {
+	if (vbe == NULL || mode == NULL) {
+		return E_VIDEO_ARGNULL;
+	}
+
+	mode->fb.location = vbe->v3.PhysBasePtr;
+	mode->fb.width = vbe->v3.XResolution;
+	mode->fb.width = vbe->v3.YResolution;
+	mode->fb.pitch = vbe->v3.LinBytesPerScanLine;
+	mode->fb.bpp = vbe->v3.BitsPerPixel;
+
+
+
+	return E_VIDEO_SUCCESS;
 }
 
 int video_dumpInfo(VideoInfo *info) {
@@ -120,5 +137,5 @@ int video_dumpInfo(VideoInfo *info) {
 	c_printf(" * Vendor: %s\n", VIDEO_INFO->info.vendor);
 	c_printf(" * Product: %s\n", VIDEO_INFO->info.productName);
 	c_printf(" * Product Revision: %s\n", VIDEO_INFO->info.productRev);
-	return EVIDEO_SUCCESS;
+	return E_VIDEO_SUCCESS;
 }

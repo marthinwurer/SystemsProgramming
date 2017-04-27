@@ -1,9 +1,9 @@
 #ifndef _KERN_VIDEO_ERR_H
 #define _KERN_VIDEO_ERR_H
 
-#define EVIDEO_SUCCESS 0
-#define EVIDEO_ARGNULL -1
-#define EVIDEO_INFO_TRUNCATED 1
+#define E_VIDEO_SUCCESS 0
+#define E_VIDEO_ARGNULL -1
+#define E_VIDEO_INFO_TRUNCATED 1
 
 
 #endif
