@@ -12,6 +12,7 @@
 
 
 #include <kern/early/video.h>
+#include <kern/video/err.h>
 
 
 int video_early_init(void) {

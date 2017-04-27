@@ -5,6 +5,7 @@ KERN_OBJ := early/_early.o \
             early/realmode.o \
             early/main.o \
             early/gdt_init.o \
+            early/video.o \
             util/marquee.o \
             vesa/edid.o \
             vesa/vbe.o \

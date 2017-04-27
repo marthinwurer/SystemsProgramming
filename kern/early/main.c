@@ -20,7 +20,13 @@
 //
 int main(void) {
 
-	
+	// Initialize the video module
+
+	int errorcode = video_early_init();
+	if (errorcode != E_VIDEO_SUCCESS) {
+		c_printf("Video initialization failed! Code: %d\n", errorcode);
+		return 1;
+	}
 
 	return 0;
 
