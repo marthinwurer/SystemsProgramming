@@ -42,6 +42,7 @@ struct nic_info {
 	uint16_t eeprom[256]; // biggest eeprom will be 256 16-bit words
 	uint32_t avail_cb;
 	struct cb* next_cb;
+	struct cb* cb_to_check;
 };
 
 // Constants to control EEPROM
@@ -129,6 +130,12 @@ enum cb_commands {
 	cb_tx_cmd = 0x0004 // transmit
 };
 
+enum cb_status {
+	cb_c = 0x8000,
+	cb_ok = 0x2000,
+	cb_u = 0x1000
+};
+
 // Command Block
 struct cb {
 	uint16_t status;
@@ -178,7 +185,7 @@ struct cb {
 	// dma_addr_t dma_addr;
 	// struct sk_buff *skb;
 
-void send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length);
+int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length);
 void intel_nic_init();
 
 #endif

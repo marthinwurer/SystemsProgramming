@@ -1,6 +1,6 @@
 #include <kern/net/intel.h>
 #include <kern/pci/pci.h>
-// #include <kern/memory/memory_map.h> //get_next_page, free_page
+#include <kern/memory/memory_map.h> //get_next_page, free_page
 
 #include <baseline/c_io.h> //c_printf
 #include <string.h> //memcpy
@@ -24,6 +24,7 @@ static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t a
 static void eeprom_load(struct nic_info *nic);
 static void intel_nic_handler(int vector, int code);
 static void init_cbl(struct nic_info* nic, uint32_t num_cb);
+static void recycle_command_blocks();
 static void execute_command(struct cb* cb);
 
 static uint32_t mem_read32(void* addr) __attribute__((unused));
@@ -183,6 +184,8 @@ static void intel_nic_handler(int vector, int code) {
 	if(stat_ack & ack_mdi) c_printf("<<< ack_mdi bit set >>>\n");
 	if(stat_ack & ack_swi) c_printf("<<< ack_swi bit set >>>\n");
 
+	// TODO clear some CBs!!!
+
 	// Check status bits and acknowledge them
 	mem_write8(&_nic.csr->scb.stat_ack, 0x00);
 
@@ -205,32 +208,100 @@ static void intel_nic_handler(int vector, int code) {
  * @param num_cb number of command blocks to create
  */
 static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
-	c_printf("TODO: initialize CBL\n");
-	(void) nic;
-	(void) num_cb;
-	// TODO finish this
+	struct cb* first = (struct cb*) get_next_page();
+	struct cb* prev = first;
+	for(uint32_t i = 0; i < num_cb; i++) {
+		prev->link = (uint32_t) get_next_page();
+		prev = (struct cb*) prev->link;
+	}
+	prev->link = (uint32_t) first; // complete the circle
 
-	// c_printf("Initializing CB ring\n");
-	// struct cb* first = (struct cb*) dumb_malloc(sizeof(struct cb));
-	// struct cb* prev = first;
-	// for(uint32_t i = 0; i < TOTAL_CB; i++) {
-	// 	prev->link = (uint32_t) dumb_malloc(sizeof(struct cb));
-	// 	prev = (struct cb*) prev->link;
-	// }
-	// prev->link = (uint32_t) first; // complete the circle
+	//put this stuff into the nic_info
+	nic->avail_cb = num_cb;
+	nic->next_cb = first;
+	nic->cb_to_check = first;
 }
 
-void send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
-	struct cb* cb = (struct cb*) dumb_malloc(sizeof(struct cb));
+static void recycle_command_blocks() {
+	// _nic
+	// check cb_status
+}
 
+int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
+	// struct cb* cb = (struct cb*) get_next_page();
 	(void) dst_hw_addr;
 	(void) data;
 	(void) length;
+	if(!_nic.avail_cb) {
+		c_printf("NIC: No available Command Blocks :(\n");
+		return -1;
+	}
+
+	struct cb* cb = _nic.next_cb;
+	_nic.next_cb = (struct cb*) cb->link;
+	_nic.avail_cb--;
+
+	cb->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
+
+	cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
+	cb->u.tcb.tcb_byte_count = 0x48 | 0x8000; // 0x8000 = EOF flag
+	cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
+	cb->u.tcb.tbd_count = 0;
+
+	cb->u.tcb.eth_header.dst_mac[0] = 0x00;
+	cb->u.tcb.eth_header.dst_mac[1] = 0xE0;
+	cb->u.tcb.eth_header.dst_mac[2] = 0x7C;
+	cb->u.tcb.eth_header.dst_mac[3] = 0xC8;
+	cb->u.tcb.eth_header.dst_mac[4] = 0x7D;
+	cb->u.tcb.eth_header.dst_mac[5] = 0x08;
+	memcpy(cb->u.tcb.eth_header.src_mac, _nic.mac, MAC_LENGTH_BYTES);
+
+	// length of ethernet data
+	cb->u.tcb.eth_header.ethertype_lo = 0x40;
+	char* my_string = "Hello world, how are you doing? I'm feeling round!";
+	memcpy(cb->u.tcb.eth_header.data, my_string, strlen(my_string) + 1);
+
+	// cb->u.tcb.eth_header.data[0x00] = 'h';
+	// cb->u.tcb.eth_header.data[0x01] = 'e';
+	// cb->u.tcb.eth_header.data[0x02] = 'l';
+	// cb->u.tcb.eth_header.data[0x03] = 'l';
+	// cb->u.tcb.eth_header.data[0x04] = 'o';
+	// cb->u.tcb.eth_header.data[0x05] = ' ';
+	// cb->u.tcb.eth_header.data[0x06] = 'w';
+	// cb->u.tcb.eth_header.data[0x07] = 'o';
+	// cb->u.tcb.eth_header.data[0x08] = 'r';
+	// cb->u.tcb.eth_header.data[0x09] = 'l';
+	// cb->u.tcb.eth_header.data[0x0A] = 'd';
+	// cb->u.tcb.eth_header.data[0x0B] = '!';
+	// for(uint32_t i = 0x0C; i < 0x40; i++) {
+	// 	cb->u.tcb.eth_header.data[i] = i - 0x0C;
+	// }
+
+	// give the cbl addr to the CU and start
+	// c_printf("Putting CBL pointer into gen_ptr...\n");
+	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
+
+	uint8_t status = mem_read8(&_nic.csr->scb.status);
+	c_printf("status=0x%02x\n", status);
+	if(!(status & cu_lpq_active) && !(status & cu_hqp_active)) {
+		mem_write8(&_nic.csr->scb.command, cuc_start);
+		write_flush(&_nic);
+	}
+	else if(status & cu_idle) {
+		mem_write8(&_nic.csr->scb.command, cuc_start);
+		write_flush(&_nic);
+	}
+	else if(status & cu_suspended) {
+		mem_write8(&_nic.csr->scb.command, cuc_resume);
+		write_flush(&_nic);
+	}
+
 	// 
-	// fill 'er up with juicy bits
+	// fill 'er up with juicy bits and send it along
 	// 
 
-	execute_command(cb);
+	// execute_command(cb);
+	return 0;
 }
 
 static void execute_command(struct cb* cb) {
@@ -328,78 +399,24 @@ void intel_nic_init() {
 	// 
 	// Setup the CBL
 	// 
+	c_printf("Initializing CB ring\n");
 	init_cbl(&_nic, TOTAL_CB);
-	
-
-	// c_printf("Initializing CB ring\n");
-	// struct cb* first = (struct cb*) dumb_malloc(sizeof(struct cb));
-	// struct cb* prev = first;
-	// for(uint32_t i = 0; i < TOTAL_CB; i++) {
-	// 	prev->link = (uint32_t) dumb_malloc(sizeof(struct cb));
-	// 	prev = (struct cb*) prev->link;
-	// }
-	// prev->link = (uint32_t) first; // complete the circle
-
-
-	// page 83 of manual
-	c_printf("Sending Tx CB\n");
-	// struct cb CB; struct cb* cbl_ptr = &CB;
-	struct cb* cbl_ptr = (struct cb*) dumb_malloc(sizeof(struct cb));
-	cbl_ptr->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
-
-	cbl_ptr->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
-	cbl_ptr->u.tcb.tcb_byte_count = 0x48 | 0x8000; // 0x8000 = EOF flag
-	cbl_ptr->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
-	cbl_ptr->u.tcb.tbd_count = 0;
-
-	cbl_ptr->u.tcb.eth_header.dst_mac[0] = 0x00;
-	cbl_ptr->u.tcb.eth_header.dst_mac[1] = 0xE0;
-	cbl_ptr->u.tcb.eth_header.dst_mac[2] = 0x7C;
-	cbl_ptr->u.tcb.eth_header.dst_mac[3] = 0xC8;
-	cbl_ptr->u.tcb.eth_header.dst_mac[4] = 0x7D;
-	cbl_ptr->u.tcb.eth_header.dst_mac[5] = 0x08;
-	memcpy(cbl_ptr->u.tcb.eth_header.src_mac, _nic.mac, MAC_LENGTH_BYTES);
-
-	cbl_ptr->u.tcb.eth_header.ethertype_lo = 0x40;
-
-	cbl_ptr->u.tcb.eth_header.data[0x00] = 'h';
-	cbl_ptr->u.tcb.eth_header.data[0x01] = 'e';
-	cbl_ptr->u.tcb.eth_header.data[0x02] = 'l';
-	cbl_ptr->u.tcb.eth_header.data[0x03] = 'l';
-	cbl_ptr->u.tcb.eth_header.data[0x04] = 'o';
-	cbl_ptr->u.tcb.eth_header.data[0x05] = ' ';
-	cbl_ptr->u.tcb.eth_header.data[0x06] = 'w';
-	cbl_ptr->u.tcb.eth_header.data[0x07] = 'o';
-	cbl_ptr->u.tcb.eth_header.data[0x08] = 'r';
-	cbl_ptr->u.tcb.eth_header.data[0x09] = 'l';
-	cbl_ptr->u.tcb.eth_header.data[0x0A] = 'd';
-	cbl_ptr->u.tcb.eth_header.data[0x0B] = '!';
-	for(uint32_t i = 0x0C; i < 0x40; i++) {
-		cbl_ptr->u.tcb.eth_header.data[i] = i - 0x0C;
-	}
-
-	// give the cbl addr to the CU and start
-	c_printf("Putting CBL pointer into gen_ptr...\n");
-	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cbl_ptr);
-	c_printf("calling CU Start on CBL...\n");
-	mem_write8(&_nic.csr->scb.command, cuc_start);
-	c_printf("flushing output...\n");
-	write_flush(&_nic);
-	c_printf("Tx CU finished\n");
 
 	// 
 	// 
 	// TODO:
-	// o Keep ring of available CB linked together, set EL flag on last one, but still have the links there
-	// o Finish writing ISR
+	// o Finish writing ISR (cleanup CB)
+	// o Enable TBD for CB, instead of TCB
 	// o Write send_packet function
-	// o Write execute_command function
-	// o Figure out what should stay static in intel.c and if some internal stuff should be removed from intel.h
 	// o configure receive buffers
 	// o enable receiving data
 	// o Write routine to output configure command blocks
 	// o mutex on doing anything with CB
 	// 
+	// 
+	// 
+	// o Figure out what should stay static in intel.c and if some internal stuff should be removed from intel.h
+	// o Keep ring of available CB linked together, set EL flag on last one, but still have the links there
 	// o Merge memory stuff in from master, HINT MERGE NOT REBASE
 	// 
 
