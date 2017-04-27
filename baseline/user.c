@@ -927,7 +927,6 @@ int32_t idle( void *arg ) {
 int32_t init( void *arg ) {
 	// cast away warnings
 	(void) arg;
-
 	pid_t pid;
 
 	cwrites( "Init started\n" );

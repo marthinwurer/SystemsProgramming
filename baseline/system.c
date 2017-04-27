@@ -24,6 +24,12 @@
 #include <baseline/sio.h>
 #include <baseline/scheduler.h>
 
+// memory map stuff
+#include <kern/memory/memory_map.h>
+
+// network stuff
+#include <kern/net/intel.h>
+
 // need init() address
 #include <baseline/user.h>
 
@@ -150,6 +156,23 @@ void _init( void ) {
 
 	c_io_init();
 	c_io_init_isr();
+
+
+	disp_memory_map();
+	setup_page_availibility_table();
+
+//	void * address = get_next_page();
+//
+//	c_printf("First Page:%x\n", address );
+//	c_printf("Next Page:%x\n",free_page(address));
+//	c_printf("Next Page:%x\n", get_next_page() );
+
+//
+//	__panic("lololol");
+//		c_getchar();
+
+
+
 	c_setscroll( 0, 7, 99, 99 );
 	c_puts_at( 0, 6, "================================================================================" );
 
@@ -179,8 +202,10 @@ void _init( void ) {
 	_clk_init();		// clock
 	intel_nic_init();	// network
 
+
 	c_puts( "\nModule initialization complete\n" );
 	c_puts( "------------------------------\n" );
+
 
 	/*
 	** Create the initial system ESP

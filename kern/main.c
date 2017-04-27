@@ -22,6 +22,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <kern/memory/memory_map.h>
+#include <baseline/support.h>
 
 static VBEModeInfo bestRes;
 static VBEModeInfo temp;
@@ -38,6 +40,9 @@ static uint16_t MODELIST[100];
 int main(void) {
 
 	c_clearscreen();
+
+
+
 
 	__init_int32();
 

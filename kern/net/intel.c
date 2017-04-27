@@ -2,7 +2,6 @@
 #include <kern/pci/pci.h>
 // #include <kern/memory/memory_map.h> //get_next_page, free_page
 
-#include <baseline/ulib.h> //sleep
 #include <baseline/c_io.h> //c_printf
 #include <string.h> //memcpy
 #include <x86arch.h> //PIC_EOI, PIC_SLAVE_CMD_PORT
@@ -17,12 +16,12 @@
 // Static method declarations
 //
 static void* dumb_malloc(uint32_t size);
+static void delay_10usec(uint32_t usec_10);
 static void print_mac_addr(uint8_t mac[]);
 static void dump_eeprom(struct nic_info* nic) __attribute__((unused));
 static void write_flush(struct nic_info *nic);
 static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t addr);
 static void eeprom_load(struct nic_info *nic);
-
 static void intel_nic_handler(int vector, int code);
 static void init_cbl(struct nic_info* nic, uint32_t num_cb);
 static void execute_command(struct cb* cb);
@@ -47,6 +46,17 @@ static void* dumb_malloc(uint32_t size) {
 	void* ret = (void*) base_free;
 	base_free += size;
 	return ret;
+}
+
+/**
+ * Delay for 10 microseconds
+ *
+ * @param usec_10 length to delay
+ */
+static void delay_10usec(uint32_t usec_10) {
+	for (; usec_10 > 0; usec_10--) {
+		for (uint32_t j = 0; j < 4000; ++j) { } // 10us
+	}
 }
 
 /**
@@ -96,19 +106,19 @@ static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t a
 	int32_t i;
 
 	cmd_addr_data = ((op_read << *addr_len) | addr) << 16;
-
 	/* Chip select */
 	mem_write8(&nic->csr->eeprom_lo, EECS | EESK);
-	write_flush(nic); sleep(1);
 
+	write_flush(nic); delay_10usec(1);
+	
 	/* Bit-bang to read word from eeprom */
 	for (i = 31; i >= 0; i--) {
 		ctrl = (cmd_addr_data & (1 << i)) ? EECS | EEDI : EECS;
 		mem_write8(&nic->csr->eeprom_lo, ctrl);
-		write_flush(nic); sleep(1);
+		write_flush(nic); delay_10usec(1);
 
 		mem_write8(&nic->csr->eeprom_lo, ctrl | EESK);
-		write_flush(nic); sleep(1);
+		write_flush(nic); delay_10usec(1);
 
 		/* Eeprom drives a dummy zero to EEDO after receiving
 		 * complete address.  Use this to adjust addr_len. */
@@ -120,11 +130,9 @@ static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t a
 
 		data = (data << 1) | (ctrl & EEDO ? 1 : 0);
 	}
-
 	/* Chip deselect */
 	mem_write8(&nic->csr->eeprom_lo, 0);
-	write_flush(nic); sleep(1);
-
+	write_flush(nic); delay_10usec(1);
 	return data;
 }
 
@@ -140,13 +148,13 @@ static void eeprom_load(struct nic_info *nic) {
 	/* Try reading with an 8-bit addr len to discover actual addr len */
 	eeprom_read(nic, &addr_len, 0);
 	nic->eeprom_count = 1 << addr_len;
-
 	for(addr = 0; addr < nic->eeprom_count; addr++) {
 		nic->eeprom[addr] = eeprom_read(nic, &addr_len, addr);
 		if(addr < nic->eeprom_count - 1) {
 			checksum += nic->eeprom[addr];
 		}
 	}
+	c_printf("\n");
 
 	/* The checksum, stored in the last word, is calculated such that
 	 * the sum of words should be 0xBABA */
@@ -182,7 +190,7 @@ static void intel_nic_handler(int vector, int code) {
 
 	// if(vector >= 0x20 && vector < 0x30) {
 	// 	__outb(PIC_MASTER_CMD_PORT, PIC_EOI);
-	// 	if(vector > 0x27) {
+	// 	if(vector > 0x27) {m
 	// 		__outb(PIC_SLAVE_CMD_PORT, PIC_EOI);
 	// 	}
 	// }
@@ -250,6 +258,9 @@ static void execute_command(struct cb* cb) {
 }
 
 void intel_nic_init() {
+
+	c_printf("\ncounting to 10 seconds!\n");
+
 	uint8_t bus, slot;
 	// Try to find DSL card first, followed by QEMU card, then give up
 	if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_DSL_NIC) >= 0) {	
@@ -267,24 +278,29 @@ void intel_nic_init() {
 
 	c_printf("CSR MMIO base addr: 0x%08x\n", (uint32_t) _nic.csr);
 
-	if(_nic.csr == 0) {
-		__panic("PCI READ FAILURE");
-	}
+	// if(_nic.csr == 0) {
+	// 	__panic("PCI READ FAILURE");
+	// }
 
 	c_printf("Loading data from EEPROM...\n");
 	eeprom_load(&_nic);
 
+	//
+	// Get MAC address setup
+	//
 	_nic.mac[0] = (uint8_t) (_nic.eeprom[0] & 0x00FF);
 	_nic.mac[1] = (uint8_t) (_nic.eeprom[0] >> 8);
 	_nic.mac[2] = (uint8_t) (_nic.eeprom[1] & 0x00FF);
 	_nic.mac[3] = (uint8_t) (_nic.eeprom[1] >> 8);
 	_nic.mac[4] = (uint8_t) (_nic.eeprom[2] & 0x00FF);
 	_nic.mac[5] = (uint8_t) (_nic.eeprom[2] >> 8);
-	c_printf("MAC Address: ");
+	c_printf("HW MAC Address: ");
 	print_mac_addr(_nic.mac);
 	c_printf("\n");
 
+	//
 	// set base CU to 0
+	//
 	mem_write32(&_nic.csr->scb.gen_ptr, 0);
 	mem_write8(&_nic.csr->scb.command, cuc_load_cu_base);
 	write_flush(&_nic);
@@ -295,7 +311,6 @@ void intel_nic_init() {
 	uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
 	uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
 	c_printf("interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
-	// __install_isr(interrupt_line + 0x20, intel_nic_handler);
 	__install_isr(NET_INTEL_INT_VECTOR, intel_nic_handler);
 
 

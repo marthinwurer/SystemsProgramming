@@ -1,4 +1,5 @@
 #include <kern/early/realmode.h>
+#include <kern/early/memory_map_setup.h>
 
 
 
@@ -13,6 +14,9 @@
 // up using the protected-to-real mode int function.
 //
 int main(void) {
+
+
+	get_memory_map();
 
 	
 

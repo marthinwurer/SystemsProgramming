@@ -17,7 +17,9 @@ KERN_OBJ := early/_early.o \
             pci/pci.o \
             net/intel.o \
             net/net_test.o \
-            net/udp.o
+            net/udp.o \
+            early/memory_map_setup.o \
+            memory/memory_map.o
 
 KERN_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_OBJ))
 
