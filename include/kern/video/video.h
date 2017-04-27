@@ -2,8 +2,10 @@
 #define _KERN_VIDEO_VIDEO_H
 
 #include <kern/vesa/VBEInfo.h>
+#include <kern/vesa/VBEModeInfo.h>
 
 #include <kern/video/VideoInfo.h>
+#include <kern/video/VideoMode.h>
 #include <kern/video/err.h>
 
 // location in memory of the VIDEO_INFO global variable
@@ -41,14 +43,14 @@ int video_dumpInfo(VideoInfo *info);
  *
  * This function is used when getting the EDID of a monitor fails.
  */
-int video_fallbackVESA()
+//int video_fallbackVESA()
 
 /**
  * @brief Changes the video mode to VGA Mode 0x13 as a fallback.
  *
  * This mode should only be used when all else has failed.
  */
-int video_fallbackVGA()
+//int video_fallbackVGA();
 
 
 

@@ -88,7 +88,7 @@ int video_convertVBEInfo(VBEInfo *vbeInfo, VideoInfo *videoInfo) {
 	for (int i = 0; i != STRINGCOUNT; ++i) {
 		if (freebytes == 1) {
 			// no more room in videoInfo, stop
-			return EVIDEO_INFO_TRUNCATED;
+			return E_VIDEO_INFO_TRUNCATED;
 		}
 		sptr = strings[i];
 		source = sources[i];

@@ -3,6 +3,8 @@
 
 #include <kern/vesa/EDIDRecord.h>
 
+#include <kern/video/VideoTiming.h>
+
 extern const VideoTiming const ESTABLISHED_TIMINGS1[8];
 
 extern const VideoTiming const ESTABLISHED_TIMINGS2[8];
