@@ -2,11 +2,13 @@
 #define _KERN_VIDEO_VIDEOINFO_H
 
 #include <stdint.h>
+#include <kern/video/VideoStatus.h>
 
 #define VIDEO_INFO_SIZE 512
 
 
 struct VideoInfo_s {
+	VideoStatus status;
 	uint16_t vbeVersion;            // VBE version, usually 0x300 (VBE 3.0)
 	uint16_t softwareRev;           // Software revision
 	uint16_t videoMemory;           // Video memory in 64 KB blocks

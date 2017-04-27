@@ -4,10 +4,12 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <baseline/c_io.h>
 
 
 int video_init(void) {
 	struct VideoInfo_s infoStruct = {
+		.status = 0,
 		.vbeVersion = 0,
 		.softwareRev = 0,
 		.videoMemory = 0,
@@ -133,13 +135,13 @@ int video_convertVBEMode(VBEModeInfo *vbe, VideoMode *mode) {
 
 int video_dumpInfo(VideoInfo *info) {
 	c_puts("Video controller information:\n");
-	c_printf(" * VBE Version: %x\n", VIDEO_INFO->info.vbeVersion);
-	c_printf(" * VBE Revision: %d\n", VIDEO_INFO->info.softwareRev);
-	c_printf(" * Video Memory: %d 64KB blocks\n", VIDEO_INFO->info.videoMemory);
-	c_printf(" * Video Modes: %d\n", VIDEO_INFO->info.modeCount);
-	c_printf(" * OEM: %s\n", VIDEO_INFO->info.oem);
-	c_printf(" * Vendor: %s\n", VIDEO_INFO->info.vendor);
-	c_printf(" * Product: %s\n", VIDEO_INFO->info.productName);
-	c_printf(" * Product Revision: %s\n", VIDEO_INFO->info.productRev);
+	c_printf(" * VBE Version: %x\n", info->info.vbeVersion);
+	c_printf(" * VBE Revision: %d\n", info->info.softwareRev);
+	c_printf(" * Video Memory: %d 64KB blocks\n", info->info.videoMemory);
+	c_printf(" * Video Modes: %d\n", info->info.modeCount);
+	c_printf(" * OEM: %s\n", info->info.oem);
+	c_printf(" * Vendor: %s\n", info->info.vendor);
+	c_printf(" * Product: %s\n", info->info.productName);
+	c_printf(" * Product Revision: %s\n", info->info.productRev);
 	return E_VIDEO_SUCCESS;
 }

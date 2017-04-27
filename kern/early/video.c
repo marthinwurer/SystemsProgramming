@@ -28,7 +28,9 @@ int video_early_init(void) {
 	VBEInfo info;
 	uint16_t vbeResult;
 	if (vbe_getInfo(&info, &vbeResult) == E_VESA_SUCCESS) {
+		VIDEO_INFO->info.status |= VIDEO_VBE_SUPPORT;
 		if (video_convertVBEInfo(&info, VIDEO_INFO) == E_VIDEO_INFO_TRUNCATED) {
+			VIDEO_INFO->info.status |= VIDEO_TRUNCATED;
 			c_puts("video: info block truncated\n");
 		}
 	} else {
@@ -36,7 +38,9 @@ int video_early_init(void) {
 	}
 
 	int edidResult = edid_getRecord(VIDEO_EDID);
-	if (edidResult != E_VESA_SUCCESS) {
+	if (edidResult == E_VESA_SUCCESS) {
+		VIDEO_INFO->info.status |= VIDEO_EDID_SUPPORT;
+	} else {
 		c_printf("video: Failed to get EDID record (%d)\n", edidResult);
 	}
 
@@ -45,6 +49,13 @@ int video_early_init(void) {
 
 
 int video_early_bestMode(VideoMode *mode) {
+
+	VideoStatus status = VIDEO_INFO->info.status;
+
+	if ((status & VIDEO_VBE_SUPPORT) == VIDEO_VBE_SUPPORT) {
+		
+	}
+
 
 	return E_VIDEO_SUCCESS;
 }
