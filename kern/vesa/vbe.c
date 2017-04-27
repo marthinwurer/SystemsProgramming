@@ -1,5 +1,6 @@
 
 #include <kern/vesa/vbe.h>
+#include <kern/vesa/err.h>
 #include <kern/early/realmode.h>
 
 #include <string.h>
@@ -14,13 +15,13 @@ static const char VBE_SIG[] = { 'V', 'B', 'E', '2'};
 
 int vbe_init(void) {
 	// unused return success
-	return VBE_SUCCESS;
+	return E_VESA_SUCCESS;
 }
 
 int vbe_getInfo(VBEInfo *info, uint16_t *vbeResult) {
 
 	if (info == NULL) {
-		return VBE_ARGNULL;
+		return E_VESA_ARGNULL;
 	}
 
 	VBEInfo *block = (VBEInfo*)VBE_BLOCK_ADDRESS;
@@ -32,14 +33,14 @@ int vbe_getInfo(VBEInfo *info, uint16_t *vbeResult) {
 	regs.es = 0;
 	regs.edi = VBE_BLOCK_ADDRESS;
 
-	int errorcode = VBE_ERROR;
+	int errorcode = E_VESA_ERROR;
 	
 	// perform VBE_FUNCTION_GETINFO
 	if (__performVBEFunction(VBE_FUNCTION_GETINFO, &regs)) {
 		// success
 		// copy block structure to argument
 		memcpy(info, block, sizeof(VBEInfo));
-		errorcode = VBE_SUCCESS;
+		errorcode = E_VESA_SUCCESS;
 	}
 
 	if (vbeResult != NULL) {
@@ -54,7 +55,7 @@ int vbe_getModeInfo(uint16_t mode, VBEModeInfo *modeInfo, uint16_t *vbeResult) {
 
 	// Check for NULL pointers
 	if (modeInfo == NULL) {
-		return VBE_ARGNULL;
+		return E_VESA_ARGNULL;
 	}
 
 	VBEModeInfo *block = (VBEModeInfo*)VBE_BLOCK_ADDRESS;
@@ -64,11 +65,11 @@ int vbe_getModeInfo(uint16_t mode, VBEModeInfo *modeInfo, uint16_t *vbeResult) {
 	regs.edi = VBE_BLOCK_ADDRESS;
 	regs.ecx = mode;
 
-	int errorcode = VBE_ERROR;
+	int errorcode = E_VESA_ERROR;
 
 	if (__performVBEFunction(VBE_FUNCTION_GETMODEINFO, &regs)) {
 		memcpy(modeInfo, block, sizeof(VBEModeInfo));
-		errorcode = VBE_SUCCESS;
+		errorcode = E_VESA_SUCCESS;
 	}
 
 	if (vbeResult != NULL) {
@@ -81,13 +82,13 @@ int vbe_getModeInfo(uint16_t mode, VBEModeInfo *modeInfo, uint16_t *vbeResult) {
 
 int vbe_setMode(uint16_t mode, uint16_t *vbeResult) {
 
-	int errorcode = VBE_ERROR;
+	int errorcode = E_VESA_ERROR;
 
 	regs16_t regs;
 	regs.ebx = mode;
 
 	if (__performVBEFunction(VBE_FUNCTION_SETMODE, &regs)) {
-		errorcode = VBE_SUCCESS;
+		errorcode = E_VESA_SUCCESS;
 	}
 
 	if (vbeResult != NULL) {
@@ -101,16 +102,16 @@ int vbe_setMode(uint16_t mode, uint16_t *vbeResult) {
 int vbe_currentMode(uint16_t *modeVar, uint16_t *vbeResult) {
 
 	if (modeVar == NULL) {
-		return VBE_ARGNULL;
+		return E_VESA_ARGNULL;
 	}
 
-	int errorcode = VBE_ERROR;
+	int errorcode = E_VESA_ERROR;
 
 	regs16_t regs;
 	
 	if (__performVBEFunction(VBE_FUNCTION_CURRENTMODE, &regs)) {
 		*modeVar = regs.ebx;
-		errorcode = VBE_SUCCESS;
+		errorcode = E_VESA_SUCCESS;
 	}
 
 	if (vbeResult != NULL) {
