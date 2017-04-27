@@ -177,6 +177,7 @@ void _init( void ) {
 	_sio_init();		// serial i/o
 	_sys_init();		// syscalls
 	_clk_init();		// clock
+	intel_nic_init();	// network
 
 	c_puts( "\nModule initialization complete\n" );
 	c_puts( "------------------------------\n" );

@@ -13,13 +13,34 @@
 #define TRUE 1
 #define FALSE 0
 
+//
+// Static method declarations
+//
+static void* dumb_malloc(uint32_t size);
+static void print_mac_addr(uint8_t mac[]);
+static void dump_eeprom(struct nic_info* nic);
+static void write_flush(struct nic_info *nic);
+static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t addr);
+static void eeprom_load(struct nic_info *nic);
+
+static void intel_nic_handler(int vector, int code);
+static void init_cbl(struct nic_info* nic, uint32_t num_cb);
+static void execute_command(struct cb* cb);
+
+static uint32_t mem_read32(void* addr);
+static uint16_t mem_read16(void* addr);
+static uint8_t mem_read8(void* addr);
+static void mem_write32(void* addr, uint32_t value);
+static void mem_write16(void* addr, uint16_t value);
+static void mem_write8(void* addr, uint8_t value);
 
 // Holds info about the network interface
 static struct nic_info _nic;
 
-uint32_t base_free = 0x3A00; // this seems safe...
-uint32_t free_top = 0x7BFF;
-void* dumb_malloc(uint32_t size) {
+static uint32_t base_free = 0x3A00; // this seems safe...
+static uint32_t free_top = 0x7BFF;
+
+static void* dumb_malloc(uint32_t size) {
 	if(base_free + size > free_top) {
 		return NULL;
 	}
@@ -28,11 +49,21 @@ void* dumb_malloc(uint32_t size) {
 	return ret;
 }
 
-void print_mac_addr(uint8_t mac[]) {
+/**
+ * Prints out a MAC address in XX:XX:XX:XX:XX:XX notation
+ *
+ * @param mac uint8_t[6] containing MAC address
+ */
+static void print_mac_addr(uint8_t mac[]) {
 	c_printf("%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
-void dump_eeprom(struct nic_info* nic) {
+/**
+ * Prints out the contents of the in-memory EEPROM cache
+ *
+ * @param nic where to get EEPROM from
+ */
+static void dump_eeprom(struct nic_info* nic) {
 	for(uint32_t i = 0; i < nic->eeprom_count; i++) {
 		if(i % 6 == 0)
 			c_printf("\neep:");
@@ -40,10 +71,24 @@ void dump_eeprom(struct nic_info* nic) {
 	}
 }
 
+/**
+ * Flushes the MMIO struct to the device by reading in something innocuous
+ *
+ * @param nic card to flush for
+ */
 static void write_flush(struct nic_info *nic) {
 	(void) mem_read8(&nic->csr->scb.status);
 }
 
+/**
+ * Reads from the EEPROM
+ * Inspired by linux kernel: linux/drivers/net/ethernet/intel/e100.c
+ *
+ * @param nic location to store the EEPROM data
+ * @param addr_len 
+ * @param addr
+ * @return
+ */
 static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t addr) {
 	uint32_t cmd_addr_data;
 	uint16_t data = 0;
@@ -83,7 +128,12 @@ static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t a
 	return data;
 }
 
-/* Load entire EEPROM image into driver cache and validate checksum */
+/**
+ * Loads the entire EEPROM into memory cache
+ * Inspired by linux kernel: linux/drivers/net/ethernet/intel/e100.c
+ * 
+ * @param nic specify where EEPROM cache should be stored
+ */
 static void eeprom_load(struct nic_info *nic) {
 	uint16_t addr, addr_len = 8, checksum = 0;
 
@@ -105,6 +155,13 @@ static void eeprom_load(struct nic_info *nic) {
 	// }
 }
 
+
+/**
+ * Interrupt handler for the NIC
+ *
+ * @param vector vector for the interrupt
+ * @param code code for the interrupt
+ */
 static void intel_nic_handler(int vector, int code) {
 	(void) vector; (void) code;
 	c_printf("INTERRUPT(v=0x%02x, c=0x%02x) -- Intel NIC, ", vector, code);
@@ -121,6 +178,8 @@ static void intel_nic_handler(int vector, int code) {
 	// Check status bits and acknowledge them
 	mem_write8(&_nic.csr->scb.stat_ack, 0x00);
 
+	// TODO do we actually not need to do the PIC_EOI thing that was blowing the system up?
+
 	// if(vector >= 0x20 && vector < 0x30) {
 	// 	__outb(PIC_MASTER_CMD_PORT, PIC_EOI);
 	// 	if(vector > 0x27) {
@@ -131,20 +190,28 @@ static void intel_nic_handler(int vector, int code) {
 	// __outb(PIC_SLAVE_CMD_PORT, PIC_EOI); // slave because we are above 0x20
 }
 
-// static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
-// 	c_printf("TODO: initialize CBL\n");
+/**
+ * Initialize the NIC with a ring of command blocks
+ *
+ * @param nic card to initialize the ring for
+ * @param num_cb number of command blocks to create
+ */
+static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
+	c_printf("TODO: initialize CBL\n");
 
-// 	// c_printf("Initializing CB ring\n");
-// 	// struct cb* first = (struct cb*) dumb_malloc(sizeof(struct cb));
-// 	// struct cb* prev = first;
-// 	// for(uint32_t i = 0; i < TOTAL_CB; i++) {
-// 	// 	prev->link = (uint32_t) dumb_malloc(sizeof(struct cb));
-// 	// 	prev = (struct cb*) prev->link;
-// 	// }
-// 	// prev->link = (uint32_t) first; // complete the circle
-// }
+	// TODO finish this
 
-void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length) {
+	// c_printf("Initializing CB ring\n");
+	// struct cb* first = (struct cb*) dumb_malloc(sizeof(struct cb));
+	// struct cb* prev = first;
+	// for(uint32_t i = 0; i < TOTAL_CB; i++) {
+	// 	prev->link = (uint32_t) dumb_malloc(sizeof(struct cb));
+	// 	prev = (struct cb*) prev->link;
+	// }
+	// prev->link = (uint32_t) first; // complete the circle
+}
+
+void send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	struct cb* cb = (struct cb*) dumb_malloc(sizeof(struct cb));
 
 	(void) dst_hw_addr;
@@ -157,7 +224,7 @@ void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length) {
 	execute_command(cb);
 }
 
-void execute_command(struct cb* cb) {
+static void execute_command(struct cb* cb) {
 	(void) cb;
 	if(_nic.csr->scb.status & (cu_lpq_active | cu_hqp_active)) { // CU active
 		// Add pointer to new CB to tail of CBL
@@ -245,7 +312,7 @@ void intel_nic_init() {
 	// 
 	// Setup the CBL
 	// 
-	// init_cbl(&_nic, TOTAL_CB);
+	init_cbl(&_nic, TOTAL_CB);
 	
 
 	// c_printf("Initializing CB ring\n");
@@ -322,27 +389,27 @@ void intel_nic_init() {
 
 }
 
-uint32_t mem_read32(void* addr) {
+static uint32_t mem_read32(void* addr) {
 	return *(volatile uint32_t*) addr;
 }
 
-uint16_t mem_read16(void* addr) {
+static uint16_t mem_read16(void* addr) {
 	return *(volatile uint16_t*) addr;
 }
 
-uint8_t mem_read8(void* addr) {
+static uint8_t mem_read8(void* addr) {
 	return *(volatile uint8_t*) addr;
 }
 
 
-void mem_write32(void* addr, uint32_t value) {
+static void mem_write32(void* addr, uint32_t value) {
 	*(volatile uint32_t*) addr = value;
 }
 
-void mem_write16(void* addr, uint16_t value) {
+static void mem_write16(void* addr, uint16_t value) {
 	*(volatile uint16_t*) addr = value;
 }
 
-void mem_write8(void* addr, uint8_t value) {
+static void mem_write8(void* addr, uint8_t value) {
 	*(volatile uint8_t*) addr = value;
 }

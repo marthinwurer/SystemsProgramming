@@ -939,8 +939,15 @@ int32_t init( void *arg ) {
 		cwrites( "init, spawn() IDLE failed\n" );
 	}
 	swritech( '+' );
-	net_test_main((void*) 0);
-	
+
+	//
+	// Launch test program for networking
+	//
+	pid = spawn(net_test_main, 0, P_HIGH);
+	if(pid < 0) {
+		cwrites("init, spawn() net_test_main failed\n");
+	}
+	swritech('{');
 
 #ifdef SPAWN_A
 	pid = spawn( user_a, 0, P_HIGH );

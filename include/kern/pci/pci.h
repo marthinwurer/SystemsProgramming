@@ -34,10 +34,8 @@
 /**
  * pci_cfg_read, pci_cfg_read_word, pci_cfg_read_byte
  *
- * You can only read 32-bits at a time, so each function extracts the needed
- * data out. Could make it more efficient by using the same calls and getting
- * multiple data points out of a single 32-bit structure, but this is waaay
- * simpler.
+ * You can only read 32-bits (no more, no less) at a time, so each function 
+ * extracts the needed data out. 
  * 
  * http://wiki.osdev.org/PCI#Configuration_Space
  * 

@@ -148,6 +148,7 @@ struct cb {
 				uint8_t src_mac[MAC_LENGTH_BYTES];
 				uint8_t ethertype_hi; // under 1500 is payload length, above is type of payload header
 				uint8_t ethertype_lo;
+				// TODO remove hardcoded data here, probably wouldn't hurt to use TBD's instead of Simplifed Mode
 				uint8_t data[0x40]; // 46-1500 bytes
 			} eth_header;
 		} tcb;
@@ -177,22 +178,8 @@ struct cb {
 	// dma_addr_t dma_addr;
 	// struct sk_buff *skb;
 
-// Vendor and device constants
-
 void send_packet(uint8_t dst_hw_addr[], uint8_t* data, uint32_t length);
-void execute_command(struct cb* cb);
-
 void intel_nic_init();
-
-void print_mac_addr(uint8_t mac[]);
-
-uint32_t mem_read32(void* addr);
-uint16_t mem_read16(void* addr);
-uint8_t mem_read8(void* addr);
-
-void mem_write32(void* addr, uint32_t value);
-void mem_write16(void* addr, uint16_t value);
-void mem_write8(void* addr, uint8_t value);
 
 #endif
 

@@ -5,11 +5,10 @@
 
 int32_t net_test_main(void* args) {
 	(void) args; // surpress warnings
-	
-	// c_printf("in net_test_main()\n");
-	// pci_enumerate(8, 16);
 
-	intel_nic_init();
+	//
+	// Do test things here...
+	//
 
 	return 0;
 }
