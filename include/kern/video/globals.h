@@ -25,7 +25,7 @@
  *
  * Contains information returned by vbe_getInfo in a compact format.
  */
-extern VideoInfo const *VIDEO_INFO;
+extern VideoInfo *VIDEO_INFO;
 
 
 /**
@@ -33,13 +33,13 @@ extern VideoInfo const *VIDEO_INFO;
  *
  * This pointer is NULL if edid_getRecord failed.
  */
- extern EDIDRecord const *VIDEO_EDID;
+ extern EDIDRecord *VIDEO_EDID;
 
 
 /**
  * @brief Global constant pointer to the current VideoMode.
  */
-extern VideoMode const *VIDEO_MODE;
+extern VideoMode *VIDEO_MODE;
 
 
 #endif

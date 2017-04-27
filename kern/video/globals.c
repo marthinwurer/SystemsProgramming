@@ -8,8 +8,8 @@
 
 #include <kern/video/globals.h>
 
-VideoInfo const *VIDEO_INFO = (VideoInfo*)VIDEO_INFO_ADDRESS;
+VideoInfo *VIDEO_INFO = (VideoInfo*)VIDEO_INFO_ADDRESS;
 
-EDIDRecord const *VIDEO_EDID = (EDIDRecord*)VIDEO_EDID_ADDRESS;
+EDIDRecord *VIDEO_EDID = (EDIDRecord*)VIDEO_EDID_ADDRESS;
 
-VideoMode const *VIDEO_MODE = (VideoMode*)VIDEO_MODE_ADDRESS;
+VideoMode *VIDEO_MODE = (VideoMode*)VIDEO_MODE_ADDRESS;

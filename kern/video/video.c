@@ -22,6 +22,11 @@ int video_init(void) {
 
 	
 	memcpy(&VIDEO_INFO->info, &infoStruct, sizeof(infoStruct));
+	// clear the EDID record
+	memset(VIDEO_EDID, 0, sizeof(EDIDRecord));
+	// mark the VIDEO_MODE as invalid
+	VIDEO_MODE->modeNum = -1;
+
 	return E_VIDEO_SUCCESS;
 }
 
