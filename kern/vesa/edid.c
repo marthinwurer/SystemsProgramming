@@ -116,15 +116,23 @@ int edid_parseDetailed(EDIDRecord *record, VideoTiming *timing, unsigned num) {
 		return E_VESA_NOTIMING;
 	}
 
-	uint16_t horizontal = entry[2];
-	horizontal |= ((entry[4] & 0xF0) << 4);
+	uint16_t pixelClock = (entry[1] << 8) | entry[0]; // LSB first
 
-	uint16_t vertical = entry[5];
-	vertical |= ((entry[7] & 0xF0) << 4);
+	uint16_t hActive = entry[2];
+	hActive |= ((entry[4] & 0xF0) << 4);
 
-	timing->width = horizontal;
-	timing->height = vertical;
-	timing->refresh = 0;
+	uint16_t hBlanking = entry[3];
+	hBlanking |= (entry[4] & 0xF) << 8;
+
+	uint16_t vActive = entry[5];
+	vActive |= ((entry[7] & 0xF0) << 4);
+
+	uint16_t vBlanking = entry[6];
+	vBlanking |= (entry[7] & 0xF) << 8;
+
+	timing->width = hActive;
+	timing->height = vActive;
+	timing->refresh = pixelClock / ((hActive + hBlanking) * (vActive + vBlanking));
 
 	return E_VESA_SUCCESS;
 }

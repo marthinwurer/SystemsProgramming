@@ -100,12 +100,25 @@ int video_early_bestMode(VideoMode *mode) {
 				}
 			}
 		}
-		if ((status & VIDEO_EDID_SUPPORT) == VIDEO_EDID_SUPPORT) {
 
+		int index;
+
+		if ((status & VIDEO_EDID_SUPPORT) == VIDEO_EDID_SUPPORT) {
+			// try to match a vbe mode with a detailed timing entry
+			VideoTiming timing;
+			for (int i = 0; i != EDID_DETAILED_TIMING_COUNT; ++i) {
+				if (edid_parseDetailed(VIDEO_EDID, &timing, i) == E_VESA_SUCCESS) {
+					index = __matchMode(modeList, usableModes, timing);
+					if (index != -1) {
+						*mode = modeList[index];
+						return E_VIDEO_SUCCESS;
+					}
+				}
+			}
 		}
 
 		// Matching a mode using EDID has failed, pick a "safe" resolution
-		int index;
+		
 		for (unsigned i = 0; i != N_SAFE_TIMINGS; ++i) {
 			index = __matchMode(modeList, usableModes, SAFE_TIMINGS[i]);
 			if (index != -1) {

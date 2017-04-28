@@ -9,6 +9,13 @@
 #include <kern/vesa/edid.h>
 #include <kern/vesa/err.h>
 
+
+// Exit codes
+
+#define EXIT_VIDEO_ERROR 1
+#define EXIT_SUCCESS 0
+
+
 //
 // Main function for the early initialization routine. Any needed BIOS function
 // calls should be done here while storing the results somewhere the kernel can
@@ -26,27 +33,34 @@ int main(void) {
 	int errorcode = video_early_init();
 	if (errorcode != E_VIDEO_SUCCESS) {
 		c_printf("Video initialization failed! Code: %d\n", errorcode);
-		return 1;
+		return EXIT_VIDEO_ERROR;
 	}
 
 	errorcode = video_early_bestMode(VIDEO_MODE);
 	if (errorcode != E_VIDEO_SUCCESS) {
 		c_printf("Failed to find best mode. Code: %d\n", errorcode);
-		return 1;
+		return EXIT_VIDEO_ERROR;
 	}
 
-	c_printf("Mode Number: %x\n", VIDEO_MODE->modeNum);
+	c_printf("Using mode: 0x%x\n", VIDEO_MODE->modeNum);
+	c_printf(" * Location: 0x%x\n", VIDEO_MODE->fb.location);
 	c_printf(" * Width: %d\n", VIDEO_MODE->fb.width);
 	c_printf(" * Height: %d\n", VIDEO_MODE->fb.height);
+	c_printf(" * Scanline: %d\n", VIDEO_MODE->fb.pitch);
 	c_printf(" * BPP: %d\n", VIDEO_MODE->fb.bpp);
 
+	//__asm("hlt");
 
-	if (vbe_setMode(VIDEO_MODE->modeNum, NULL) == E_VESA_SUCCESS) {
-		fb_clear(&VIDEO_MODE->fb, 0xFF0000);
+	VideoFb *fb = &VIDEO_MODE->fb;
+
+	uint16_t vbeResult;
+	if (vbe_setMode(VIDEO_MODE->modeNum | 0x4000, &vbeResult) != E_VESA_SUCCESS) {
+		c_printf("Failed to switch mode. Code %d\n", vbeResult);
+		return EXIT_VIDEO_ERROR;
 	}
 
 	__asm("hlt");
 
-	return 0;
+	return EXIT_SUCCESS;
 
 }

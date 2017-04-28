@@ -29,7 +29,7 @@ int vbe_getInfo(VBEInfo *info, uint16_t *vbeResult) {
 	// copy signature to block struct
 	memcpy(block->signature, VBE_SIG, sizeof(VBE_SIG));
 
-	regs16_t regs;
+	regs16_t regs = {0};
 	regs.es = 0;
 	regs.edi = VBE_BLOCK_ADDRESS;
 
@@ -60,7 +60,7 @@ int vbe_getModeInfo(uint16_t mode, VBEModeInfo *modeInfo, uint16_t *vbeResult) {
 
 	VBEModeInfo *block = (VBEModeInfo*)VBE_BLOCK_ADDRESS;
 
-	regs16_t regs;
+	regs16_t regs = {0};
 	regs.es = 0;
 	regs.edi = VBE_BLOCK_ADDRESS;
 	regs.ecx = mode;
@@ -84,7 +84,7 @@ int vbe_setMode(uint16_t mode, uint16_t *vbeResult) {
 
 	int errorcode = E_VESA_ERROR;
 
-	regs16_t regs;
+	regs16_t regs = {0};
 	regs.ebx = mode;
 
 	if (__performVBEFunction(VBE_FUNCTION_SETMODE, &regs)) {
@@ -107,7 +107,7 @@ int vbe_currentMode(uint16_t *modeVar, uint16_t *vbeResult) {
 
 	int errorcode = E_VESA_ERROR;
 
-	regs16_t regs;
+	regs16_t regs = {0};
 	
 	if (__performVBEFunction(VBE_FUNCTION_CURRENTMODE, &regs)) {
 		*modeVar = regs.ebx;
