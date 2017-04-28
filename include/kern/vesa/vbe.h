@@ -3,6 +3,7 @@
 
 #include <kern/vesa/VBEInfo.h>
 #include <kern/vesa/VBEModeInfo.h>
+#include <kern/vesa/err.h>
 
 #include <stdint.h>
 

@@ -145,3 +145,17 @@ int video_dumpInfo(VideoInfo *info) {
 	c_printf(" * Product Revision: %s\n", info->info.productRev);
 	return E_VIDEO_SUCCESS;
 }
+
+int video_setMode(VideoMode *mode) {
+
+	if (vbe_setMode(mode->modeNum | VBE_MODE_FLAG_LFB, NULL) != E_VESA_SUCCESS) {
+		return E_VIDEO_UNSUPPORTED;
+	}
+
+	// set the current VIDEO_MODE to this one
+	memcpy(VIDEO_MODE, mode, sizeof(VideoMode));
+
+	fb_clear(&VIDEO_MODE->fb, 0);
+
+	return E_VIDEO_SUCCESS;
+}

@@ -36,26 +36,29 @@ int main(void) {
 		return EXIT_VIDEO_ERROR;
 	}
 
-	errorcode = video_early_bestMode(VIDEO_MODE);
+	// Find the best available video mode
+
+	VideoMode mode;
+	errorcode = video_early_bestMode(&mode);
 	if (errorcode != E_VIDEO_SUCCESS) {
 		c_printf("Failed to find best mode. Code: %d\n", errorcode);
 		return EXIT_VIDEO_ERROR;
 	}
 
-	c_printf("Using mode: 0x%x\n", VIDEO_MODE->modeNum);
-	c_printf(" * Location: 0x%x\n", VIDEO_MODE->fb.location);
-	c_printf(" * Width: %d\n", VIDEO_MODE->fb.width);
-	c_printf(" * Height: %d\n", VIDEO_MODE->fb.height);
-	c_printf(" * Scanline: %d\n", VIDEO_MODE->fb.pitch);
-	c_printf(" * BPP: %d\n", VIDEO_MODE->fb.bpp);
+	// Dump the best mode
 
-	//__asm("hlt");
+	c_printf("Using mode: 0x%x\n", mode.modeNum);
+	c_printf(" * Location: 0x%x\n", mode.fb.location);
+	c_printf(" * Width: %d\n", mode.fb.width);
+	c_printf(" * Height: %d\n", mode.fb.height);
+	c_printf(" * Scanline: %d\n", mode.fb.pitch);
+	c_printf(" * BPP: %d\n", mode.fb.bpp);
 
-	VideoFb *fb = &VIDEO_MODE->fb;
+	// Set the mode
 
-	uint16_t vbeResult;
-	if (vbe_setMode(VIDEO_MODE->modeNum | 0x4000, &vbeResult) != E_VESA_SUCCESS) {
-		c_printf("Failed to switch mode. Code %d\n", vbeResult);
+	errorcode = video_setMode(&mode);
+	if (errorcode != E_VIDEO_SUCCESS) {
+		c_printf("Failed to switch mode. Code %d\n", errorcode);
 		return EXIT_VIDEO_ERROR;
 	}
 

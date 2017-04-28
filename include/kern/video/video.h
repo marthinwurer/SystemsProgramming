@@ -30,6 +30,15 @@ int video_convertVBEMode(VBEModeInfo *vbe, VideoMode *mode);
 //
 int video_dumpInfo(VideoInfo *info);
 
+/**
+ * @brief Sets the video mode to the given mode instance.
+ *
+ * The video mode is changed by calling vbe_setMode, if successful, the
+ * global variable VIDEO_MODE is then set and the framebuffer is cleared
+ * with the color black.
+ */
+int video_setMode(VideoMode *mode);
+
 
 /**
  * @brief Changes the video mode to 720x480, that most monitors support.
