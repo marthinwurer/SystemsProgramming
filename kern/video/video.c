@@ -124,7 +124,7 @@ int video_convertVBEMode(VBEModeInfo *vbe, VideoMode *mode) {
 
 	mode->fb.location = vbe->v3.PhysBasePtr;
 	mode->fb.width = vbe->v3.XResolution;
-	mode->fb.width = vbe->v3.YResolution;
+	mode->fb.height = vbe->v3.YResolution;
 	mode->fb.pitch = vbe->v3.LinBytesPerScanLine;
 	mode->fb.bpp = vbe->v3.BitsPerPixel;
 

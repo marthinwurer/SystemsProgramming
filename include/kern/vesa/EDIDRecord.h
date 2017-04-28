@@ -2,6 +2,13 @@
 #define _KERN_VESA_EDIDRECORD_H
 
 #define EDID_STANDARD_TIMING_COUNT 8
+#define EDID_DETAILED_TIMING_COUNT 4
+
+// Aspect ratios
+#define EDID_RATIO_16_10 0         // 16:10
+#define EDID_RATIO_4_3   1         // 4:3
+#define EDID_RATIO_5_4   2         // 5:4
+#define EDID_RATIO_16_9  3         // 16:9
 
 
 struct EDIDRecord_s {
@@ -49,11 +56,11 @@ struct EDIDRecord_s {
 
 	// Standard Timing Identification
 
-	uint16_t StandardTimings[EDID_STANDARD_TIMING_COUNT];
+	uint8_t StandardTimings[EDID_STANDARD_TIMING_COUNT][2];
 
 	// Detailed Timing Descriptions
 
-	uint8_t DetailedTimings[18][8];
+	uint8_t DetailedTimings[EDID_DETAILED_TIMING_COUNT][18];
 
 	uint8_t ExtensionFlag;
 	uint8_t Checksum;

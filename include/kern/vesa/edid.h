@@ -30,10 +30,19 @@ int edid_getNativeTiming(EDIDRecord *record, VideoTiming *timing);
  *
  * Reads the Standard Timings table for a given index and parses it
  * as a VideoTiming struct. If no timing exists at the given index, then
- * EDID_NOTIMING is returned
+ * E_VESA_NOTIMING is returned.
  *
  */
-int edid_parseTiming(EDIDRecord *record, VideoTiming *timing, int num);
+int edid_parseStandard(EDIDRecord *record, VideoTiming *timing, unsigned num);
+
+/**
+ * @brief Parse the EDIDRecord Detailed Timings section.
+ *
+ * Reads the Detailed Timings table for a given index and parses it as a
+ * VideoTiming struct. If no timing exists at the given index, then
+ * E_VESA_NOTIMING is returned.
+ */
+int edid_parseDetailed(EDIDRecord *record, VideoTiming *timing, unsigned num);
 
 
 

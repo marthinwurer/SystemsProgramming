@@ -20,6 +20,25 @@
 #include <kern/vesa/edid.h>
 #include <kern/vesa/err.h>
 
+#include <stddef.h>
+
+
+static VideoTiming SAFE_TIMINGS[] = {
+	{ .width = 720, .height = 480, .refresh = 0},
+	{ .width = 640, .height = 480, .refresh = 0},
+	{ .width = 360, .height = 480, .refresh = 0},
+	{ .width = 320, .height = 480, .refresh = 0},
+	{ .width = 720, .height = 240, .refresh = 0},
+	{ .width = 640, .height = 240, .refresh = 0},
+	{ .width = 360, .height = 240, .refresh = 0},
+	{ .width = 320, .height = 240, .refresh = 0}
+};
+
+#define N_SAFE_TIMINGS (sizeof(SAFE_TIMINGS) / sizeof(VideoTiming))
+
+
+static int __matchMode(VideoMode *modeList, unsigned size, VideoTiming timing);
+
 
 int video_early_init(void) {
 
@@ -50,12 +69,69 @@ int video_early_init(void) {
 
 int video_early_bestMode(VideoMode *mode) {
 
+	// desired attributes:
+	// 1. Supported by hardware
+	// 2. Color support (not monochrome)
+	// 3. Graphics mode
+	// 4. Has linear framebuffer
+	#define DESIRED_ATTRIBUTES (VBE_MODEATTR_SUPPORTED \
+	                            | VBE_MODEATTR_COLOR \
+	                            | VBE_MODEATTR_GRAPHICS \
+	                            | VBE_MODEATTR_FRAMEBUFFER)
+
 	VideoStatus status = VIDEO_INFO->info.status;
 
 	if ((status & VIDEO_VBE_SUPPORT) == VIDEO_VBE_SUPPORT) {
-		
+
+		VBEModeInfo modeInfo;
+		unsigned modeCount = VIDEO_INFO->info.modeCount;
+		VideoMode modeList[modeCount];
+		unsigned usableModes = 0;
+		for (unsigned i = 0; i != modeCount; ++i) {
+			uint16_t curModeNum = VIDEO_INFO->info.modes[i];
+			if (vbe_getModeInfo(curModeNum, &modeInfo, NULL) == E_VESA_SUCCESS) {
+				if ((modeInfo.v3.ModeAttributes & DESIRED_ATTRIBUTES) == DESIRED_ATTRIBUTES
+				    && modeInfo.v3.MemoryModel == VBE_MODEL_DIRECT
+				    && modeInfo.v3.BitsPerPixel >= 24) {
+
+						video_convertVBEMode(&modeInfo, modeList + usableModes);
+						(modeList + usableModes)->modeNum = curModeNum;
+						++usableModes;
+				}
+			}
+		}
+		if ((status & VIDEO_EDID_SUPPORT) == VIDEO_EDID_SUPPORT) {
+
+		}
+
+		// Matching a mode using EDID has failed, pick a "safe" resolution
+		int index;
+		for (unsigned i = 0; i != N_SAFE_TIMINGS; ++i) {
+			index = __matchMode(modeList, usableModes, SAFE_TIMINGS[i]);
+			if (index != -1) {
+				*mode = modeList[index];
+				return E_VIDEO_SUCCESS;
+			}
+		}
+
+
+	}
+	
+	#undef DESIRED_ATTRIBUTES
+	return E_VIDEO_UNSUPPORTED; // did not find a mode
+}
+
+
+int __matchMode(VideoMode *modeList, unsigned size, VideoTiming timing) {
+
+	VideoMode *mode;
+	for (unsigned i = 0; i != size; ++i) {
+		mode = modeList + i;
+		if (mode->fb.width == timing.width && mode->fb.height == timing.height) {
+			return i;
+		}
 	}
 
+	return -1;
 
-	return E_VIDEO_SUCCESS;
 }

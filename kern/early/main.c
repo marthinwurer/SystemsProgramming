@@ -7,6 +7,7 @@
 
 #include <kern/video/fb/fb.h>
 #include <kern/vesa/edid.h>
+#include <kern/vesa/err.h>
 
 //
 // Main function for the early initialization routine. Any needed BIOS function
@@ -27,6 +28,24 @@ int main(void) {
 		c_printf("Video initialization failed! Code: %d\n", errorcode);
 		return 1;
 	}
+
+	errorcode = video_early_bestMode(VIDEO_MODE);
+	if (errorcode != E_VIDEO_SUCCESS) {
+		c_printf("Failed to find best mode. Code: %d\n", errorcode);
+		return 1;
+	}
+
+	c_printf("Mode Number: %x\n", VIDEO_MODE->modeNum);
+	c_printf(" * Width: %d\n", VIDEO_MODE->fb.width);
+	c_printf(" * Height: %d\n", VIDEO_MODE->fb.height);
+	c_printf(" * BPP: %d\n", VIDEO_MODE->fb.bpp);
+
+
+	if (vbe_setMode(VIDEO_MODE->modeNum, NULL) == E_VESA_SUCCESS) {
+		fb_clear(&VIDEO_MODE->fb, 0xFF0000);
+	}
+
+	__asm("hlt");
 
 	return 0;
 
