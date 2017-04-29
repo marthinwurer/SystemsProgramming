@@ -128,7 +128,25 @@ int video_convertVBEMode(VBEModeInfo *vbe, VideoMode *mode) {
 	mode->fb.pitch = vbe->v3.LinBytesPerScanLine;
 	mode->fb.bpp = vbe->v3.BitsPerPixel;
 
+	#define MASK(field) ((1 << field) - 1)
 
+	mode->fb.colorspace[VIDEO_COMPONENT_RED] = (struct VideoColorConfig_s){
+		.mask = MASK(vbe->v3.LinRedMaskSize),
+		.position = vbe->v3.LinRedFieldPosition
+	};
+
+	mode->fb.colorspace[VIDEO_COMPONENT_BLUE] = (struct VideoColorConfig_s){
+		.mask = MASK(vbe->v3.LinBlueMaskSize),
+		.position = vbe->v3.LinBlueFieldPosition
+	};
+
+	mode->fb.colorspace[VIDEO_COMPONENT_GREEN] = (struct VideoColorConfig_s){
+		.mask = MASK(vbe->v3.LinGreenMaskSize),
+		.position = vbe->v3.LinGreenFieldPosition
+	};
+
+
+	#undef MASK
 
 	return E_VIDEO_SUCCESS;
 }

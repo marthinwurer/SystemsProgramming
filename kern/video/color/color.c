@@ -4,7 +4,8 @@
 VideoCol color_getComponent(VideoColorSpace colorspace, VideoComp comp, int value) {
 	struct VideoColorConfig_s config = colorspace[comp];
 
-	return (value << config.position) & config.mask;
+	return (value & config.mask) << config.position;
+	//return (value << config.position) & config.mask;
 }
 
 VideoCol color_getColor(VideoColorSpace colorspace, int red, int green, int blue) {

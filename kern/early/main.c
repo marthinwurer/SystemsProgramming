@@ -62,6 +62,8 @@ int main(void) {
 		return EXIT_VIDEO_ERROR;
 	}
 
+	fb_clear(&mode.fb, color_getColor(mode.fb.colorspace, 255, 0, 0));
+
 	__asm("hlt");
 
 	return EXIT_SUCCESS;
