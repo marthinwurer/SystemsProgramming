@@ -20,6 +20,8 @@
 #include <kern/vesa/edid.h>
 #include <kern/vesa/err.h>
 
+#include <kern/early/realmode.h>
+
 #include <stddef.h>
 
 
@@ -62,6 +64,48 @@ int video_early_init(void) {
 	} else {
 		c_printf("video: Failed to get EDID record (%d)\n", edidResult);
 	}
+
+	// Now copy the VGA fontset someplace so we don't have to make one
+	// ourselves. Example taken from http://wiki.osdev.org/VGA_Fonts
+
+	regs16_t regs = {0};
+	regs.eax = 0x1130;
+	regs.ebx = 0x0600;
+	int32(0x10, &regs);
+
+	uint32_t *srcFontset = (uint32_t*)((regs.es << 4) + regs.ebp);
+	uint32_t *dstFontset = (uint32_t*)0x3C00;
+
+	for (int i = 0; i != 1024; ++i) {
+		//for (int j = 0; j != 4; ++j) {
+			*dstFontset++ = *srcFontset++;
+		//}
+	}
+
+	// __outb(0x3CE, 5); // clear even/odd mode
+	// __outb(0x3CE, 0x406); // map VGA memory to 0xA0000
+	// __outb(0x3C4, 0x402); // set bitplane 2
+	// __outb(0x3C4, 0x604); // clear even/odd mode again
+
+	// uint32_t *dstFontset = (uint32_t*)0x3C00;
+	// uint32_t *srcFontset = (uint32_t*)0xA0000;
+
+	// // copy charmap
+	// for (int i = 0; i != 256; ++i) {
+	// 	// copy 16-byte glyph to destination fontset
+	// 	for (int j = 0; j != 4; ++j) {
+	// 		*dstFontset++ = *srcFontset++;
+	// 	}
+	// 	srcFontset += 4; // skip 16 bytes
+	// }
+
+	// // reset VGA state
+	// __outb(0x3C4, 0x302);
+	// __outb(0x3C4, 0x204);
+	// __outb(0x3CE, 0x1005);
+	// __outb(0x3CE, 0xE06);
+
+
 
 	return E_VIDEO_SUCCESS;
 }

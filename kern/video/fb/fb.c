@@ -116,7 +116,7 @@ int fb_putcolsf(VideoFb *fb, uint32_t offset, uint16_t bufsize, VideoCol buf[]) 
 
 	unsigned dcol = fb->bpp / 8;
 	for (unsigned i = 0; i != bufsize; ++i) {
-		fb_putpixelf(fb, offset, buf[0]);
+		fb_putpixelf(fb, offset, buf[i]);
 		offset += dcol;
 	}
 

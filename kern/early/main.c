@@ -16,6 +16,26 @@
 #define EXIT_SUCCESS 0
 
 
+void __putchar(VideoFb *fb, int x, int y, VideoCol fg, VideoCol bg, char c) {
+
+	uint8_t *glyph = (uint8_t*)(0x3C00 + (c * 16));
+	VideoCol rowBuf[8];
+	uint8_t row;
+
+	for (int i = 0; i != 16; ++i) {
+		row = glyph[i];
+		for (int j = 0; j != 8; ++j) {
+			if ((row >> (7 - j)) & 1) {
+				rowBuf[j] = fg;
+			} else {
+				rowBuf[j] = bg;
+			}
+		}
+		fb_putcols(fb, x, y + i, 8, rowBuf);
+	}
+
+}
+
 //
 // Main function for the early initialization routine. Any needed BIOS function
 // calls should be done here while storing the results somewhere the kernel can
@@ -62,7 +82,22 @@ int main(void) {
 		return EXIT_VIDEO_ERROR;
 	}
 
-	fb_clear(&mode.fb, color_getColor(mode.fb.colorspace, 255, 0, 0));
+	// white-on-purple test
+
+	VideoCol white = color_getColor(mode.fb.colorspace, 255, 255, 255);
+	VideoCol purple = color_getColor(mode.fb.colorspace, 75, 0, 130);
+
+	fb_clear(&mode.fb, purple);
+
+	// test draw character using fontset at 0x3C00
+	int x, y;
+	for (int i = 0; i != 256; ++i) {
+		x = (i % 32) * 8;
+		y = (i / 32) * 16;
+		__putchar(&mode.fb, 16 + x, 16 + y, white, purple, (char)i);
+	}
+
+	//__putchar(&mode.fb, 10, 10, white, purple, 'B');
 
 	__asm("hlt");
 
