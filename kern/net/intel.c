@@ -15,7 +15,7 @@
 //
 // Static method declarations
 //
-static void* dumb_malloc(uint32_t size);
+static void* dumb_malloc(uint32_t size) __attribute__((unused));
 static void delay_10usec(uint32_t usec_10);
 static void print_mac_addr(uint8_t mac[]);
 static void dump_eeprom(struct nic_info* nic) __attribute__((unused));
@@ -24,6 +24,7 @@ static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t a
 static void eeprom_load(struct nic_info *nic);
 static void intel_nic_handler(int vector, int code);
 static void init_cbl(struct nic_info* nic, uint32_t num_cb);
+static struct cb* get_next_cb();
 static void recycle_command_blocks();
 static void execute_command(struct cb* cb);
 
@@ -184,7 +185,7 @@ static void intel_nic_handler(int vector, int code) {
 	if(stat_ack & ack_mdi) c_printf("<<< ack_mdi bit set >>>\n");
 	if(stat_ack & ack_swi) c_printf("<<< ack_swi bit set >>>\n");
 
-	// TODO clear some CBs!!!
+	recycle_command_blocks();
 
 	// Check status bits and acknowledge them
 	mem_write8(&_nic.csr->scb.stat_ack, 0x00);
@@ -222,9 +223,34 @@ static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
 	nic->cb_to_check = first;
 }
 
+/**
+ * frees up command blocks (and associated buffers) for future use
+ */
 static void recycle_command_blocks() {
-	// _nic
-	// check cb_status
+	while(_nic.cb_to_check->status & cb_c) {
+		_nic.cb_to_check->status &= ~cb_c; // unset complete flag
+
+		// TODO free up TBD or any other buffers
+
+		_nic.avail_cb++; // increment available command blocks
+		_nic.cb_to_check = (struct cb*) _nic.cb_to_check->link;
+	}
+}
+
+/**
+ * Gets the next command block from the nic_info
+ *
+ * @return next available command block, NULL if there aren't any
+ */
+static struct cb* get_next_cb() {
+	if(!_nic.avail_cb) {
+		c_printf("NIC: No available Command Blocks :(\n");
+		return NULL;
+	}
+	struct cb* cb = _nic.next_cb;
+	_nic.next_cb = (struct cb*) cb->link;
+	_nic.avail_cb--;
+	return cb;
 }
 
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
@@ -232,57 +258,50 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	(void) dst_hw_addr;
 	(void) data;
 	(void) length;
-	if(!_nic.avail_cb) {
-		c_printf("NIC: No available Command Blocks :(\n");
-		return -1;
-	}
 
-	struct cb* cb = _nic.next_cb;
-	_nic.next_cb = (struct cb*) cb->link;
-	_nic.avail_cb--;
+	struct cb* cb = get_next_cb();
 
-	cb->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
-
-	cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
-	cb->u.tcb.tcb_byte_count = 0x48 | 0x8000; // 0x8000 = EOF flag
-	cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
-	cb->u.tcb.tbd_count = 0;
-
-	cb->u.tcb.eth_header.dst_mac[0] = 0x00;
-	cb->u.tcb.eth_header.dst_mac[1] = 0xE0;
-	cb->u.tcb.eth_header.dst_mac[2] = 0x7C;
-	cb->u.tcb.eth_header.dst_mac[3] = 0xC8;
-	cb->u.tcb.eth_header.dst_mac[4] = 0x7D;
-	cb->u.tcb.eth_header.dst_mac[5] = 0x08;
+	//
+	// Flexible (TBD) mode
+	// 
+	cb->command = cb_el | cb_tx_cmd;
 	memcpy(cb->u.tcb.eth_header.src_mac, _nic.mac, MAC_LENGTH_BYTES);
+	memcpy(cb->u.tcb.eth_header.dst_mac, dst_hw_addr, MAC_LENGTH_BYTES);
+	// cb->u.tcb.tbd_array = 0xFFFFFFFF;
+	// cb->u.tcb.tbd_count = 0;
+	cb->u.tcb.tcb_byte_count = 0;
+	cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
 
-	// length of ethernet data
-	cb->u.tcb.eth_header.ethertype_lo = 0x40;
-	char* my_string = "Hello world, how are you doing? I'm feeling round!";
-	memcpy(cb->u.tcb.eth_header.data, my_string, strlen(my_string) + 1);
 
-	// cb->u.tcb.eth_header.data[0x00] = 'h';
-	// cb->u.tcb.eth_header.data[0x01] = 'e';
-	// cb->u.tcb.eth_header.data[0x02] = 'l';
-	// cb->u.tcb.eth_header.data[0x03] = 'l';
-	// cb->u.tcb.eth_header.data[0x04] = 'o';
-	// cb->u.tcb.eth_header.data[0x05] = ' ';
-	// cb->u.tcb.eth_header.data[0x06] = 'w';
-	// cb->u.tcb.eth_header.data[0x07] = 'o';
-	// cb->u.tcb.eth_header.data[0x08] = 'r';
-	// cb->u.tcb.eth_header.data[0x09] = 'l';
-	// cb->u.tcb.eth_header.data[0x0A] = 'd';
-	// cb->u.tcb.eth_header.data[0x0B] = '!';
-	// for(uint32_t i = 0x0C; i < 0x40; i++) {
-	// 	cb->u.tcb.eth_header.data[i] = i - 0x0C;
-	// }
+
+
+
+
+	//
+	// Simplified mode
+	//
+	// cb->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
+	// cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
+	// cb->u.tcb.tcb_byte_count = 0x48 | 0x8000; // 0x8000 = EOF flag
+	// cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
+	// cb->u.tcb.tbd_count = 0;
+	// cb->u.tcb.eth_header.dst_mac[0] = 0x00;
+	// cb->u.tcb.eth_header.dst_mac[1] = 0xE0;
+	// cb->u.tcb.eth_header.dst_mac[2] = 0x7C;
+	// cb->u.tcb.eth_header.dst_mac[3] = 0xC8;
+	// cb->u.tcb.eth_header.dst_mac[4] = 0x7D;
+	// cb->u.tcb.eth_header.dst_mac[5] = 0x08;
+	// memcpy(cb->u.tcb.eth_header.src_mac, _nic.mac, MAC_LENGTH_BYTES);
+	// cb->u.tcb.eth_header.ethertype_lo = 0x40; // length of ethernet data
+	// char* my_string = "Hello world, how are you doing? I'm feeling round!";
+	// memcpy(cb->u.tcb.eth_header.data, my_string, strlen(my_string) + 1);
+
 
 	// give the cbl addr to the CU and start
-	// c_printf("Putting CBL pointer into gen_ptr...\n");
 	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
 
 	uint8_t status = mem_read8(&_nic.csr->scb.status);
-	c_printf("status=0x%02x\n", status);
+	// c_printf("status=0x%02x\n", status);
 	if(!(status & cu_lpq_active) && !(status & cu_hqp_active)) {
 		mem_write8(&_nic.csr->scb.command, cuc_start);
 		write_flush(&_nic);
@@ -295,12 +314,6 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 		mem_write8(&_nic.csr->scb.command, cuc_resume);
 		write_flush(&_nic);
 	}
-
-	// 
-	// fill 'er up with juicy bits and send it along
-	// 
-
-	// execute_command(cb);
 	return 0;
 }
 
@@ -405,8 +418,8 @@ void intel_nic_init() {
 	// 
 	// 
 	// TODO:
-	// o Finish writing ISR (cleanup CB)
 	// o Enable TBD for CB, instead of TCB
+	// o cleanup TBD buffers in recycle_command_blocks()
 	// o Write send_packet function
 	// o configure receive buffers
 	// o enable receiving data
@@ -415,6 +428,7 @@ void intel_nic_init() {
 	// 
 	// 
 	// 
+	// o Finish writing ISR (cleanup CB)
 	// o Figure out what should stay static in intel.c and if some internal stuff should be removed from intel.h
 	// o Keep ring of available CB linked together, set EL flag on last one, but still have the links there
 	// o Merge memory stuff in from master, HINT MERGE NOT REBASE

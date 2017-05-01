@@ -45,6 +45,47 @@ struct nic_info {
 	struct cb* cb_to_check;
 };
 
+// Command Block
+struct cb {
+	uint16_t status;
+	uint16_t command;
+	uint32_t link;
+	union {
+		uint8_t mac_addr[MAC_LENGTH_BYTES];
+		struct {
+			uint32_t tbd_array;
+			uint16_t tcb_byte_count;
+			uint8_t threshold;
+			uint8_t tbd_count;
+			struct {
+				uint8_t dst_mac[MAC_LENGTH_BYTES];
+				uint8_t src_mac[MAC_LENGTH_BYTES];
+				uint8_t ethertype_hi; // under 1500 is payload length, above is type of payload header
+				uint8_t ethertype_lo;
+				// TODO remove hardcoded data here, probably wouldn't hurt to use TBD's instead of Simplifed Mode
+				uint8_t data[0x40]; // 46-1500 bytes
+			} eth_header;
+		} tcb;
+	} u;
+};
+
+// MMIO Control Status Register
+struct csr {
+	struct {
+		uint8_t status;
+		uint8_t stat_ack;
+		uint8_t command;
+		uint8_t interrupt_mask;
+		uint32_t gen_ptr;
+	} scb;
+	uint32_t port;
+	uint16_t reserved1;
+	uint8_t eeprom_lo;
+	uint8_t eeprom_hi;
+	uint32_t mdi;
+	uint32_t rx_dma_byte_count;
+};
+
 // Constants to control EEPROM
 enum eeprom_lo_control {
 	EESK = 0x01, // Serial clock
@@ -98,24 +139,6 @@ enum eeprom_opcodes {
 	op_ewen  = 0x13, // Erase/write enable
 };
 
-
-// MMIO Control Status Register
-struct csr {
-	struct {
-		uint8_t status;
-		uint8_t stat_ack;
-		uint8_t command;
-		uint8_t interrupt_mask;
-		uint32_t gen_ptr;
-	} scb;
-	uint32_t port;
-	uint16_t reserved1;
-	uint8_t eeprom_lo;
-	uint8_t eeprom_hi;
-	uint32_t mdi;
-	uint32_t rx_dma_byte_count;
-};
-
 enum cb_commands {
 	// common
 	cb_el = 0x8000, // end list (end of CBL, stop executing CBs)
@@ -135,33 +158,6 @@ enum cb_status {
 	cb_ok = 0x2000,
 	cb_u = 0x1000
 };
-
-// Command Block
-struct cb {
-	uint16_t status;
-	uint16_t command;
-	uint32_t link;
-	union {
-		uint8_t mac_addr[MAC_LENGTH_BYTES];
-		struct {
-			uint32_t tbd_array;
-			uint16_t tcb_byte_count;
-			uint8_t threshold;
-			uint8_t tbd_count;
-			struct {
-				// uint8_t preamble[7]; // ethernet clock sync preamble
-				// uint8_t sfd; // start of frame delimeter
-				uint8_t dst_mac[MAC_LENGTH_BYTES];
-				uint8_t src_mac[MAC_LENGTH_BYTES];
-				uint8_t ethertype_hi; // under 1500 is payload length, above is type of payload header
-				uint8_t ethertype_lo;
-				// TODO remove hardcoded data here, probably wouldn't hurt to use TBD's instead of Simplifed Mode
-				uint8_t data[0x40]; // 46-1500 bytes
-			} eth_header;
-		} tcb;
-	} u;
-};
-
 
 	// union {
 	// 	u8 iaaddr[ETH_ALEN];
