@@ -9,6 +9,7 @@
 #include <kern/vesa/edid.h>
 #include <kern/vesa/err.h>
 
+#include <kern/graphics/text/text.h>
 
 // Exit codes
 
@@ -89,13 +90,26 @@ int main(void) {
 
 	fb_clear(&mode.fb, purple);
 
+	PaintContext ctx;
+	ctx.drawCol = white;
+	ctx.fillCol = purple;
+	ctx.font.bytesPerGlyph = 16;
+	ctx.font.height = 16;
+	ctx.font.width = 8;
+	ctx.font.glyphs = 256;
+	ctx.font.glyphMap = VIDEO_FONTSET;
+	ctx.fb = &mode.fb;
+
+	Point p = { .x = 0, .y = 0};
+	graphics_drawString(&ctx, &p, "TEST string! shitlord.");
+
 	// test draw character using fontset at 0x3C00
-	int x, y;
-	for (int i = 0; i != 256; ++i) {
-		x = (i % 32) * 8;
-		y = (i / 32) * 16;
-		__putchar(&mode.fb, 16 + x, 16 + y, white, purple, (char)i);
-	}
+	// int x, y;
+	// for (int i = 0; i != 256; ++i) {
+	// 	x = (i % 32) * 8;
+	// 	y = (i / 32) * 16;
+	// 	__putchar(&mode.fb, 16 + x, 16 + y, white, purple, (char)i);
+	// }
 
 	//__putchar(&mode.fb, 10, 10, white, purple, 'B');
 

@@ -74,7 +74,7 @@ int video_early_init(void) {
 	int32(0x10, &regs);
 
 	uint32_t *srcFontset = (uint32_t*)((regs.es << 4) + regs.ebp);
-	uint32_t *dstFontset = (uint32_t*)0x3C00;
+	uint32_t *dstFontset = (uint32_t*)VIDEO_FONTSET_ADDRESS;
 
 	for (int i = 0; i != 1024; ++i) {
 		//for (int j = 0; j != 4; ++j) {

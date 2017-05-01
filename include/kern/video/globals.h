@@ -18,6 +18,8 @@
 #define VIDEO_EDID_ADDRESS 0x3A00
 #define VIDEO_MODE_ADDRESS 0x3B00
 
+#define VIDEO_FONTSET_ADDRESS 0x3C00
+#define VIDEO_FONTSET_SIZE 4096 // 256 8x16 bit glyphs
 
 
 /**
@@ -40,6 +42,17 @@ extern VideoInfo *VIDEO_INFO;
  * @brief Global constant pointer to the current VideoMode.
  */
 extern VideoMode *VIDEO_MODE;
+
+/**
+ * @brief Global pointer to the default fontset, the BIOS fontset.
+ *
+ * This pointer points to a block of 4096 bytes in memory containing a copy
+ * of the BIOS 8x16 fontset. This fontset contains 256 glyphs, with each glyph
+ * 8x16 pixels in size. A single glyph is 16 bytes. To access the corresponding
+ * ASCII glyph, take the ascii value and multiply by 16, then add this value to
+ * the pointer.
+ */
+extern uint8_t *VIDEO_FONTSET;
 
 
 #endif
