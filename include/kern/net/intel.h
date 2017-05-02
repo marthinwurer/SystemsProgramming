@@ -1,6 +1,7 @@
 #ifndef _KERN_NET_INTEL_H
 #define _KERN_NET_INTEL_H
 
+#include <kern/memory/memory_map.h> //PAGE_SIZE
 #include <baseline/common.h>
 
 /**
@@ -24,22 +25,29 @@
  * 
  */
 
-#define TOTAL_CB 0x80
-
-#define MAC_LENGTH_BYTES 6
-
 #define NET_INTEL_VENDOR 0x8086
 #define NET_INTEL_QEMU_NIC 0x100E
 #define NET_INTEL_DSL_NIC 0x1229
 
 #define NET_INTEL_INT_VECTOR 0x2B
 
+#define TOTAL_CB 0x80
+
+#define MAX_EEPROM_LENGTH 256
+#define MAC_LENGTH_BYTES 6
+
+#define NET_INTEL_CFG_LENGTH 22
+#define NET_INTEL_TCB_MAX_DATA_LEN 2600
+#define NET_INTEL_MIN_ETH_LENGTH 46
+#define NET_INTEL_MAX_ETH_LENGTH 1500
+#define NET_INTEL_ETH_HEAD_LEN 14
+
 // Stores info about network interface
 struct nic_info {
 	struct csr * csr;
 	uint8_t mac[MAC_LENGTH_BYTES];
 	uint16_t eeprom_count;
-	uint16_t eeprom[256]; // biggest eeprom will be 256 16-bit words
+	uint16_t eeprom[MAX_EEPROM_LENGTH]; // biggest eeprom will be 256 16-bit words
 	uint32_t avail_cb;
 	struct cb* next_cb;
 	struct cb* cb_to_check;
@@ -51,6 +59,7 @@ struct cb {
 	uint16_t command;
 	uint32_t link;
 	union {
+		uint8_t cfg[NET_INTEL_CFG_LENGTH];
 		uint8_t mac_addr[MAC_LENGTH_BYTES];
 		struct {
 			uint32_t tbd_array;
@@ -60,11 +69,9 @@ struct cb {
 			struct {
 				uint8_t dst_mac[MAC_LENGTH_BYTES];
 				uint8_t src_mac[MAC_LENGTH_BYTES];
-				uint8_t ethertype_hi; // under 1500 is payload length, above is type of payload header
-				uint8_t ethertype_lo;
-				// TODO remove hardcoded data here, probably wouldn't hurt to use TBD's instead of Simplifed Mode
-				uint8_t data[0x40]; // 46-1500 bytes
-			} eth_header;
+				uint16_t ethertype; // under 1500 is payload length, above is type of payload header
+				uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
+			} eth_packet;
 		} tcb;
 	} u;
 };
@@ -144,6 +151,9 @@ enum cb_commands {
 	cb_el = 0x8000, // end list (end of CBL, stop executing CBs)
 	cb_s = 0x4000, // suspend
 	cb_i = 0x2000, // generate interrupt when CB finishes
+
+	// configure
+	cb_cfg_cmd = 0x0002,
 
 	// IA configuration
 	cb_ia_cmd = 0x0001, // individual address setup

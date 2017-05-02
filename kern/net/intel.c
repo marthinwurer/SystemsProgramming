@@ -26,7 +26,6 @@ static void intel_nic_handler(int vector, int code);
 static void init_cbl(struct nic_info* nic, uint32_t num_cb);
 static struct cb* get_next_cb();
 static void recycle_command_blocks();
-static void execute_command(struct cb* cb);
 
 static uint32_t mem_read32(void* addr) __attribute__((unused));
 static uint16_t mem_read16(void* addr) __attribute__((unused));
@@ -230,7 +229,11 @@ static void recycle_command_blocks() {
 	while(_nic.cb_to_check->status & cb_c) {
 		_nic.cb_to_check->status &= ~cb_c; // unset complete flag
 
-		// TODO free up TBD or any other buffers
+
+		if(_nic.cb_to_check->command & cb_tx_cmd) { // transmit CB
+			// TODO free up TBD or any other buffers
+			
+		}
 
 		_nic.avail_cb++; // increment available command blocks
 		_nic.cb_to_check = (struct cb*) _nic.cb_to_check->link;
@@ -254,48 +257,38 @@ static struct cb* get_next_cb() {
 }
 
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
-	// struct cb* cb = (struct cb*) get_next_page();
-	(void) dst_hw_addr;
-	(void) data;
-	(void) length;
+	if(length > NET_INTEL_MAX_ETH_LENGTH) {
+		return -1;
+	}
 
 	struct cb* cb = get_next_cb();
+	if(cb == NULL) {
+		return -1;
+	}
 
-	//
-	// Flexible (TBD) mode
-	// 
-	cb->command = cb_el | cb_tx_cmd;
-	memcpy(cb->u.tcb.eth_header.src_mac, _nic.mac, MAC_LENGTH_BYTES);
-	memcpy(cb->u.tcb.eth_header.dst_mac, dst_hw_addr, MAC_LENGTH_BYTES);
-	// cb->u.tcb.tbd_array = 0xFFFFFFFF;
-	// cb->u.tcb.tbd_count = 0;
-	cb->u.tcb.tcb_byte_count = 0;
-	cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
-
-
-
-
-
+	uint32_t tx_length = (length < NET_INTEL_MIN_ETH_LENGTH) ? NET_INTEL_MIN_ETH_LENGTH : length;
+	// ensure minimum frame size is met by padding from length of user data
+	// through 46 bytes
+	for (int i = length; i <= NET_INTEL_MIN_ETH_LENGTH; i++) {
+		cb->u.tcb.eth_packet.data[i] = 0;
+	}
 
 	//
 	// Simplified mode
 	//
-	// cb->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
-	// cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
-	// cb->u.tcb.tcb_byte_count = 0x48 | 0x8000; // 0x8000 = EOF flag
-	// cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
-	// cb->u.tcb.tbd_count = 0;
-	// cb->u.tcb.eth_header.dst_mac[0] = 0x00;
-	// cb->u.tcb.eth_header.dst_mac[1] = 0xE0;
-	// cb->u.tcb.eth_header.dst_mac[2] = 0x7C;
-	// cb->u.tcb.eth_header.dst_mac[3] = 0xC8;
-	// cb->u.tcb.eth_header.dst_mac[4] = 0x7D;
-	// cb->u.tcb.eth_header.dst_mac[5] = 0x08;
-	// memcpy(cb->u.tcb.eth_header.src_mac, _nic.mac, MAC_LENGTH_BYTES);
-	// cb->u.tcb.eth_header.ethertype_lo = 0x40; // length of ethernet data
-	// char* my_string = "Hello world, how are you doing? I'm feeling round!";
-	// memcpy(cb->u.tcb.eth_header.data, my_string, strlen(my_string) + 1);
+	cb->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
+	cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
+	cb->u.tcb.tcb_byte_count = (tx_length + NET_INTEL_ETH_HEAD_LEN)| 0x8000; // 0x8000 = EOF flag
+	cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
+	cb->u.tcb.tbd_count = 0;
+	memcpy(cb->u.tcb.eth_packet.dst_mac, dst_hw_addr, MAC_LENGTH_BYTES);
+	// We shouldn't need the src mac (it should be inserted automagically)
+	// memcpy(cb->u.tcb.eth_packet.src_mac, _nic.mac, MAC_LENGTH_BYTES);
 
+	cb->u.tcb.eth_packet.ethertype = tx_length; // length of ethernet data
+	memcpy(cb->u.tcb.eth_packet.data, data, length);
+	// char* my_string = "Hello world, how are you doing? I'm feeling round!";
+	// memcpy(cb->u.tcb.eth_packet.data, my_string, strlen(my_string) + 1);
 
 	// give the cbl addr to the CU and start
 	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
@@ -317,60 +310,28 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	return 0;
 }
 
-static void execute_command(struct cb* cb) {
-	(void) cb;
-	if(_nic.csr->scb.status & (cu_lpq_active | cu_hqp_active)) { // CU active
-		// Add pointer to new CB to tail of CBL
-
-	}
-	else if(_nic.csr->scb.status & cu_idle) { // CU idle
-		// CU start
-
-	}
-	else if(_nic.csr->scb.status & cu_suspended) { // CU suspended
-		// Add pointer to new CB to tail of CBL, then CU resume
-
-	}
-	else {
-		// ?!?!? Famous last words, "this can never happen"
-	}
-	// Craft a beautiful Command Block
-	// Check where we should put this command block 
-	// --- keep a pointer to the last CB for chaining if CU is running
-	// --- Run CU Resume if CU is idle
-	// --- if CU is active put CB ptr into gen_ptr and run CU Start
-}
-
 void intel_nic_init() {
-
-	c_printf("\ncounting to 10 seconds!\n");
-
-	uint8_t bus, slot;
 	// Try to find DSL card first, followed by QEMU card, then give up
+	uint8_t bus, slot;
 	if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_DSL_NIC) >= 0) {	
-		c_printf("DSL Lab Intel NIC found - bus: %d, slot: %d\n", bus, slot);
+		c_printf("NIC: DSL Lab Intel NIC found - bus: %d, slot: %d\n", bus, slot);
 	}
 	else if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_QEMU_NIC) >= 0) {
-		c_printf("QEMU Intel NIC found - bus: %d, slot: %d\n", bus, slot);
+		c_printf("NIC: QEMU Intel NIC found - bus: %d, slot: %d\n", bus, slot);
 	}
 	else {
-		c_printf("Could not find Intel NIC\n");
+		c_printf("NIC: Could not find Intel NIC\n");
 		return;
 	}
 
 	_nic.csr = (struct csr *) pci_cfg_read(bus, slot, 0, PCI_CSR_MEM_MAPPED_BASE_ADDR_REG);
+	c_printf("NIC: CSR MMIO base addr: 0x%08x\n", (uint32_t) _nic.csr);
 
-	c_printf("CSR MMIO base addr: 0x%08x\n", (uint32_t) _nic.csr);
-
-	// if(_nic.csr == 0) {
-	// 	__panic("PCI READ FAILURE");
-	// }
-
-	c_printf("Loading data from EEPROM...\n");
+	c_printf("NIC: Loading data from EEPROM...\n");
 	eeprom_load(&_nic);
 
 	//
-	// Get MAC address setup
+	// MAC address setup
 	//
 	_nic.mac[0] = (uint8_t) (_nic.eeprom[0] & 0x00FF);
 	_nic.mac[1] = (uint8_t) (_nic.eeprom[0] >> 8);
@@ -378,60 +339,106 @@ void intel_nic_init() {
 	_nic.mac[3] = (uint8_t) (_nic.eeprom[1] >> 8);
 	_nic.mac[4] = (uint8_t) (_nic.eeprom[2] & 0x00FF);
 	_nic.mac[5] = (uint8_t) (_nic.eeprom[2] >> 8);
-	c_printf("HW MAC Address: ");
+	c_printf("NIC: HW MAC Address: ");
 	print_mac_addr(_nic.mac);
 	c_printf("\n");
 
 	//
-	// set base CU to 0
+	// Set base CU to 0
 	//
 	mem_write32(&_nic.csr->scb.gen_ptr, 0);
 	mem_write8(&_nic.csr->scb.command, cuc_load_cu_base);
 	write_flush(&_nic);
 
 	// 
-	// connect interrupt handler
+	// Connect interrupt handler
 	// 
 	uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
 	uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
-	c_printf("interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
+	c_printf("NIC: interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
 	__install_isr(NET_INTEL_INT_VECTOR, intel_nic_handler);
-
-
-	// 
-	// Individual Address Config
-	// 
-	// struct cb* cb_ia = (struct cb*) dumb_malloc(sizeof(struct cb));
-	// cb_ia->command = cb_ia_cmd;
-	// cb_ia->link = (uint32_t) cbl_ptr;
-	// memcpy(cb_ia->u.mac_addr, _nic.mac, MAC_LENGTH_BYTES);
-	// c_printf("setting IA to: ");
-	// print_mac_addr(cb_ia->u.mac_addr);
-
 
 	// 
 	// Setup the CBL
 	// 
-	c_printf("Initializing CB ring\n");
+	c_printf("NIC: Initializing CB ring\n");
 	init_cbl(&_nic, TOTAL_CB);
+
+
+	//
+	// Initial Configure command
+	// 
+	c_printf("NIC: Sending initial configure command");
+	struct cb* configure_cb = get_next_cb();
+	configure_cb->command = cb_cfg_cmd;
+	configure_cb->u.cfg[0] = 16; // 16 bytes of configuration
+	configure_cb->u.cfg[1] = 8;
+	configure_cb->u.cfg[2] = 0;
+	configure_cb->u.cfg[3] = 0;
+	configure_cb->u.cfg[4] = 0;
+	configure_cb->u.cfg[5] = 0;
+	configure_cb->u.cfg[6] = 
+		1 << 7 |
+		1 << 6 |
+		1 << 5 |
+		1 << 4 |
+		1 << 2 |
+		1 << 1;
+	configure_cb->u.cfg[7] = 1 << 1;
+	configure_cb->u.cfg[8] = 0;
+	configure_cb->u.cfg[9] = 0; 
+	configure_cb->u.cfg[10] = 
+		1 << 5 | // 7 byte ethernet preamble
+		1 << 2 |
+		1 << 1;
+	configure_cb->u.cfg[11] = 0;
+	configure_cb->u.cfg[12] = 6 << 4;
+	configure_cb->u.cfg[13] = 0x00;
+	configure_cb->u.cfg[14] = 0xF2;
+	configure_cb->u.cfg[15] = 
+		1 << 7 | 
+		1 << 6 | 
+		1 << 3 | 
+		1; // promiscuous mode
+
+
+	// 
+	// Individual Address Configuration
+	// 
+	struct cb* ia_cb = get_next_cb();
+	ia_cb->command = cb_ia_cmd | cb_el;
+	memcpy(ia_cb->u.mac_addr, _nic.mac, MAC_LENGTH_BYTES);
+	c_printf("NIC: Setting IA to: ");
+	print_mac_addr(ia_cb->u.mac_addr);
+	c_printf("\n");
+
+	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) configure_cb);
+	mem_write8(&_nic.csr->scb.command, cuc_start);
+	write_flush(&_nic);
 
 	// 
 	// 
 	// TODO:
-	// o Enable TBD for CB, instead of TCB
-	// o cleanup TBD buffers in recycle_command_blocks()
-	// o Write send_packet function
+	// o figure out if interrupt handler needs to send EOI (caused bugs before)
+	// o enable receiving data (pg 99)
 	// o configure receive buffers
-	// o enable receiving data
-	// o Write routine to output configure command blocks
 	// o mutex on doing anything with CB
 	// 
+	// TEST:
+	// o ensure CBL ring and cleanup actually works
+	// o Write send_packet function (check on ethernet header)
+	// o make sure CRC/IA are being inserted (ask other networking guy)
+	// o configure IA
+	// o change configure command to make sure NSAI (byte 10) is set correctly to insert source address
+	// o Write routine to output configure command blocks
 	// 
-	// 
+	// DONE:
 	// o Finish writing ISR (cleanup CB)
 	// o Figure out what should stay static in intel.c and if some internal stuff should be removed from intel.h
 	// o Keep ring of available CB linked together, set EL flag on last one, but still have the links there
 	// o Merge memory stuff in from master, HINT MERGE NOT REBASE
+	// 
+	// 
 	// 
 
 }
@@ -447,7 +454,6 @@ static uint16_t mem_read16(void* addr) {
 static uint8_t mem_read8(void* addr) {
 	return *(volatile uint8_t*) addr;
 }
-
 
 static void mem_write32(void* addr, uint32_t value) {
 	*(volatile uint32_t*) addr = value;
