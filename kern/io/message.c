@@ -29,6 +29,12 @@ status_t _io_msg_setprop(PIO_MESSAGE msg, IOPROP prop, void* value, int32_t leng
         case IOPROP_BUFFER:
             msg->buffer = value;
             break;
+        case IOPROP_CURSOR_POSITION:
+            msg->offset_prop.offset = (int32_t)value;
+            break;
+        case IOPROP_PROP:
+            msg->offset_prop.property = (IOPROP)value;
+            break;
         default:
             return E_BAD_ARG;
     }
@@ -87,5 +93,46 @@ status_t _io_msg_iterate(PIOHANDLE out, int index) {
         return E_OUT_OF_BOUNDS;
     }
     *out = _IO_MSG_TABLE[index].handle;
+    return E_SUCCESS;
+}
+status_t _io_msg_getprop(PIO_MESSAGE msg, IOPROP prop, void* value, PBSIZE plength){
+    //verify length
+    if (*plength < 0){
+        return E_BAD_ARG;
+    }
+    //verify value pointer
+    if (msg->handle < 0){
+        return E_BAD_HANDLE;
+    }
+    //update property
+    switch (prop){
+        case IOPROP_PATH: ;
+            int length = strlen(msg->path);
+            if (length > *plength) { 
+                *plength = length;
+                return E_MORE_DATA; 
+            }
+            *plength = length;
+            strcpy(msg->path, (char*) value);
+            return E_SUCCESS;
+        case IOPROP_FILESYSTEM:
+            return E_BAD_ARG;
+        case IOPROP_DEVICE:
+            return E_BAD_ARG;
+        case IOPROP_BUFFER:
+            *plength = sizeof(void*);
+            *((void**)value) = msg->buffer;
+            return E_SUCCESS;
+        case IOPROP_CURSOR_POSITION:
+            *plength = sizeof(int32_t);
+            *((int32_t*)value) = msg->offset_prop.offset;
+            return E_SUCCESS;
+        case IOPROP_PROP:
+            *plength = sizeof(IOPROP);
+            *((IOPROP*)value) = msg->offset_prop.property;
+            break;
+        default:
+            return E_BAD_ARG;
+    }
     return E_SUCCESS;
 }

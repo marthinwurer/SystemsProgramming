@@ -6,8 +6,8 @@
 #include <baseline/common.h>
 #include <string.h>
 
-const static char IO_PATH_DELIMITER = '\\';
-const static char IO_CHAN_DELIMITER = ':';
+#define IO_PATH_DELIMITER '\\'
+#define IO_CHAN_DELIMITER ':'
 
 int32_t io_path_count_nodes(char* path);
 

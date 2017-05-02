@@ -81,3 +81,37 @@ status_t _io_md_iterate(PIOHANDLE out, int index) {
     *out = _IO_MD_TABLE[index].handle;
     return E_SUCCESS;
 }
+status_t _io_md_getprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, PBSIZE plength){
+    //verify length
+    if (*plength < 0){
+        return E_BAD_ARG;
+    }
+    //verify value pointer
+    if (md->handle < 0){
+        return E_BAD_HANDLE;
+    }
+    //update property
+    switch (prop){
+        case IOPROP_NAME: ;
+            int length = strlen(md->name);
+            if (length > *plength) {
+                *plength = length;
+                return E_MORE_DATA;
+            }
+            *plength = length;
+            strcpy(md->name, (char*)value);
+            break;
+        case IOPROP_CREATED:
+            *plength = sizeof(int32_t);
+            *((int32_t*)value) = md->created;
+            return E_BAD_ARG;
+        case IOPROP_EXECUTE:
+            *plength = sizeof(void*);
+            *((void**)value) = md->execute;
+            break;
+        default:
+            return E_BAD_ARG;
+    }
+    return E_SUCCESS;
+
+}

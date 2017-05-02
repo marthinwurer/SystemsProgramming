@@ -46,3 +46,12 @@ status_t _io_grab_next_mount(PIO_MOUNT* out_p_mount);
  * \param index index of mount point to return
  */
 status_t _io_mp_iterate(PIOHANDLE out, int index);
+
+/**
+ * \brief function for getting specified property of an IO_MOUNT object
+ * \param mp [in] Pointer to IO_MOUNT Object
+ * \param prop [in] Property to get
+ * \param value [out] Pointer for storing out value
+ * \param plength [out] Length of data returned or available in case of E_MORE_DATA
+ */
+status_t _io_mp_getprop(PIO_MOUNT mp, IOPROP prop, void* value, PBSIZE plength);

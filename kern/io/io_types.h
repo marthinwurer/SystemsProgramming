@@ -10,6 +10,18 @@ typedef int IOHANDLE, *PIOHANDLE; //handle to I/O objects
 typedef int FILEHANDLE, *PFILEHANDLE; //handle to open files
 typedef int BSIZE, *PBSIZE; //buffer size, bytes
 
+typedef enum _ioctl {
+    IOCTL_READ,
+    IOCTL_APPEND,
+    IOCTL_WRITE,
+    IOCTL_EXPAND,
+    IOCTL_DELETE,
+    IOCTL_QUERY,
+    IOCTL_CREATE,
+    IOCTL_ENUMERATE,
+    IOCTL_IDENTIFY
+} IOCTL, *PIOCTL;
+
 typedef enum _file_prop {
     IOPROP_IS_DIR,
     IOPROP_COUNT_CHILDREN,
@@ -28,7 +40,9 @@ typedef enum _file_prop {
     IOPROP_READ,
     IOPROP_WRITE,
     IOPROP_FINALIZE,
-    IOPROP_BUFFER
+    IOPROP_IOCTL,
+    IOPROP_BUFFER,
+    IOPROP_PROP
 } IOPROP, *PIOPROP;
 
 typedef enum io_obj_type {

@@ -94,3 +94,50 @@ status_t _io_mp_iterate(PIOHANDLE out, int index) {
     *out = _IO_MP_TABLE[index].handle;
     return E_SUCCESS;
 }
+status_t _io_mp_getprop(PIO_MOUNT mp, IOPROP prop, void* value, PBSIZE plength){
+    //verify length
+    if (*plength < 0){
+        return E_BAD_ARG;
+    }
+    //verify value pointer
+    if (mp->handle < 0){
+        return E_BAD_HANDLE;
+    }
+    int length = 0;
+    //update property
+    switch (prop){
+        case IOPROP_PATH: ;
+            length = strlen(mp->path);
+            if (length > *plength) {
+                *plength = length;
+                return E_MORE_DATA;
+            }
+            *plength = length;
+            strcpy(mp->path, (char*)value);
+            break;
+        case IOPROP_NAME: ;
+            length = strlen(mp->name);
+            if (length > *plength) {
+                *plength = length;
+                return E_MORE_DATA;
+            }
+            *plength = length;
+            strcpy(mp->name, (char*) value);
+            break;
+        case IOPROP_FILESYSTEM: ;
+            *plength = sizeof(IOHANDLE);
+            *((IOHANDLE*)value) = mp->filesystem;
+            break;
+        case IOPROP_DEVICE: ;
+            *plength = sizeof(IOHANDLE);
+            *((IOHANDLE*)value) = mp->device;
+            break;
+        case IOPROP_CREATED: ;
+            *plength = sizeof(int32_t);
+            *((int32_t*)value) = mp->created;
+            break;
+        default:
+            return E_BAD_ARG;
+    }
+    return E_SUCCESS;
+}

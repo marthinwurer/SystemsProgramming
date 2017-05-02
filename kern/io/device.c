@@ -90,3 +90,41 @@ status_t _io_dv_iterate(PIOHANDLE out, int index) {
     *out = _IO_DV_TABLE[index].handle;
     return E_SUCCESS;
 }
+status_t _io_dv_getprop(PIO_DEVICE dv, IOPROP prop, void* value, PBSIZE plength){
+    //verify length
+    if (*plength < 0){
+        return E_BAD_ARG;
+    }
+    //verify value pointer
+    if (dv->handle < 0){
+        return E_BAD_HANDLE;
+    }
+    //update property
+    switch (prop){
+        case IOPROP_NAME: ;
+            int length = strlen(dv->name);
+            if (length > *plength) { return E_MORE_DATA; }
+            *plength = length;
+            strcpy(dv->name, (char*)value);
+            return E_SUCCESS;
+        case IOPROP_CREATED: 
+            *((int32_t*)value) = (int32_t)dv->created;
+            *plength = sizeof(int32_t);
+            return E_SUCCESS;
+        case IOPROP_READ:
+            *plength = sizeof(void*);
+            *((void**)value) = dv->read;
+            return E_SUCCESS;
+        case IOPROP_WRITE:
+            *((void**)value) = dv->write;
+            *plength = sizeof(void*);
+            return E_SUCCESS;
+        case IOPROP_FINALIZE:
+            *((void**)value) = dv->finalize;
+            *plength = sizeof(void*);
+            return E_SUCCESS;
+        default:
+            return E_BAD_ARG;
+    }
+    return E_BAD_ARG;
+}

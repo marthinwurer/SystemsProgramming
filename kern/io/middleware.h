@@ -44,3 +44,12 @@ status_t _io_grab_next_middleware(PIO_MIDDLEWARE* out_p_middleware);
  * \param index index of middleware to return
  */
 status_t _io_md_iterate(PIOHANDLE out, int index);
+
+/**
+ * \brief function for getting specified property of an IO_MIDDLEWARE object
+ * \param md [in] Pointer to IO_MIDDLEWARE Object
+ * \param prop [in] Property to get
+ * \param value [out] Out pointer for returned value
+ * \param plength [out] Length of data returned or available in case of E_MORE_DATA
+ */
+status_t _io_md_getprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, PBSIZE plength);

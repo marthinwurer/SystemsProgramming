@@ -46,3 +46,12 @@ status_t _io_grab_next_filesystem(PIO_FILESYSTEM* out_p_fs);
  * \param index index of filesystem to return
  */
 status_t _io_fs_iterate(PIOHANDLE out, int index);
+
+/**
+ * \brief function for getting specified property of an IO_FILESYSTEM object
+ * \param fs [in] Pointer to IO_FILESYSTEM Object
+ * \param prop [in] Property to get
+ * \param value [out] Pointer to the returned value
+ * \param plength [out] Size of value returned or available in case of E_MORE_DATA
+ */
+status_t _io_fs_getprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, PBSIZE plength);

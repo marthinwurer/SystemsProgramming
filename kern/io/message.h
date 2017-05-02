@@ -8,6 +8,11 @@ typedef struct _io_message {
     char*           buffer; ///< Data buffer for storing input/output data
     int32_t         length; ///< Length of buffer
     status_t        status; ///< Current status of message; intended to support cancelation by middleware, etc.
+    IOCTL           ioctl; ///< Operation to perform
+    union POSITION {
+        IOPROP property;
+        int32_t offset;
+    } offset_prop; ///< Controls where in file to perform operation, or specifies property to read/set
 } IO_MESSAGE, *PIO_MESSAGE;
 
 /**
@@ -47,3 +52,12 @@ status_t _io_grab_next_message(PIO_MESSAGE* out_p_message);
  * \param index index of message to return
  */
 status_t _io_msg_iterate(PIOHANDLE out, int index);
+
+/**
+ * \brief function for getting specified property of an IO_MESSAGE object
+ * \param msg [in] Pointer to IO_MESSAGE Object
+ * \param prop [in] Property to get
+ * \param value [out] Out pointer for returned value
+ * \param plength [out] Length of data returned or available in case of E_MORE_DATA
+ */
+status_t _io_msg_getprop(PIO_MESSAGE msg, IOPROP prop, void* value, PBSIZE plength);

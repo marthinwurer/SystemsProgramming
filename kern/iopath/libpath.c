@@ -28,7 +28,7 @@ int32_t  io_path_count_nodes(char* path) {
 
 void io_path_keep_n_nodes(char* path, unsigned int n, char* out) {
     int compareIndex = 0;
-    int pathcount = 0;
+    unsigned int pathcount = 0;
     char lastChar = '\0';
     char currentChar = path[compareIndex];
     while (currentChar != '\0'){

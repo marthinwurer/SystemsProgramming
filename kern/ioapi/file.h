@@ -89,7 +89,7 @@ status_t IoFileDelete (FILEHANDLE file);
  * \param plength [in] defines size of output buffer in bytes. [out] number of bytes in answer
  * \param out [out] string path to file; null if plength is less than the size of the path.
  */
-status_t IoFileNextChild (FILEHANDLE file, IOPROP property, IOSORT sort, int index, PBSIZE plength, char* out);
+status_t IoFileNextChild (FILEHANDLE file, int index, PBSIZE plength, char* out);
 
 /**
  * \brief closes a file

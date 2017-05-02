@@ -89,3 +89,44 @@ status_t _io_fs_iterate(PIOHANDLE out, int index) {
     *out = _IO_FS_TABLE[index].handle;
     return E_SUCCESS;
 }
+status_t _io_fs_getprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, PBSIZE plength){
+    //verify length
+    if (*plength < 0){
+        return E_BAD_ARG;
+    }
+    //verify value pointer
+    if (fs->handle < 0){
+        return E_BAD_HANDLE;
+    }
+    //update property
+    switch (prop){
+        case IOPROP_NAME: ;
+            int length = strlen(fs->name);
+            if (length > plength) {
+                *plength = length;
+                return E_MORE_DATA;
+            }
+            *plength = length;
+            strcpy(fs->name, (char*)value);
+            return E_SUCCESS;
+        case IOPROP_CREATED:
+            *plength = sizeof(int32_t);
+            *((int32_t*)value) = fs->created;
+            return E_SUCCESS;
+        case IOPROP_EXECUTE:
+            *((void**)value) = fs->execute;
+            *plength = sizeof(void*);
+            return E_SUCCESS;
+        case IOPROP_INIT:
+            *((void**)value) = fs->init;
+            *plength = sizeof(void*);
+            return E_SUCCESS;
+        case IOPROP_FINALIZE:
+            *((void**)value) = fs->finalize;
+            *plength = sizeof(void*);
+            return E_SUCCESS;
+        default:
+            return E_BAD_ARG;
+    }
+    return E_SUCCESS;
+}

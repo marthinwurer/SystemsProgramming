@@ -46,3 +46,12 @@ status_t _io_grab_next_device(PIO_DEVICE* out_p_device);
  * \param index index of device to return
  */
 status_t _io_dv_iterate(PIOHANDLE out, int index);
+
+/**
+ * \brief function for getting specified property of an IO DEVICE object
+ * \param dv [in] Pointer to IO DEVICE Object
+ * \param prop [in] Property to get
+ * \param value [out] Pointer for returned value
+ * \param plength [out] Size of returned data or available data in case of E_MORE_DATA
+ */
+status_t _io_dv_getprop(PIO_DEVICE dv, IOPROP prop, void* value, PBSIZE plength);

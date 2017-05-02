@@ -337,10 +337,29 @@ status_t IO_ENUMERATE(IO_OBJ_TYPE type, int index, PIOHANDLE object){
     return stat;
 }
 status_t IO_LOCK(IOHANDLE handle){
+    if (handle < 0) { return E_BAD_HANDLE; }
     _io_object_entry* t = &HANDLE_TABLE[handle];
-    if ((*t).handle < 0){
-        return E_BAD_HANDLE;
-    }
+    if ((*t).handle < 0) { return E_BAD_HANDLE; }
     (*t).locked = 1;
     return E_SUCCESS;
+}
+status_t IO_INTERROGATE(IOHANDLE handle, IOPROP prop, void* buffer, PBSIZE plength){
+    if (handle < 0) { return E_BAD_HANDLE; }
+    _io_object_entry* t = &HANDLE_TABLE[handle];
+    if (t->handle < 0) { return E_BAD_HANDLE; }
+    switch (t->type) {
+        case IO_OBJ_DEVICE:
+            return _io_dv_getprop(t->object, prop, buffer, plength);
+        case IO_OBJ_MESSAGE:
+            return _io_msg_getprop(t->object, prop, buffer, plength);
+        case IO_OBJ_FILESYSTEM:
+            return _io_fs_getprop(t->object, prop, buffer, plength);
+        case IO_OBJ_MIDDLEWARE:
+            return _io_md_getprop(t->object, prop, buffer, plength);
+        case IO_OBJ_MOUNT:
+            return _io_mp_getprop(t->object, prop, buffer, plength);
+        default:
+            return E_BAD_ARG;
+    }
+    return E_BAD_ARG;
 }

@@ -58,3 +58,12 @@ status_t IO_ENUMERATE(IO_OBJ_TYPE type, int index, PIOHANDLE object);
  * \param handle [in] handle to object to be locked
  * */
 status_t IO_LOCK(IOHANDLE handle);
+
+/**
+ * \brief reads a property of an IO object by handle
+ * \param handle [in] handle for which to read property
+ * \param prop [in] property to read
+ * \param buffer [out] buffer in which to write result data
+ * \param plength [in] size of buffer to write to. [out] actual size of data
+ */
+status_t IO_INTERROGATE(IOHANDLE handle, IOPROP prop, void* buffer, PBSIZE plength);

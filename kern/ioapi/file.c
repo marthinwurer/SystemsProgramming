@@ -6,82 +6,333 @@
  */
 
 #include "file.h"
+#include "../io/router.h"
+#include "../iopath/libpath.h"
+
+#define HANDLED(code) if((stat = code) != E_SUCCESS){ return stat; }
+#define THANDLED(type, code) length = sizeof(type); HANDLED(code)
+#define SHANDLED(str, code) length = strlen(str); HANDLED(code);
+#define IGNORED(code) code
+#define TIGNORED(type, code) length = sizeof(type); IGNORED(code)
+#define RETURNED(code) return code
+#define TRETURNED(type, code) length = sizeof(type); RETURNED(code)
+
+typedef struct _io_file_instance {
+    FILEHANDLE          handle;         //ID of the file
+    IOHANDLE            message_in;        //ID of the I/O Message object
+    IOHANDLE            message_out;
+    char*               path;
+    BSIZE               length;
+    pid_t               owner;
+    BSIZE               cursor;
+    int32_t             created;
+    int32_t             written;
+    int32_t             read;
+} io_file_entry, *pio_file_entry;
+
+#define FILES_MAX 50
+static io_file_entry FILETABLE[FILES_MAX]; //statically allocate file object
+static int _iofs_has_init = 0;
+/**
+ * \brief Initialize filesystem API data structures
+ */
+void _iofs_init() {
+    for (int index = 0; index <FILES_MAX; index++){
+        FILETABLE[index] = (io_file_entry) { .handle = -1,
+            .message_in = -1,
+            .message_out = -1,
+            .path = NULL,
+            .length = 0,
+            .owner = 0,
+            .cursor = 0,
+            .created = 0,
+            .written = 0,
+            .read = 0
+        };
+    }
+    _iofs_has_init = 1;
+}
+
+int _iofs_verify_handle(FILEHANDLE handle){
+    if (handle < 0){
+        return 0;
+    }
+    if (handle >= FILES_MAX){
+        return 0;
+    }
+    if (FILETABLE[handle].handle != handle){
+        return 0;
+    }
+    return 1;
+}
 status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
     //ensure data structures initialized
-
+    if (_iofs_has_init == 0){
+        _iofs_init();
+    }
+    int index;
     //allocate table entry
+    for (index = 0; index < FILES_MAX; index++){
+        if (FILETABLE[index].handle == -1){
+            FILETABLE[index].handle = index;
+            break;
+        }
+    }
+    //look for file
+    IOHANDLE hMessage = -1;
+    status_t stat = IO_PROTOTYPE(IO_OBJ_MESSAGE, &hMessage);
+    FILETABLE[index].message_in = hMessage;
+    int length = 0;
+    IOCTL _ioctlvalue = IOCTL_IDENTIFY;
+    SHANDLED(path, IO_UPDATE(hMessage, IOPROP_PATH, &path, &length));
+    THANDLED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
+    stat = IO_EXECUTE(hMessage);
+    if (stat == E_SUCCESS){
+        *out = index;
+        return E_SUCCESS;
+    }
+    char newpath[strlen(path)]; //because we can't use variable allocation inside switch
+    int mountindex = 0;
+    //file not found, handle that
+    switch (strat) {
+        case IO_CP_CREATE: 
+            //strip last element from path
+            io_path_disc_n_nodes(path, 1, newpath);
+            //check for existence of new path
+            SHANDLED(newpath, IO_UPDATE(hMessage, IOPROP_PATH, &newpath, &length));
+            stat = IO_EXECUTE(hMessage);
+            //if exists, create original path
+            if (stat == E_SUCCESS) {
+                length = strlen(path);
+                IGNORED(IO_UPDATE(hMessage, IOPROP_PATH, &path, &length));
+                _ioctlvalue = IOCTL_CREATE;
+                TIGNORED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
+                stat = IO_EXECUTE(hMessage);
+                if (stat == E_SUCCESS) {
+                    *out = index;
+                } else {
+                    FILETABLE[index].handle = -1;
+                    return stat;
+                }
+                return stat;
+            } else {
+                FILETABLE[index].handle = -1;
+                return E_NO_MATCH;
+            }
+            break;
+        case IO_CP_CREATERECURSIVE: 
+            mountindex = 0;
+            //verify mount is valid
+            IOHANDLE mount = -1;
+            while (stat == E_SUCCESS) {
+                stat = IO_ENUMERATE(IO_OBJ_MOUNT, mountindex, &mount);
+                length = strlen(path);
+                char outpath[length];
+                IGNORED(IO_INTERROGATE(mount, IOPROP_PATH, &outpath, &length));
+                if (io_path_canonicalized_compare(path, outpath) == 0){
+                    mountindex = -1;
+                    break;
+                } 
+                mountindex++;
+            }
+            if (mountindex < 0){
+                //iterate through path components, making as necessary
+                int numpathparts = io_path_count_nodes(path);
+                for (int pathind = 1; pathind < numpathparts; pathind++){
+                    //get path component
+                    length = strlen(path);
+                    char outpath[length];
+                    io_path_keep_n_nodes(path, pathind, outpath);
+                    HANDLED(IO_UPDATE(hMessage, IOPROP_PATH, &outpath, &length));
+                    _ioctlvalue = IOCTL_CREATE;
+                    THANDLED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
+                    stat = IO_EXECUTE(hMessage);
+                    if (stat != E_SUCCESS){
+                        FILETABLE[index].handle = -1;
+                        return E_NO_MATCH;
+                    }
+                }
+            } else {
+                IO_DELETE(hMessage);
+                return E_NO_MATCH;
+            }
+            //finished, return success
+            *out = index;
+            return E_SUCCESS;
+            break;
+        case IO_CP_FAIL:
+        default:
+            FILETABLE[index].handle = -1;
+            return E_NO_MATCH;
+    }
+    return E_SUCCESS;
+}
 
-    //update table entry
+status_t IoFileRead (FILEHANDLE hFile, BSIZE offset, PBSIZE plength, void* out){
+    //verify handle
+    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    io_file_entry file = FILETABLE[hFile];
+    //open or create IO Message
+    status_t stat; //used by HANDLED
+    int length = 0; //for use in calls to IO_UPDATE
+    if (file.message_in == -1){
+        //update message
+        HANDLED(IO_PROTOTYPE(IO_OBJ_MESSAGE, &file.message_in));
+        SHANDLED(file.path, IO_UPDATE(file.message_in, IOPROP_PATH, &file.path, &length));
+    }
     
-    //Look for File, create if required by policy
-
-    return E_NOT_IMPLEMENTED;
-}
-
-status_t IoFileRead (FILEHANDLE file, BSIZE offset, PBSIZE plength, void* out){
-    //verify handle
-
-    //form IO request
-
-    //send IO request
-    
-    //verify status & return
-    return E_NOT_IMPLEMENTED;
-}
-status_t IoFileWrite (FILEHANDLE file, BSIZE offset, PBSIZE plength, void* in){
-    //verify handle
-
-    //form IO request
-
-    //send IO request
-
-    //verify status & return
-    return E_NOT_IMPLEMENTED;
-}
-status_t IoFileSeek (FILEHANDLE file, BSIZE offset, PBSIZE poffset){
-    //verify handle
-
     //update cursor
-
-    //return status
-    return E_NOT_IMPLEMENTED;
+    file.cursor += offset;
+    THANDLED(int32_t, IO_UPDATE(file.message_in, IOPROP_CURSOR_POSITION, &file.cursor, &length));
+    //update message
+    THANDLED(int32_t, IO_UPDATE(file.message_in, IOPROP_BUFFER, out, &length));
+    THANDLED(int32_t, IO_UPDATE(file.message_in, IOPROP_LENGTH_CONTENT, plength, &length));
+    IOCTL _ioctlvalue = IOCTL_READ;
+    THANDLED(IOCTL, IO_UPDATE(file.message_in, IOPROP_IOCTL, &_ioctlvalue, &length));
+    //send IO request
+    HANDLED(IO_EXECUTE(file.message_in));
+    //verify status & return
+    file.cursor += *plength;
+    TIGNORED(int32_t, IO_UPDATE(file.message_out, IOPROP_CURSOR_POSITION, &file.cursor, &length));
+    TRETURNED(int32_t, IO_UPDATE(file.message_in, IOPROP_CURSOR_POSITION, &file.cursor, &length));    //update cursor
 }
-status_t IoFileQuery (FILEHANDLE file, IOPROP property, PBSIZE plength, void* out){
-    //verify handle
-    
-    //verify metadata; fetch if needed
 
+status_t IoFileWrite (FILEHANDLE hFile, BSIZE offset, PBSIZE plength, void* in){
+    //verify handle
+    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    //form IO request
+    io_file_entry file = FILETABLE[hFile];
+    status_t stat; //used by handled macros
+    int length = 0;
+    if (file.message_out == -1) {
+        HANDLED(IO_PROTOTYPE(IO_OBJ_MESSAGE, &file.message_out));
+        SHANDLED(file.path, IO_UPDATE(file.message_out, IOPROP_PATH, &file.path, &length)); 
+    }
+    //update cursor
+    file.cursor += offset;
+    //update IO Request
+    THANDLED(void*,IO_UPDATE(file.message_out, IOPROP_BUFFER, in, &length));
+    THANDLED(void*, IO_UPDATE(file.message_out, IOPROP_LENGTH_CONTENT, plength, &length));
+    IOCTL _ioctlvalue = IOCTL_WRITE;
+    THANDLED(IOCTL, IO_UPDATE(file.message_out, IOPROP_IOCTL, &_ioctlvalue, &length));
+    //send IO request
+    HANDLED(IO_EXECUTE(file.message_out));
+    //verify status & return
+    file.cursor += *plength;
+    TIGNORED(int32_t, IO_UPDATE(file.message_in, IOPROP_CURSOR_POSITION, &file.cursor, &length));
+    TRETURNED(int32_t, IO_UPDATE(file.message_out, IOPROP_CURSOR_POSITION, &file.cursor, &length));
+}
+status_t IoFileSeek (FILEHANDLE hFile, BSIZE offset, PBSIZE poffset){
+    //verify handle
+    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    io_file_entry file = FILETABLE[hFile];
+    file.cursor = offset;
+    status_t stat; //used by HANDLED macros
+    int length = 0;
+    //update cursor
+    if (file.message_in != -1) { 
+        THANDLED(int32_t, IO_UPDATE(file.message_in, IOPROP_CURSOR_POSITION, &file.cursor, &length));
+    }
+    if (file.message_out != -1) { 
+        THANDLED(int32_t, IO_UPDATE(file.message_out, IOPROP_CURSOR_POSITION, &file.cursor, &length));
+    }
+    *poffset = file.cursor;
+    //return status
+    return E_SUCCESS;
+}
+status_t IoFileQuery (FILEHANDLE hFile, IOPROP property, PBSIZE plength, void* out){
+    //verify handle
+    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    io_file_entry file = FILETABLE[hFile];
+    //open or create IO Message
+    status_t stat; //used by HANDLED
+    int length = 0;
+    if (file.message_in == -1){
+        //update message
+        HANDLED(IO_PROTOTYPE(IO_OBJ_MESSAGE, &file.message_in));
+        SHANDLED(file.path, IO_UPDATE(file.message_in, IOPROP_PATH, &file.path, &length));
+    }
+    THANDLED(IOPROP, IO_UPDATE(file.message_in, IOPROP_PROP, &property, &length));
+    //update message
+    THANDLED(int32_t, IO_UPDATE(file.message_in, IOPROP_BUFFER, out, &length));
+    THANDLED(int32_t, IO_UPDATE(file.message_in, IOPROP_LENGTH_CONTENT, plength, &length));
+    IOCTL _ioctlvalue = IOCTL_QUERY;
+    THANDLED(IOCTL, IO_UPDATE(file.message_in, IOPROP_IOCTL, &_ioctlvalue, &length));
+    //send IO request
+    RETURNED(IO_EXECUTE(file.message_in));
     //form output & return
-    return E_NOT_IMPLEMENTED;
 }
-status_t IoFileSet (FILEHANDLE file, IOPROP property, PBSIZE plength, void* in){
+status_t IoFileSet (FILEHANDLE hFile, IOPROP property, PBSIZE plength, void* in){
     //verify handle
-
+    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
     //update metadata block
-
-    //flush changes
-    return E_NOT_IMPLEMENTED;
+    io_file_entry file = FILETABLE[hFile];
+    status_t stat; //used by handled macros
+    int length = 0;
+    if (file.message_out == -1) {
+        HANDLED(IO_PROTOTYPE(IO_OBJ_MESSAGE, &file.message_out));
+        SHANDLED(file.path, IO_UPDATE(file.message_out, IOPROP_PATH, &file.path, &length));
+    }
+    THANDLED(IOPROP, IO_UPDATE(file.message_out, IOPROP_PROP, &property, &length));
+    //update IO Request
+    THANDLED(void*, IO_UPDATE(file.message_out, IOPROP_BUFFER, in, &length));
+    THANDLED(int32_t, IO_UPDATE(file.message_out, IOPROP_LENGTH_CONTENT, plength, &length));
+    IOCTL _ioctlvalue = IOCTL_WRITE;
+    THANDLED(IOCTL, IO_UPDATE(file.message_out, IOPROP_IOCTL, &_ioctlvalue, &length));
+    //send IO request
+    RETURNED(IO_EXECUTE(file.message_out));
 }
-status_t IoFileDelete (FILEHANDLE file){
+status_t IoFileDelete (FILEHANDLE hFile){
     //verify handle
-
+    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    status_t stat = E_SUCCESS;
+    int length = 0;
     //build IO Message & send
-
+    io_file_entry file = FILETABLE[hFile];
+    if (file.message_out == -1) {
+        HANDLED(IO_PROTOTYPE(IO_OBJ_MESSAGE, &file.message_out));
+        SHANDLED(file.path, IO_UPDATE(file.message_out, IOPROP_PATH, &file.path, &length));
+    };
+    IOCTL _ioctlvalue = IOCTL_DELETE;
+    THANDLED(IOCTL, IO_UPDATE(file.message_out, IOPROP_IOCTL, &_ioctlvalue, &length));
+    HANDLED(IO_EXECUTE(file.message_out));
+    IGNORED(IO_DELETE(file.message_in));
+    IGNORED(IO_DELETE(file.message_out));
     //close file handle if delete succesful
+    file.message_in = -1;
+    file.message_out = -1;
+    file.handle = -1;
     //return status
-    return E_NOT_IMPLEMENTED;
+    return E_SUCCESS;
 }
-status_t IoFileNextChild (FILEHANDLE file, IOPROP property, IOSORT sort, int index, PBSIZE plength, char* out){
+status_t IoFileNextChild (FILEHANDLE hFile, int index, PBSIZE plength, char* out){
     //verify handle
-
-    //fetch metadata if necessary
-
-    //verify index & return data
-    return E_NOT_IMPLEMENTED;
+    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    io_file_entry file = FILETABLE[hFile];
+    status_t stat = E_SUCCESS;
+    int length = 0;
+    //open input handle
+    if (file.message_in == -1) {
+        HANDLED(IO_PROTOTYPE(IO_OBJ_MESSAGE, &file.message_in));
+        SHANDLED(file.path, IO_UPDATE(file.message_in, IOPROP_PATH, &file.path, &length));
+    }
+    //update input handle
+    THANDLED(void*, IO_UPDATE(file.message_in, IOPROP_BUFFER, out, &length));
+    THANDLED(void*, IO_UPDATE(file.message_in, IOPROP_LENGTH_CONTENT, plength, &length));
+    IOCTL value = IOCTL_ENUMERATE; //because it needs to be a pointer
+    THANDLED(IOCTL, IO_UPDATE(file.message_in, IOPROP_IOCTL, &value, &length));
+    THANDLED(int32_t, IO_UPDATE(file.message_in, IOPROP_CURSOR_POSITION, &index, &length));
+    //execute & return
+    RETURNED(IO_EXECUTE(file.message_in));
 }
-status_t IoFileClose (FILEHANDLE file){
+status_t IoFileClose (FILEHANDLE hFile){
     //verify handle
-    
+    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    status_t stat = E_SUCCESS;
+    io_file_entry file = FILETABLE[hFile];
+    IGNORED(IO_DELETE(file.message_out));
+    IGNORED(IO_DELETE(file.message_in));
+    file.handle = -1;
     //close the handle
-    return E_NOT_IMPLEMENTED;
+    return stat;
 }
