@@ -2,7 +2,9 @@
 #include <kern/vconsole/console.h>
 #include <stddef.h>
 
-#define NULL_CELL (VConChar){ .color = 7, .character = ' ' }
+#define DEFAULT_COLOR 7
+
+#define NULL_CELL (VConChar){ .color = DEFAULT_COLOR, .character = ' ' }
 
 #define calcIndex(con, x, y) ((con->columns * y) + x)
 
@@ -108,29 +110,50 @@ int vcon_putchar(VCon *con, char ch) {
 	return E_VCON_SUCCESS;
 }
 
-int vcon_putcharAt(VCon *con, char ch, uint16_t row, uint16_t col) {
+int vcon_putcharAt(VCon *con, char ch, uint16_t x, uint16_t y) {
 	if (con == NULL) {
 		return E_VCON_ARGNULL;
 	}
-	(void)ch; (void)row; (void)col;
+
+	if (x >= con->columns || y >= con->rows) {
+		return E_VCON_BOUNDS;
+	}
+
+	int index = calcIndex(con, x, y);
+	con->buf[index] = (VConChar){
+		.character = ch,
+		.color = DEFAULT_COLOR
+	};
 
 	return E_VCON_SUCCESS;
 }
 
 int vcon_puts(VCon *con, const char *str) {
-	if (con == NULL) {
+	if (con == NULL || str == NULL) {
 		return E_VCON_ARGNULL;
 	}
-	(void)str;
+
+	char ch;
+	while ((ch = *str++) != '\0') {
+		vcon_putchar(con, ch);
+	}
 
 	return E_VCON_SUCCESS;
 }
 
-int vcon_putsAt(VCon *con, const char *str, uint16_t row, uint16_t col) {
+int vcon_putsAt(VCon *con, const char *str, uint16_t x, uint16_t y) {
 	if (con == NULL) {
 		return E_VCON_ARGNULL;
 	}
-	(void)str; (void)row; (void)col;
+	
+	char ch;
+	int error;
+	while ((ch = *str++) != '\0') {
+		error = vcon_putcharAt(con, ch, x, y);
+		if (++x == con->columns || error == E_VCON_BOUNDS) {
+			return E_VCON_BOUNDS;
+		}
+	}
 
 	return E_VCON_SUCCESS;
 }
@@ -139,16 +162,50 @@ int vcon_scroll(VCon *con, uint16_t lines) {
 	if (con == NULL) {
 		return E_VCON_ARGNULL;
 	}
-	(void)lines;
+	
+	if (lines > con->scrollMaxY - con->scrollMinY) {
+		vcon_clearScroll(con);
+		con->cursorX = con->scrollMinX;
+		con->cursorY = con->scrollMinY;
+	} else {
+
+		uint16_t line;
+		uint16_t lineCount = con->scrollMaxY - lines;
+		uint16_t nchars = con->scrollMaxX - con->scrollMinX + 1;
+		VConChar *from, *to;
+
+		for (line = con->scrollMinY; line != lineCount; ++line) {
+			from = con->buf + (((line + lines) * con->columns) + con->scrollMinX);
+			to = con->buf + ((line * con->columns) + con->scrollMinX);
+			for (uint16_t c = 0; c != nchars; ++c) {
+				*to++ = *from++;
+			}
+		}
+
+		for (; line != con->scrollMaxY; ++line) {
+			to = con->buf + ((line * con->columns) + con->scrollMinX);
+			for (uint16_t c = 0; c != nchars; ++c) {
+				*to++ = NULL_CELL;
+			}
+		}
+
+	}
 
 	return E_VCON_SUCCESS;
 }
 
-int vcon_setCursor(VCon *con, uint16_t row, uint16_t column) {
+int vcon_setCursor(VCon *con, uint16_t x, uint16_t y) {
 	if (con == NULL) {
 		return E_VCON_ARGNULL;
 	}
-	(void)row; (void)column;
+
+	if (x < con->scrollMinX || y < con->scrollMinY || 
+	    x >= con->scrollMaxX || y >= con->scrollMaxY) {
+		return E_VCON_BOUNDS;
+	}
+
+	con->cursorX = x;
+	con->cursorY = y;
 
 	return E_VCON_SUCCESS;
 }
@@ -157,7 +214,17 @@ int vcon_setScroll(VCon *con, uint16_t minX, uint16_t minY, uint16_t maxX, uint1
 	if (con == NULL) {
 		return E_VCON_ARGNULL;
 	}
-	(void)minX; (void)minY; (void)maxX; (void)maxY;
+	
+	if (minX >= maxX || minY >= maxY || maxX > con->columns || maxY > con->rows) {
+		return E_VCON_BOUNDS;
+	}
+
+	con->scrollMinX = minX;
+	con->scrollMaxX = maxX;
+	con->scrollMinY = minY;
+	con->scrollMaxY = maxY;
+	con->cursorX = minX;
+	con->cursorY = maxY;
 
 	return E_VCON_SUCCESS;
 }

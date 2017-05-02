@@ -30,23 +30,26 @@
 //
 int main(void) {
 
-	VCon console;
+	// VCon console;
 
-	VConCtrl ctrl = (VConCtrl){
-		.current = &console,
-		.mode = VCON_MODE_VGATEXT
-	};
+	// VConCtrl ctrl = (VConCtrl){
+	// 	.current = &console,
+	// 	.mode = VCON_MODE_VGATEXT
+	// };
 
-	vcon_init(&console, (VConChar*)0x4C00, 25, 80);
-	vcon_clear(&console);
+	// vcon_init(&console, (VConChar*)0x4C00, 25, 80);
+	// vcon_clear(&console);
 
-	vcon_putchar(&console, 'A');
-	vcon_putchar(&console, 's');
+	// vcon_puts(&console, "Assfaggot bitch\n");
+	// vcon_puts(&console, "WHORE");
+
+	// vcon_putcharAt(&console, '9', 79, 24);
+	// vcon_scroll(&console, 1);
 	
 
-	vcon_redraw(&ctrl);
+	// vcon_redraw(&ctrl);
 
-	__asm("hlt");
+	// __asm("hlt");
 
 
 	// Initialize the video module
@@ -75,15 +78,17 @@ int main(void) {
 	c_printf(" * Scanline: %d\n", mode.fb.pitch);
 	c_printf(" * BPP: %d\n", mode.fb.bpp);
 
-	// Set the mode
+	// __asm("hlt");
 
-	errorcode = video_setMode(&mode);
-	if (errorcode != E_VIDEO_SUCCESS) {
-		c_printf("Failed to switch mode. Code %d\n", errorcode);
-		return EXIT_VIDEO_ERROR;
-	}
+	// // Set the mode
 
-	__asm("hlt");
+	// errorcode = video_setMode(&mode);
+	// if (errorcode != E_VIDEO_SUCCESS) {
+	// 	c_printf("Failed to switch mode. Code %d\n", errorcode);
+	// 	return EXIT_VIDEO_ERROR;
+	// }
+
+	// __asm("hlt");
 
 	return EXIT_SUCCESS;
 

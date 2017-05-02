@@ -56,6 +56,11 @@
 #ifndef _C_IO_H_
 #define _C_IO_H_
 
+#include <kern/vconsole/VConCtrl.h>
+
+extern VConCtrl CIO_CONTROLLER;
+
+
 /*
 ** Name:	c_io_init
 **
