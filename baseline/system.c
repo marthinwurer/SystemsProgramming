@@ -155,8 +155,10 @@ void _init( void ) {
 	c_io_init_isr();
 
 
+	// set up the memory
 	disp_memory_map();
 	setup_page_availibility_table();
+	setup_initial_page_table();
 
 //	void * address = get_next_page();
 //

@@ -18,6 +18,9 @@ memory_map_entry * map = (memory_map_entry *) MY_MM_ADDRESS;
 
 uint32_t mm_size = 0;
 
+uint32_t * page_directory = 0;
+uint32_t * page_table;
+
 
 void disp_memory_map(void){
 	// for reference: http://www.uruk.org/orig-grub/mem64mb.html
@@ -152,7 +155,7 @@ void * get_next_page(void){
 
 			// rebuild the address.
 			uintptr_t address = index << 15 | next << 12;
-			c_printf("next address: %x\n", address );
+//			c_printf("next address: %x\n", address );
 
 			// mark it as used
 			set_pat(address, 0xFF);
@@ -196,6 +199,78 @@ int free_page(void * address){
 
 
 
+/**
+ * Generates a page table that maps 1:1 with memory and enables paging with it installed.
+ */
+void setup_initial_page_table(void){
+
+	// get a page for the page_directory
+	page_directory = get_next_page();
+
+	uint32_t page_flags = 0b000000000011;
+
+	// make page tables for each directory
+	for( int ii = 0; ii < KB; ++ii){
+		uint32_t * cur_pt = get_next_page();
+		page_directory[ii] = (uint32_t) cur_pt | page_flags;
+		for( int jj = 0; jj < KB; ++jj){
+			cur_pt[jj] = (ii << 22) | ( jj << 12 ) | page_flags;
+
+		}
+		c_printf("pte:%x\n", cur_pt[0]);
+	}
+
+	set_page_directory(page_directory);
+}
+
+/**
+ * sets the current page directory and enables paging and memory protection.
+ */
+void set_page_directory(uint32_t * directory){
+
+	c_printf("setting pd to %x\n", directory);
+
+	uint32_t * old = NULL;
+
+
+	// remember, AT&T syntax
+	// set the page directory
+	__asm__
+	__volatile__      /* optional */
+	(
+		"movl %%cr3, %%ebx\n"
+		"movl %%eax, %%cr3"
+			:"=b"(old) /*output operands optional */
+			  : "a"(directory) /*input operands  optional */
+				: //clobber list    /* optional */
+	);
+
+	c_printf("old pd: %x\n",old);
+//	__panic("done setting pd");
+	c_printf("enabling paging\n");
+
+	// enable paging
+	__asm__
+	(
+		"movl %%cr0, %%eax\n"
+		"orl $0x80000001, %%eax\n"
+		"movl %%eax, %%cr0"
+		: : : "eax"
+	);
+
+	c_printf("paging done\n");
+//	__panic("done with paging setup");
+
+
+
+}
+
+/**
+ * disables paging and returns the previous page directory.
+ */
+uint32_t * disable_paging(void){
+	return NULL;
+}
 
 
 

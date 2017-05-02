@@ -75,6 +75,10 @@ void * get_next_page(void);
  */
 int free_page(void * address);
 
+void setup_initial_page_table(void);
+
+void set_page_directory(uint32_t * directory);
+
 
 
 
