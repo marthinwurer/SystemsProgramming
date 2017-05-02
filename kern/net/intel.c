@@ -24,8 +24,12 @@ static uint16_t eeprom_read(struct nic_info *nic, uint16_t *addr_len, uint16_t a
 static void eeprom_load(struct nic_info *nic);
 static void intel_nic_handler(int vector, int code);
 static void init_cbl(struct nic_info* nic, uint32_t num_cb);
-static struct cb* get_next_cb();
+static void init_rfa(struct nic_info* nic, uint32_t num_rfd);
 static void recycle_command_blocks();
+static void claim_rfd_data();
+static struct cb* get_next_cb();
+static int32_t send_arp();
+
 
 static uint32_t mem_read32(void* addr) __attribute__((unused));
 static uint16_t mem_read16(void* addr) __attribute__((unused));
@@ -175,30 +179,31 @@ static void intel_nic_handler(int vector, int code) {
 	(void) vector; (void) code;
 	c_printf("INTERRUPT(v=0x%02x, c=0x%02x) -- Intel NIC, ", vector, code);
 	uint8_t stat_ack = mem_read8(&_nic.csr->scb.stat_ack);
-	c_printf("stat_ack=0x%02x\n", stat_ack);
+	c_printf("stat_ack=0x%02x ", stat_ack);
 
-	if(stat_ack & ack_cs_tno) c_printf("<<< ack_cs_tno bit set >>>\n");
-	if(stat_ack & ack_fr) c_printf("<<< ack_fr bit set >>>\n");
-	if(stat_ack & ack_cna) c_printf("<<< ack_cna bit set >>>\n");
-	if(stat_ack & ack_rnr) c_printf("<<< ack_rnr bit set >>>\n");
-	if(stat_ack & ack_mdi) c_printf("<<< ack_mdi bit set >>>\n");
-	if(stat_ack & ack_swi) c_printf("<<< ack_swi bit set >>>\n");
+	if(stat_ack & ack_cs_tno) c_printf("ack_cs_tno ");
+	if(stat_ack & ack_fr) {
+		c_printf("ack_fr ");
+		// claim_rfd_data();
+	}
+	if(stat_ack & ack_cna) c_printf("ack_cna ");
+	if(stat_ack & ack_rnr) c_printf("ack_rnr ");
+	if(stat_ack & ack_mdi) c_printf("ack_mdi ");
+	if(stat_ack & ack_swi) c_printf("ack_swi ");
+	c_printf("\n");
 
 	recycle_command_blocks();
 
-	// Check status bits and acknowledge them
-	mem_write8(&_nic.csr->scb.stat_ack, 0x00);
+	// acknowledge status bits
+	mem_write8(&_nic.csr->scb.stat_ack, ~0);
+	write_flush(&_nic);
 
-	// TODO do we actually not need to do the PIC_EOI thing that was blowing the system up?
-
-	// if(vector >= 0x20 && vector < 0x30) {
-	// 	__outb(PIC_MASTER_CMD_PORT, PIC_EOI);
-	// 	if(vector > 0x27) {m
-	// 		__outb(PIC_SLAVE_CMD_PORT, PIC_EOI);
-	// 	}
-	// }
-	// __outb(PIC_MASTER_CMD_PORT, PIC_EOI); // slave because we are above 0x20
-	// __outb(PIC_SLAVE_CMD_PORT, PIC_EOI); // slave because we are above 0x20
+	if(vector >= 0x20 && vector < 0x30) {
+		__outb(PIC_MASTER_CMD_PORT, PIC_EOI);
+		if(vector > 0x27) {
+			__outb(PIC_SLAVE_CMD_PORT, PIC_EOI);
+		}
+	}
 }
 
 /**
@@ -223,22 +228,67 @@ static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
 }
 
 /**
+ * Initialize the NIC with a ring of receive frame descriptors
+ *
+ * @param nic card to initialize the ring for
+ * @param num_rfd number of receive frame descriptors to create
+ */
+static void init_rfa(struct nic_info* nic, uint32_t num_rfd) {
+	struct rfd* first = (struct rfd*) get_next_page();
+	struct rfd* curr = first;
+	curr->size = NET_INTEL_RFD_SIZE;
+	curr->command = 1 << 3; // simplified mode
+	for(uint32_t i = 0; i < num_rfd; i++) {
+		curr->link = (uint32_t) get_next_page();
+		curr = (struct rfd*) curr->link;
+		curr->size = NET_INTEL_RFD_SIZE;
+		curr->command = 1 << 3; // simplified mode
+	}
+	curr->link = (uint32_t) first; // complete the circle
+	nic->next_rfd = first;
+}
+
+/**
  * frees up command blocks (and associated buffers) for future use
  */
 static void recycle_command_blocks() {
 	while(_nic.cb_to_check->status & cb_c) {
+		c_printf("freeing command block: %08x\n", (uint32_t) _nic.cb_to_check);
 		_nic.cb_to_check->status &= ~cb_c; // unset complete flag
-
-
-		if(_nic.cb_to_check->command & cb_tx_cmd) { // transmit CB
-			// TODO free up TBD or any other buffers
-			
-		}
-
 		_nic.avail_cb++; // increment available command blocks
 		_nic.cb_to_check = (struct cb*) _nic.cb_to_check->link;
 	}
 }
+
+// static void claim_rfd_data() {
+// 	struct rfd* rfd = _nic.next_rfd;
+// 	uint16_t byte_count = rfd->count & 0x3FFF;
+// 	c_printf("EOF=%c,F=%c,received %d bytes\n", 
+// 		(rfd->count & 0x8000) ? '1' : '0', 
+// 		(rfd->count & 0x4000) ? '1' : '0', 
+// 		rfd->count & 0x3FFF);
+// 	for(uint16_t i = 0; i < byte_count; i+=4) {
+// 		c_printf("[%4d] = %02x%02x %02x%02x (%c%c%c%c)\n",
+// 			i,
+// 			rfd->data[i],
+// 			rfd->data[i + 1],
+// 			rfd->data[i + 2],
+// 			rfd->data[i + 3],
+// 			rfd->data[i],
+// 			rfd->data[i + 1],
+// 			rfd->data[i + 2],
+// 			rfd->data[i + 3]);
+// 	}
+// 	// TODO finish writing this
+// 	// 
+// 	// check _nic.next_rfd to see if its been written to
+// 	// if it has:
+// 	//     process data (read actual count)
+// 	//     clear EOF and F flags
+// 	//     
+// 	//     _nic.next_rfd = (struct rfd*) _nic.next_rfd->link;
+// 	// 
+// }
 
 /**
  * Gets the next command block from the nic_info
@@ -247,14 +297,42 @@ static void recycle_command_blocks() {
  */
 static struct cb* get_next_cb() {
 	if(!_nic.avail_cb) {
-		c_printf("NIC: No available Command Blocks :(\n");
-		return NULL;
+		recycle_command_blocks();
+		if(!_nic.avail_cb) {
+			c_printf("NIC: No available Command Blocks :(\n");
+			return NULL;
+		}
 	}
 	struct cb* cb = _nic.next_cb;
 	_nic.next_cb = (struct cb*) cb->link;
 	_nic.avail_cb--;
 	return cb;
 }
+
+// static int32_t send_arp() {
+// 	struct cb* cb = get_next_cb();
+// 	if(cb == NULL) {
+// 		return -1;
+// 	}
+// 	struct arp arp; // TODO network byte order?
+// 	arp.hw_type = 0x0001; // ethernet
+// 	arp.protocol_type = 0x0800; // IPv4
+// 	arp.hw_addr_len = 0x06; // ethernet HW addr length
+// 	arp.protocol_addr_len = 0x04; // IPv4 addr length
+// 	arp.opcode = 0x01; // request
+// 	memcpy(arp.sender_hw_addr, _nic.mac, MAC_LENGTH_BYTES);
+// 	arp.sender_protocol_addr = 0xC4C4C4C4;
+// 	arp.target_hw_addr[0] = 0xFF;
+// 	arp.target_hw_addr[1] = 0xFF;
+// 	arp.target_hw_addr[2] = 0xFF;
+// 	arp.target_hw_addr[3] = 0xFF;
+// 	arp.target_hw_addr[4] = 0xFF;
+// 	arp.target_hw_addr[5] = 0xFF;
+// 	arp.target_protocol_addr = 0x00000000;
+
+// 	// TODO attach these things together
+// 	// ethertype = 0x0806 for ARP
+// }
 
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	if(length > NET_INTEL_MAX_ETH_LENGTH) {
@@ -276,25 +354,18 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	//
 	// Simplified mode
 	//
-	cb->command = cb_el | cb_sf | cb_tx_cmd; // end of cbl, simplified mode, transmit
+	cb->command = cb_s | cb_sf | cb_tx_cmd | cb_i;
 	cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
-	cb->u.tcb.tcb_byte_count = (tx_length + NET_INTEL_ETH_HEAD_LEN)| 0x8000; // 0x8000 = EOF flag
+	cb->u.tcb.tcb_byte_count = (tx_length + NET_INTEL_ETH_HEAD_LEN)| 1 << 15; // bit15 = EOF flag
 	cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
 	cb->u.tcb.tbd_count = 0;
 	memcpy(cb->u.tcb.eth_packet.dst_mac, dst_hw_addr, MAC_LENGTH_BYTES);
-	// We shouldn't need the src mac (it should be inserted automagically)
-	// memcpy(cb->u.tcb.eth_packet.src_mac, _nic.mac, MAC_LENGTH_BYTES);
 
-	cb->u.tcb.eth_packet.ethertype = tx_length; // length of ethernet data
+	cb->u.tcb.eth_packet.ethertype = ((tx_length >> 8) & 0x00FF) | (((tx_length << 8) & 0xFF00)); // network byte order
 	memcpy(cb->u.tcb.eth_packet.data, data, length);
-	// char* my_string = "Hello world, how are you doing? I'm feeling round!";
-	// memcpy(cb->u.tcb.eth_packet.data, my_string, strlen(my_string) + 1);
 
-	// give the cbl addr to the CU and start
 	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
-
 	uint8_t status = mem_read8(&_nic.csr->scb.status);
-	// c_printf("status=0x%02x\n", status);
 	if(!(status & cu_lpq_active) && !(status & cu_hqp_active)) {
 		mem_write8(&_nic.csr->scb.command, cuc_start);
 		write_flush(&_nic);
@@ -314,11 +385,11 @@ void intel_nic_init() {
 	// Try to find DSL card first, followed by QEMU card, then give up
 	uint8_t bus, slot;
 	if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_DSL_NIC) >= 0) {	
-		c_printf("NIC: DSL Lab Intel NIC found - bus: %d, slot: %d\n", bus, slot);
+		c_printf("NIC: Intel 8255x found - bus: %d, slot: %d\n", bus, slot);
 	}
-	else if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_QEMU_NIC) >= 0) {
-		c_printf("NIC: QEMU Intel NIC found - bus: %d, slot: %d\n", bus, slot);
-	}
+	// else if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_QEMU_NIC) >= 0) {
+	// 	c_printf("NIC: QEMU Intel NIC found - bus: %d, slot: %d\n", bus, slot);
+	// }
 	else {
 		c_printf("NIC: Could not find Intel NIC\n");
 		return;
@@ -344,10 +415,13 @@ void intel_nic_init() {
 	c_printf("\n");
 
 	//
-	// Set base CU to 0
+	// Set base CU and RU to 0
 	//
 	mem_write32(&_nic.csr->scb.gen_ptr, 0);
 	mem_write8(&_nic.csr->scb.command, cuc_load_cu_base);
+	write_flush(&_nic);
+	mem_write32(&_nic.csr->scb.gen_ptr, 0);
+	mem_write8(&_nic.csr->scb.command, ruc_load_ru_base);
 	write_flush(&_nic);
 
 	// 
@@ -359,10 +433,12 @@ void intel_nic_init() {
 	__install_isr(NET_INTEL_INT_VECTOR, intel_nic_handler);
 
 	// 
-	// Setup the CBL
+	// Setup the CBL and RFA
 	// 
-	c_printf("NIC: Initializing CB ring\n");
+	c_printf("NIC: Initializing CBL\n");
 	init_cbl(&_nic, TOTAL_CB);
+	c_printf("NIC: Initializing RFA\n");
+	init_rfa(&_nic, TOTAL_RFD);
 
 
 	//
@@ -406,7 +482,7 @@ void intel_nic_init() {
 	// Individual Address Configuration
 	// 
 	struct cb* ia_cb = get_next_cb();
-	ia_cb->command = cb_ia_cmd | cb_el;
+	ia_cb->command = cb_ia_cmd | cb_s;
 	memcpy(ia_cb->u.mac_addr, _nic.mac, MAC_LENGTH_BYTES);
 	c_printf("NIC: Setting IA to: ");
 	print_mac_addr(ia_cb->u.mac_addr);
@@ -416,28 +492,41 @@ void intel_nic_init() {
 	mem_write8(&_nic.csr->scb.command, cuc_start);
 	write_flush(&_nic);
 
+	//
+	// Enable Receiving
+	//
+	// mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) _nic.next_rfd);
+	// mem_write8(&_nic.csr->scb.command, ruc_start);
+
+	//
+	// ARP
+	//
+	// send_arp();
+
 	// 
 	// 
 	// TODO:
-	// o figure out if interrupt handler needs to send EOI (caused bugs before)
-	// o enable receiving data (pg 99)
-	// o configure receive buffers
+	// o handle receive interrupts in addition to CU interrupts
+	// o finish send_arp(), and handle arp packets
+	// o IPv4 header insertion
 	// o mutex on doing anything with CB
 	// 
 	// TEST:
-	// o ensure CBL ring and cleanup actually works
+	// o enable receiving data by putting first RFD ptr into gen_ptr (pg 99)
+	// o configure receive buffers
+	// 
+	// DONE:
+	// o make sure CRC is being inserted (ask other networking guy)
 	// o Write send_packet function (check on ethernet header)
-	// o make sure CRC/IA are being inserted (ask other networking guy)
 	// o configure IA
 	// o change configure command to make sure NSAI (byte 10) is set correctly to insert source address
 	// o Write routine to output configure command blocks
-	// 
-	// DONE:
+	// o figure out if interrupt handler needs to send EOI (caused bugs before)
+	// o ensure CBL ring and cleanup actually works
 	// o Finish writing ISR (cleanup CB)
 	// o Figure out what should stay static in intel.c and if some internal stuff should be removed from intel.h
 	// o Keep ring of available CB linked together, set EL flag on last one, but still have the links there
 	// o Merge memory stuff in from master, HINT MERGE NOT REBASE
-	// 
 	// 
 	// 
 

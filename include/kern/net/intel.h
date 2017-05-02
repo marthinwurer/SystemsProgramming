@@ -14,13 +14,17 @@
  * ---- Defintions ----
  * CSR := Control Status Register
  * SCB := System Control Block
+ * 
+ * CU := Command Unit
  * CB := Command Block
  * CBL := Command Block List
- * RFA := Receive Frame Area
- * CU := Command Unit
- * RU := Receive Unit
  * TCB := Transmit Command Block
  * TBD := Transmit Buffer Descriptor
+ * IA := Individual Address
+ * 
+ * RU := Receive Unit
+ * RFD := Receive Frame Descriptor
+ * RFA := Receive Frame Area
  * 
  * 
  */
@@ -32,6 +36,7 @@
 #define NET_INTEL_INT_VECTOR 0x2B
 
 #define TOTAL_CB 0x80
+#define TOTAL_RFD 0x80
 
 #define MAX_EEPROM_LENGTH 256
 #define MAC_LENGTH_BYTES 6
@@ -41,6 +46,7 @@
 #define NET_INTEL_MIN_ETH_LENGTH 46
 #define NET_INTEL_MAX_ETH_LENGTH 1500
 #define NET_INTEL_ETH_HEAD_LEN 14
+#define NET_INTEL_RFD_SIZE 3096
 
 // Stores info about network interface
 struct nic_info {
@@ -51,6 +57,24 @@ struct nic_info {
 	uint32_t avail_cb;
 	struct cb* next_cb;
 	struct cb* cb_to_check;
+	struct rfd* next_rfd;
+};
+
+// MMIO Control Status Register
+struct csr {
+	struct {
+		uint8_t status;
+		uint8_t stat_ack;
+		uint8_t command;
+		uint8_t interrupt_mask;
+		uint32_t gen_ptr;
+	} scb;
+	uint32_t port;
+	uint16_t __pad1;
+	uint8_t eeprom_lo;
+	uint8_t eeprom_hi;
+	uint32_t mdi;
+	uint32_t rx_dma_byte_count;
 };
 
 // Command Block
@@ -68,7 +92,7 @@ struct cb {
 			uint8_t tbd_count;
 			struct {
 				uint8_t dst_mac[MAC_LENGTH_BYTES];
-				uint8_t src_mac[MAC_LENGTH_BYTES];
+				// uint8_t src_mac[MAC_LENGTH_BYTES];
 				uint16_t ethertype; // under 1500 is payload length, above is type of payload header
 				uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
 			} eth_packet;
@@ -76,21 +100,28 @@ struct cb {
 	} u;
 };
 
-// MMIO Control Status Register
-struct csr {
-	struct {
-		uint8_t status;
-		uint8_t stat_ack;
-		uint8_t command;
-		uint8_t interrupt_mask;
-		uint32_t gen_ptr;
-	} scb;
-	uint32_t port;
-	uint16_t reserved1;
-	uint8_t eeprom_lo;
-	uint8_t eeprom_hi;
-	uint32_t mdi;
-	uint32_t rx_dma_byte_count;
+// Receive Frame Descriptor
+struct rfd {
+	uint16_t status;
+	uint16_t command;
+	uint32_t link;
+	uint32_t __pad1;
+	uint16_t count;
+	uint16_t size;
+	uint8_t data[NET_INTEL_RFD_SIZE];
+};
+
+// ARP packet
+struct arp {
+	uint16_t hw_type;
+	uint16_t protocol_type;
+	uint8_t hw_addr_len;
+	uint8_t protocol_addr_len;
+	uint16_t opcode;
+	uint8_t sender_hw_addr[6];
+	uint32_t sender_protocol_addr; // unaligned
+	uint8_t target_hw_addr[6];
+	uint32_t target_protocol_addr;
 };
 
 // Constants to control EEPROM
