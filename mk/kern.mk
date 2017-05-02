@@ -8,6 +8,8 @@ KERN_OBJ := early/_early.o \
             early/video.o \
             graphics/text/text.o \
             util/marquee.o \
+            vconsole/console.o \
+            vconsole/control.o \
             vesa/edid.o \
             vesa/vbe.o \
             video/color/color.o \

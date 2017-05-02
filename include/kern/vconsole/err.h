@@ -3,6 +3,8 @@
 
 #define E_VCON_SUCCESS 0
 #define E_VCON_ERROR 1
+#define E_VCON_BOUNDS 2
+#define E_VCON_BADSCROLL 3
 #define E_VCON_ARGNULL -1
 
 

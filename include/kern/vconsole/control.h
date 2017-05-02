@@ -2,6 +2,7 @@
 #define _KERN_VCONSOLE_CONTROL_H
 
 #include <kern/vconsole/err.h>
+#include <kern/vconsole/VConCtrl.h>
 
 /**
  * @brief Switches the currently displayed virtual console with another one

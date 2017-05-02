@@ -3,14 +3,17 @@
 
 #include <stdint.h>
 #include <kern/vconsole/err.h>
+#include <kern/vconsole/VCon.h>
+
+int vcon_init(VCon *con, VConChar *buf, uint16_t rows, uint16_t columns);
 
 int vcon_clear(VCon *con);
 
 int vcon_clearScroll(VCon *con);
 
-int vcon_putchar(VCon *con, char c);
+int vcon_putchar(VCon *con, char ch);
 
-int vcon_putcharAt(VCon *con, char c, uint16_t row, uint16_t col);
+int vcon_putcharAt(VCon *con, char ch, uint16_t row, uint16_t col);
 
 int vcon_puts(VCon *con, const char *str);
 

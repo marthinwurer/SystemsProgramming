@@ -9,7 +9,9 @@
 #include <kern/vesa/edid.h>
 #include <kern/vesa/err.h>
 
-#include <kern/graphics/text/text.h>
+#include <kern/vconsole/console.h>
+#include <kern/vconsole/control.h>
+
 
 // Exit codes
 
@@ -27,6 +29,25 @@
 // up using the protected-to-real mode int32 function.
 //
 int main(void) {
+
+	VCon console;
+
+	VConCtrl ctrl = (VConCtrl){
+		.current = &console,
+		.mode = VCON_MODE_VGATEXT
+	};
+
+	vcon_init(&console, (VConChar*)0x4C00, 25, 80);
+	vcon_clear(&console);
+
+	vcon_putchar(&console, 'A');
+	vcon_putchar(&console, 's');
+	
+
+	vcon_redraw(&ctrl);
+
+	__asm("hlt");
+
 
 	// Initialize the video module
 
