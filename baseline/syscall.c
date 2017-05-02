@@ -12,6 +12,7 @@
 
 #define	__SP_KERNEL__
 
+
 #include <baseline/common.h>
 
 #include <x86arch.h>
@@ -25,6 +26,9 @@
 #include <baseline/stack.h>
 #include <baseline/clock.h>
 #include <baseline/sio.h>
+
+#include <stddef.h>
+
 
 /*
 ** PRIVATE DEFINITIONS
@@ -68,6 +72,11 @@ queue_t _waiting;	// concerned parents
 ** that routine to assign all return values for the call.
 */
 void _sys_isr( int vector, int code ) {
+
+	// cast away warnings
+	(void) vector;
+	(void) code;
+
 	uint32_t syscode;
 	
 	// retrieve the system call code
@@ -526,11 +535,11 @@ static void _sys_fork( pcb_t *pcb ) {
 	
 	// figure out the byte offset from stack to stack
 	int32_t offset = (int)
-	    ( ((void *)new->stack) - ((void *)pcb->stack) );
+	    ( ((ptrdiff_t)new->stack) - ((ptrdiff_t)pcb->stack) );
 	
 	// fix the child's context pointer
 	new->context = (context_t *)
-	    ( ((void *) pcb->context) + offset );
+	    ( ((ptrdiff_t) pcb->context) + offset );
 	
 	// fix the child's EBP
 	REG(new,ebp) += offset;

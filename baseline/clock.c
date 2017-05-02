@@ -60,6 +60,10 @@ time_t _now;		// the current system time
 ** for the current process.
 */
 static void _clk_isr( int vector, int code ) {
+	// get rid of warnings
+	(void) vector;
+	(void) code;
+
 	pcb_t *pcb;
 
 	// spin the pinwheel

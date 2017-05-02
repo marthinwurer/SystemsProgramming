@@ -289,7 +289,7 @@ move_gdt:
 	movw	%cs, %si
 	movw	%si, %ds
 	movw	$start_gdt + BOOT_ADDRESS, %si
-	movw	$GDT_SEGMENT, %di
+	movw	$EARLY_GDT_SEGMENT, %di
 	movw	%di, %es
 	xorw	%di, %di
 	movl	$gdt_len, %ecx
@@ -357,12 +357,12 @@ err_diskfail:
 ** The GDTR and IDTR contents.
 */
 gdt_48:
-	.word	0x2000		/* 1024 GDT entries x 8 bytes/entry = 8192 */
-	.quad	GDT_ADDRESS
+	.word	gdt_len - 1		/* 1024 GDT entries x 8 bytes/entry = 8192 */
+	.quad	EARLY_GDT_ADDRESS
 
-idt_48:
-	.word	0x0800		/* 256 interrupts */
-	.quad	IDT_ADDRESS
+//idt_48:
+//	.word	0x0800		/* 256 interrupts */
+//	.quad	IDT_ADDRESS
 
 /*
 ** Originally, the GDT contents were here.  When booting from a floppy
@@ -407,12 +407,20 @@ switch:
 	call	move_gdt
 	call	check_mem
 
+	// call _early
+	// this routine will call bios functions for early initialization
+	
+	//lcall	$0x300, $0x0
+
+	//lcall	*0x300:0
+
+
 /*
 ** The IDTR and GDTR are loaded relative to this segment, so we must
 ** use the full offsets from the beginning of the segment (0000:0000);
 ** however, we were loaded at 0000:7c00, so we need to add that in.
 */
-	lidt	idt_48 + BOOT_ADDRESS
+	//lidt	idt_48 + BOOT_ADDRESS
 	lgdt	gdt_48 + BOOT_ADDRESS
 
 	movl	%cr0, %eax	/* get current CR0 */
@@ -438,7 +446,7 @@ switch:
 
 	.byte	0x66	/* 32-bit mode prefix */
 	.code32
-	ljmp	$GDT_CODE, $TARGET_ADDRESS
+	ljmp	$EARLY_GDT_CODE32, $TARGET_ADDRESS
 	.code16
 
 /*
@@ -515,15 +523,7 @@ wait2_exit:
 start_gdt:
 	.word	0,0,0,0		/* first GDT entry is always null */
 
-linear_seg:	/* limit FFFFF, base 0, R/W data seg, 32-bit 4K */
-	.word	0xFFFF	/* limit[15:0] */
-	.word	0x0000	/* base[15:0] */
-	.byte	0x00	/* base[23:16] */
-	.byte	0x92	/* access byte */
-	.byte	0xCF	/* granularity */
-	.byte	0x00	/* base[31:24] */
-
-code_seg:	/* limit FFFFF, base 0, R/E code seg, 32-bit 4K */
+code32_seg:	/* limit FFFFF, base 0, R/E code seg, 32-bit 4K */
 	.word	0xFFFF
 	.word	0x0000
 	.byte	0x00
@@ -531,7 +531,7 @@ code_seg:	/* limit FFFFF, base 0, R/E code seg, 32-bit 4K */
 	.byte	0xCF	/* 1 1 00 1111: 4K, 32-bit, 0, 0, limit[19:16] */
 	.byte	0x00
 
-data_seg:	/* limit FFFFF, base 0, R/W data seg, 32-bit 4K */
+data32_seg:	/* limit FFFFF, base 0, R/W data seg, 32-bit 4K */
 	.word	0xFFFF
 	.word	0x0000
 	.byte	0x00
@@ -539,13 +539,21 @@ data_seg:	/* limit FFFFF, base 0, R/W data seg, 32-bit 4K */
 	.byte	0xCF
 	.byte	0x00
 
-stack_seg:	/* limit FFFFF, base 0, R/W data seg, 32-bit 4K */
-	.word	0xFFFF
-	.word	0x0000
-	.byte	0x00
-	.byte	0x92
-	.byte	0xCF
-	.byte	0x00
+code16_seg:
+	.word   0xFFFF
+	.word   0x0000
+	.byte   0x00 
+	.byte   0x9A
+	.byte   0x0F
+	.byte   0x00
+
+data16_seg:
+	.word   0xFFFF
+	.word   0x0000
+	.byte   0x00
+	.byte   0x92
+	.byte   0x0F
+	.byte   0x00
 
 end_gdt:
 gdt_len = end_gdt - start_gdt

@@ -64,6 +64,8 @@
 */
 void c_io_init( void );
 
+void c_io_init_isr(void);
+
 /*****************************************************************************
 **
 ** SCROLLING OUTPUT ROUTINES

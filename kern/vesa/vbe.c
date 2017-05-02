@@ -129,5 +129,5 @@ int __performVBEFunction(uint16_t function, regs16_t *regs) {
 	regs->ax = VBE_AX | function;
 	__int32(0x10, regs);
 
-	return regs->ax == VBE_RETURN_FUNCTION_SUPPORTED | VBE_RETURN_FUNCTION_SUCCESS;
+	return regs->ax == (VBE_RETURN_FUNCTION_SUPPORTED | VBE_RETURN_FUNCTION_SUCCESS);
 }

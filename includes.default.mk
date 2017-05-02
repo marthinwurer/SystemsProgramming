@@ -27,7 +27,7 @@ WERROR :=
 
 WARNFLAGS := -Wall -Wextra -pedantic
 
-CFLAGS = -m32 -std=c99 -fno-stack-protector -fno-builtin $(WARNFLAGS) $(WERROR)
+CFLAGS = -std=c99 -fno-stack-protector -fno-builtin $(WARNFLAGS) $(WERROR)
 
 CPPFLAGS = -nostdinc -I$(INC_DIR)
 

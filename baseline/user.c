@@ -82,6 +82,8 @@ int32_t user_a( void *arg ) {
 	int i, j;
 	int32_t n;
 	char buf[12];
+	// cast away warnings
+	(void) arg;
 
 	n = swritech( 'A' );
 	if( n != 1 ) {
@@ -120,6 +122,9 @@ int32_t user_b( void *arg ) {
 	int i, j;
 	int32_t n;
 	char buf[12];
+	// cast away warnings
+	(void) arg;
+
 
 	n = swritech( 'B' );
 	if( n != 1 ) {
@@ -154,6 +159,9 @@ int32_t user_b( void *arg ) {
 }
 
 int32_t user_c( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int i, j;
 	int32_t n;
 	char buf[12];
@@ -196,6 +204,9 @@ int32_t user_c( void *arg ) {
 */
 
 int32_t user_d( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	pid_t pid;
 	int ret = EXIT_SUCCESS;
 
@@ -223,6 +234,9 @@ int32_t user_d( void *arg ) {
 */
 
 int32_t user_e( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 
 	report( 'E', arg, getpid() );
 	swritech( 'E' );
@@ -241,6 +255,9 @@ int32_t user_e( void *arg ) {
 */
 
 int32_t user_f( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 
 	report( 'F', arg, getpid() );
 	swritech( 'F' );
@@ -259,6 +276,9 @@ int32_t user_f( void *arg ) {
 */
 
 int32_t user_g( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 
 	report( 'G', arg, getpid() );
 	swritech( 'G' );
@@ -279,6 +299,9 @@ int32_t user_g( void *arg ) {
 */
 
 int32_t user_h( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 
 	swritech( 'H' );
 	for( int i = 0; i < 5; ++i ) {
@@ -299,6 +322,9 @@ int32_t user_h( void *arg ) {
 */
 
 int32_t user_j( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 
 	swritech( 'J' );
 
@@ -323,6 +349,9 @@ int32_t user_j( void *arg ) {
 */
 
 int32_t user_k( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 
 	swritech( 'K' );
 
@@ -348,6 +377,9 @@ int32_t user_k( void *arg ) {
 */
 
 int32_t user_l( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int i;
 	time_t time;
 	char buf[8];
@@ -390,6 +422,9 @@ int32_t user_l( void *arg ) {
 */
 
 int32_t user_m( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int i;
 	char buf[12];
 
@@ -420,6 +455,9 @@ int32_t user_m( void *arg ) {
 */
 
 int32_t user_n( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int i;
 	pid_t pid;
 	char buf[12];
@@ -462,6 +500,9 @@ int32_t user_n( void *arg ) {
 */
 
 int32_t user_p( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	time_t time;
 	int i;
 	char buf[8];
@@ -496,6 +537,9 @@ int32_t user_p( void *arg ) {
 */
 
 int32_t user_q( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 
 	swritech( 'Q' );
 	bogus();
@@ -512,6 +556,9 @@ int32_t user_q( void *arg ) {
 */
 
 int32_t user_r( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int ch = '&';
 	char buf[12];
 
@@ -547,6 +594,9 @@ int32_t user_r( void *arg ) {
 */
 
 int32_t user_s( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 
 	swritech( 'S' );
 	for(;;) {
@@ -568,6 +618,9 @@ int32_t user_s( void *arg ) {
 */
 
 int32_t user_t( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	pid_t pid[3];
 	char buf[12];
 
@@ -614,6 +667,9 @@ int32_t user_t( void *arg ) {
 */
 
 int32_t user_u( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int pid[3];
 	status_t status;
 	char buf[12];
@@ -679,6 +735,9 @@ int32_t user_u( void *arg ) {
 */
 
 int32_t user_w( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	char buf[12];
 
 	report( 'W', arg, getpid() );
@@ -706,6 +765,9 @@ int32_t user_w( void *arg ) {
 */
 
 int32_t user_x( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int i, j;
 	pid_t pid;
 	char buf[12];
@@ -734,6 +796,9 @@ int32_t user_x( void *arg ) {
 */
 
 int32_t user_y( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int i, j;
 
 	for( i = 0; i < 10 ; ++i ) {
@@ -756,6 +821,9 @@ int32_t user_y( void *arg ) {
 */
 
 int32_t user_z( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int i, j;
 	pid_t pid, ppid;
 	char buf[12];
@@ -806,6 +874,9 @@ int32_t user_z( void *arg ) {
 */
 
 int32_t idle( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	int i;
 	pid_t pid;
 	time_t time;
@@ -853,6 +924,9 @@ int32_t idle( void *arg ) {
 */
 
 int32_t init( void *arg ) {
+	// cast away warnings
+	(void) arg;
+
 	pid_t pid;
 
 	cwrites( "Init started\n" );

@@ -32,6 +32,16 @@
 #define	GDT_DATA	0x0018		/* All of memory, R/W */
 #define	GDT_STACK	0x0020		/* All of memory, R/W */
 
+// GDT used by the early initialization routine
+#define EARLY_GDT_SEGMENT 0x02D1
+#define EARLY_GDT_ADDRESS 0x2D10
+
+#define EARLY_GDT_CODE32 0x08
+#define EARLY_GDT_DATA32 0x10
+#define EARLY_GDT_CODE16 0x18
+#define EARLY_GDT_DATA16 0x20
+
+
 /*
 ** The Interrupt Descriptor Table (0000:2500 - 0000:2D00)
 */
@@ -49,6 +59,14 @@
 #define	MMAP_CFG_HI	0x06	/* configured memory - high register */
 #define	MMAP_PROGRAMS	0x08	/* # of programs loaded from disk (+ kernel) */
 #define	MMAP_SECTORS	0x0a	/* table of sector counts for each program */
+
+
+/*
+** realprog address (0000:2E00 - 0000:2FFF)
+*/
+
+#define REALPROG_SEGMENT 0x0300
+#define REALPROG_ADDRESS 0x3000
 
 /*
 ** Real Mode Program(s) Text Area (0000:3000 - 0x7c00)
