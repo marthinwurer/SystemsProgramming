@@ -225,6 +225,7 @@ enum cb_status {
 	// struct sk_buff *skb;
 
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length);
+void intel_nic_enable_rx();
 void intel_nic_init();
 
 #endif

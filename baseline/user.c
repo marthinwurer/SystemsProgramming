@@ -933,7 +933,8 @@ int32_t init( void *arg ) {
 
 	swritech( '$' );
 
-	pid = spawn( idle, (void *) '.', P_MIN );
+	// pid = spawn( idle, (void *) '.', P_MIN );
+	pid = spawn( idle, 0, P_MIN );
 	if( pid < 0 ) {
 		cwrites( "init, spawn() IDLE failed\n" );
 	}

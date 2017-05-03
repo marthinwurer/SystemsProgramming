@@ -26,6 +26,7 @@ static void intel_nic_handler(int vector, int code);
 static void init_cbl(struct nic_info* nic, uint32_t num_cb);
 static void init_rfa(struct nic_info* nic, uint32_t num_rfd);
 static void recycle_command_blocks();
+static char ascii_to_printable_char(char c);
 static void claim_rfd_data();
 static struct cb* get_next_cb();
 static int32_t send_arp();
@@ -214,14 +215,15 @@ static void intel_nic_handler(int vector, int code) {
  */
 static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
 	struct cb* first = (struct cb*) get_next_page();
-	struct cb* prev = first;
+	struct cb* curr = first;
+	curr->status = 0;
 	for(uint32_t i = 0; i < num_cb; i++) {
-		prev->link = (uint32_t) get_next_page();
-		prev = (struct cb*) prev->link;
+		curr->link = (uint32_t) get_next_page();
+		curr = (struct cb*) curr->link;
+		curr->status = 0;
 	}
-	prev->link = (uint32_t) first; // complete the circle
+	curr->link = (uint32_t) first; // complete the circle
 
-	//put this stuff into the nic_info
 	nic->avail_cb = num_cb;
 	nic->next_cb = first;
 	nic->cb_to_check = first;
@@ -247,12 +249,15 @@ static void init_rfa(struct nic_info* nic, uint32_t num_rfd) {
 	curr->link = (uint32_t) first; // complete the circle
 	nic->next_rfd = first;
 }
-
 /**
  * frees up command blocks (and associated buffers) for future use
  */
 static void recycle_command_blocks() {
-	c_printf("NIC: attempting to free up some command blocks");
+	// c_printf("NIC: first CB (0x%08x)\n", first_cbl);
+	// c_printf("NIC: begin recycle status (0x%08x)=0x%02x\n", 
+	// 	(uint32_t) _nic.cb_to_check, 
+	// 	_nic
+	// 	.cb_to_check->status);
 	while(_nic.cb_to_check->status & cb_c) {
 		c_printf("NIC: freeing command block: %08x\n", (uint32_t) _nic.cb_to_check);
 		_nic.cb_to_check->status &= ~cb_c; // unset complete flag
@@ -262,40 +267,51 @@ static void recycle_command_blocks() {
 	}
 }
 
+// static char ascii_to_printable_char(char c) {
+// 	if(c  > 31 && c < 127) {
+// 		return c;
+// 	}
+// 	else {
+// 		return '.';
+// 	}
+// }
+
 // static void claim_rfd_data() {
 // 	struct rfd* rfd = _nic.next_rfd;
 // 	uint16_t byte_count = rfd->count & 0x3FFF;
 // 	c_printf("EOF=%c,F=%c,received %d bytes\n", 
 // 		(rfd->count & 0x8000) ? '1' : '0', 
 // 		(rfd->count & 0x4000) ? '1' : '0', 
-// 		rfd->count & 0x3FFF);
-// 	for(uint16_t i = 0; i < byte_count; i+=4) {
-// 		c_printf("[%4d] = %02x%02x %02x%02x (%c%c%c%c)\n",
-// 			i,
-// 			rfd->data[i],
+// 		byte_count);
+// 	for(uint16_t i = 0; i < byte_count; i+=8) {
+// 		c_printf("rx[%5d] = %02x%02x %02x%02x %02x%02x %02x%02x (%c%c%c%c %c%c%c%c)\n", i, 
+// 			rfd->data[i + 0], 
 // 			rfd->data[i + 1],
 // 			rfd->data[i + 2],
 // 			rfd->data[i + 3],
-// 			rfd->data[i],
-// 			rfd->data[i + 1],
-// 			rfd->data[i + 2],
-// 			rfd->data[i + 3]);
+// 			rfd->data[i + 4],
+// 			rfd->data[i + 5],
+// 			rfd->data[i + 6],
+// 			rfd->data[i + 7],
+// 			ascii_to_printable_char(rfd->data[i + 0]),
+// 			ascii_to_printable_char(rfd->data[i + 1]),
+// 			ascii_to_printable_char(rfd->data[i + 2]),
+// 			ascii_to_printable_char(rfd->data[i + 3]),
+// 			ascii_to_printable_char(rfd->data[i + 4]),
+// 			ascii_to_printable_char(rfd->data[i + 5]),
+// 			ascii_to_printable_char(rfd->data[i + 6]),
+// 			ascii_to_printable_char(rfd->data[i + 7]));
 // 	}
-// 	// TODO finish writing this
-// 	// 
-// 	// check _nic.next_rfd to see if its been written to
-// 	// if it has:
-// 	//     process data (read actual count)
-// 	//     clear EOF and F flags
-// 	//     
-// 	//     _nic.next_rfd = (struct rfd*) _nic.next_rfd->link;
-// 	// 
+// 	rfd->count &= ~0x8000; //clear EOF
+// 	rfd->count &= ~0x4000; //clear F
+// 	_nic.next_rfd = (struct rfd*) _nic.next_rfd->link;
 // }
 
 /**
  * Gets the next command block from the nic_info
  *
- * @return next available command block, NULL if there aren't any
+ * @return next available command block,
+ NULL if there aren't any
  */
 static struct cb* get_next_cb() {
 	if(!_nic.avail_cb) {
@@ -306,6 +322,7 @@ static struct cb* get_next_cb() {
 		}
 	}
 	struct cb* cb = _nic.next_cb;
+	c_printf("NIC: get_next_cb = 0x%08x\n", (uint32_t) cb);
 	_nic.next_cb = (struct cb*) cb->link;
 	_nic.avail_cb--;
 	return cb;
@@ -367,10 +384,9 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	memcpy(cb->u.tcb.eth_packet.data, data, length);
 
 	uint8_t status = mem_read8(&_nic.csr->scb.status);
-	c_printf("status: 0x%02x\n", status);
+	c_printf("send_packet CU/RU status = 0x%02x\n", status);
 	if(((status & cu_mask) == cu_idle) 
 			|| ((status & cu_mask) == cu_suspended)) {
-		c_printf("NIC: Starting CUC\n");
 		mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
 		mem_write8(&_nic.csr->scb.command, cuc_start);
 		write_flush(&_nic);
@@ -423,7 +439,7 @@ void intel_nic_init() {
 	// 
 	uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
 	uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
-	c_printf("NIC: interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
+	// c_printf("NIC: interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
 	__install_isr(NET_INTEL_INT_VECTOR, intel_nic_handler);
 
 	// 
@@ -431,14 +447,14 @@ void intel_nic_init() {
 	// 
 	c_printf("NIC: Initializing CBL\n");
 	init_cbl(&_nic, TOTAL_CB);
-	// c_printf("NIC: Initializing RFA\n");
-	// init_rfa(&_nic, TOTAL_RFD);
+	c_printf("NIC: Initializing RFA\n");
+	init_rfa(&_nic, TOTAL_RFD);
 
 
 	//
 	// Initial Configure command
 	// 
-	c_printf("NIC: Sending initial configure command");
+	c_printf("NIC: Sending initial configure command\n");
 	struct cb* configure_cb = get_next_cb();
 	configure_cb->command = cb_cfg_cmd;
 	configure_cb->u.cfg[0] = 16; // 16 bytes of configuration
@@ -488,12 +504,6 @@ void intel_nic_init() {
 	write_flush(&_nic);
 
 	//
-	// Enable Receiving
-	//
-	// mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) _nic.next_rfd);
-	// mem_write8(&_nic.csr->scb.command, ruc_start);
-
-	//
 	// ARP
 	//
 	// send_arp();
@@ -526,6 +536,11 @@ void intel_nic_init() {
 	// 
 	// 
 
+}
+
+void intel_nic_enable_rx() {
+	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) _nic.next_rfd);
+	mem_write8(&_nic.csr->scb.command, ruc_start);
 }
 
 static uint32_t mem_read32(void* addr) {
