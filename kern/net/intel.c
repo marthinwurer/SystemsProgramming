@@ -252,9 +252,11 @@ static void init_rfa(struct nic_info* nic, uint32_t num_rfd) {
  * frees up command blocks (and associated buffers) for future use
  */
 static void recycle_command_blocks() {
+	c_printf("NIC: attempting to free up some command blocks");
 	while(_nic.cb_to_check->status & cb_c) {
-		c_printf("freeing command block: %08x\n", (uint32_t) _nic.cb_to_check);
+		c_printf("NIC: freeing command block: %08x\n", (uint32_t) _nic.cb_to_check);
 		_nic.cb_to_check->status &= ~cb_c; // unset complete flag
+		_nic.cb_to_check->command &= 0;
 		_nic.avail_cb++; // increment available command blocks
 		_nic.cb_to_check = (struct cb*) _nic.cb_to_check->link;
 	}
@@ -354,7 +356,7 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	//
 	// Simplified mode
 	//
-	cb->command = cb_s | cb_sf | cb_tx_cmd | cb_i;
+	cb->command = cb_el | cb_sf | cb_tx_cmd;
 	cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
 	cb->u.tcb.tcb_byte_count = (tx_length + NET_INTEL_ETH_HEAD_LEN)| 1 << 15; // bit15 = EOF flag
 	cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
@@ -364,18 +366,13 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	cb->u.tcb.eth_packet.ethertype = ((tx_length >> 8) & 0x00FF) | (((tx_length << 8) & 0xFF00)); // network byte order
 	memcpy(cb->u.tcb.eth_packet.data, data, length);
 
-	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
 	uint8_t status = mem_read8(&_nic.csr->scb.status);
-	if(!(status & cu_lpq_active) && !(status & cu_hqp_active)) {
+	c_printf("status: 0x%02x\n", status);
+	if(((status & cu_mask) == cu_idle) 
+			|| ((status & cu_mask) == cu_suspended)) {
+		c_printf("NIC: Starting CUC\n");
+		mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
 		mem_write8(&_nic.csr->scb.command, cuc_start);
-		write_flush(&_nic);
-	}
-	else if(status & cu_idle) {
-		mem_write8(&_nic.csr->scb.command, cuc_start);
-		write_flush(&_nic);
-	}
-	else if(status & cu_suspended) {
-		mem_write8(&_nic.csr->scb.command, cuc_resume);
 		write_flush(&_nic);
 	}
 	return 0;
@@ -387,9 +384,6 @@ void intel_nic_init() {
 	if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_DSL_NIC) >= 0) {	
 		c_printf("NIC: Intel 8255x found - bus: %d, slot: %d\n", bus, slot);
 	}
-	// else if(pci_get_device(&bus, &slot, NET_INTEL_VENDOR, NET_INTEL_QEMU_NIC) >= 0) {
-	// 	c_printf("NIC: QEMU Intel NIC found - bus: %d, slot: %d\n", bus, slot);
-	// }
 	else {
 		c_printf("NIC: Could not find Intel NIC\n");
 		return;
@@ -437,8 +431,8 @@ void intel_nic_init() {
 	// 
 	c_printf("NIC: Initializing CBL\n");
 	init_cbl(&_nic, TOTAL_CB);
-	c_printf("NIC: Initializing RFA\n");
-	init_rfa(&_nic, TOTAL_RFD);
+	// c_printf("NIC: Initializing RFA\n");
+	// init_rfa(&_nic, TOTAL_RFD);
 
 
 	//
@@ -482,12 +476,13 @@ void intel_nic_init() {
 	// Individual Address Configuration
 	// 
 	struct cb* ia_cb = get_next_cb();
-	ia_cb->command = cb_ia_cmd | cb_s;
+	ia_cb->command = cb_ia_cmd | cb_el;
 	memcpy(ia_cb->u.mac_addr, _nic.mac, MAC_LENGTH_BYTES);
 	c_printf("NIC: Setting IA to: ");
 	print_mac_addr(ia_cb->u.mac_addr);
 	c_printf("\n");
 
+	// [configure_cb]-->[ia_cb]-->
 	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) configure_cb);
 	mem_write8(&_nic.csr->scb.command, cuc_start);
 	write_flush(&_nic);
@@ -507,6 +502,7 @@ void intel_nic_init() {
 	// 
 	// TODO:
 	// o handle receive interrupts in addition to CU interrupts
+	// o write raw_tcb_tx()
 	// o finish send_arp(), and handle arp packets
 	// o IPv4 header insertion
 	// o mutex on doing anything with CB

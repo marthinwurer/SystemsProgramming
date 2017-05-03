@@ -142,14 +142,16 @@ enum scb_stat_ack {
 };
 
 enum scb_status {
+	cu_mask = 0xC0,
+	ru_mask = 0x3C,
 	cu_idle = 0x00,
 	cu_suspended = 0x40,
 	cu_lpq_active = 0x80,
 	cu_hqp_active = 0xC0,
 	ru_idle = 0x00,
-	ru_suspended = 0x01,
-	ru_no_resources = 0x02,
-	ru_ready = 0x04
+	ru_suspended = 0x04,
+	ru_no_resources = 0x08,
+	ru_ready = 0x10
 };
 
 enum scb_control {
