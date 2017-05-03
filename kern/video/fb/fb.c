@@ -99,7 +99,7 @@ int fb_putpixelf(VideoFb *fb, uint32_t offset, VideoCol color) {
 			*((uint8_t*)(location + 2)) = (uint8_t)(color >> 16);
 			break;
 		case 4:
-			*((uint32_t*)location) = color;
+			*((uint32_t*)location) = (uint32_t)color;
 			break;
 		default:
 			break;

@@ -159,6 +159,16 @@ int video_early_bestMode(VideoMode *mode) {
 					}
 				}
 			}
+
+			for (int i = 0; i != EDID_STANDARD_TIMING_COUNT; ++i) {
+				if (edid_parseStandard(VIDEO_EDID, &timing, i) == E_VESA_SUCCESS) {
+					index = __matchMode(modeList, usableModes, timing);
+					if (index != -1) {
+						*mode = modeList[index];
+						return E_VIDEO_SUCCESS;
+					}
+				}
+			}
 		}
 
 		// Matching a mode using EDID has failed, pick a "safe" resolution

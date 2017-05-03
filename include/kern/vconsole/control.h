@@ -19,4 +19,7 @@ int vcon_switch(VConCtrl *ctrl, VCon *console);
 int vcon_redraw(VConCtrl *ctrl);
 
 
+int vcon_redrawCells(VConCtrl *ctrl, unsigned index, unsigned cells);
+
+
 #endif

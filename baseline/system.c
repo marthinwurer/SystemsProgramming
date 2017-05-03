@@ -152,10 +152,18 @@ void _init( void ) {
 	** Console I/O system.
 	*/
 
-	c_io_init();
+	//c_io_init();
+
+	c_clearscreen();
+
 	c_io_init_isr();
-	c_setscroll( 0, 7, 99, 99 );
-	c_puts_at( 0, 6, "================================================================================" );
+	c_setscroll( 0, 7, CIO_CONTROLLER.current->columns, CIO_CONTROLLER.current->rows );
+	
+	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
+		c_putchar_at(i, 6, '=');
+	}
+	//c_puts_at( 0, 6, "================================================================================" );
+
 
 	video_dumpInfo(VIDEO_INFO);
 

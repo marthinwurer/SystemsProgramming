@@ -1,6 +1,10 @@
 #ifndef _KERN_VCONSOLE_VCONSOLE_H
 #define _KERN_VCONSOLE_VCONSOLE_H
 
+typedef struct VCon_s VCon;
+
+
+#include <kern/vconsole/VConCtrl.h>
 #include <kern/vconsole/VConChar.h>
 
 #include <stdint.h>
@@ -20,7 +24,7 @@
 
 #define vcon_cursor(columns, row, col) (col + (row * columns))
 
-typedef struct VCon_s {
+struct VCon_s {
 
 	uint16_t rows;
 	uint16_t columns;
@@ -31,11 +35,9 @@ typedef struct VCon_s {
 	uint16_t scrollMaxX;
 	uint16_t scrollMaxY;
 	uint8_t tabSize;
-	uint32_t lastWriteIndex; // index in buffer of the last write
-	uint32_t lastWriteCount; // number of cells in the buffer from last write
 	VConChar *buf;
-
-} VCon;
+	VConCtrl *controller;
+};
 
 
 #endif

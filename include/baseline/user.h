@@ -41,32 +41,32 @@
 
 //	user	          baseline system calls in use
 //		   xt cr sr cw sw fe sp wt kl sl gp gP gt gs
-// #define SPAWN_A	//  X  .  .  X  X  .  .  .  .  .  .  .  .  .
-// #define SPAWN_B	//  X  .  .  X  X  .  .  .  .  .  .  .  .  .
-// #define SPAWN_C	//  X  .  .  X  X  .  .  .  .  .  .  .  .  .
-// #define SPAWN_D	//  X  .  .  X  X  .  X  .  .  .  .  .  .  .
-// #define SPAWN_E	//  X  .  .  X  X  .  .  .  .  X  X  .  .  .
-// #define SPAWN_F	//  X  .  .  X  X  .  .  .  .  X  X  .  .  .
-// #define SPAWN_G	//  X  .  .  X  X  .  .  .  .  X  X  .  .  .
-// #define SPAWN_H	//  .  .  .  X  X  .  .  .  .  .  .  .  .  .
-// 		// user H doesn't call exit()
-// // no user I
-// #define SPAWN_J	//  X  .  .  .  X  .  X  .  .  .  .  .  .  .
-// 		// user J tries to spawn() 2*N_PROCS children
-// #define SPAWN_K	//  X  .  .  .  X  .  X  .  .  X  .  .  .  .
-// #define SPAWN_L	//  X  .  .  X  X  .  .  .  .  .  .  .  X  .
-// #define SPAWN_M	//  X  .  .  X  X  .  X  .  .  .  .  .  .  .
-// #define SPAWN_N	//  X  .  .  X  X  .  X  .  .  .  .  .  .  .
-// 		// user N spawns W and Z at low priority
-// // no user O
-// #define SPAWN_P	//  X  .  .  X  X  .  .  .  .  X  .  .  X  .
-// #define SPAWN_Q	//  X  .  .  X  X  .  .  .  .  .  .  .  .  .
-//  		// user Q makes a bogus system call
-// #define SPAWN_R	//  X  .  X  X  X  .  .  .  .  X  .  .  .  .
-// #define SPAWN_S	//  .  .  X  X  .  .  .  .  .  X  .  .  .  .
-// 		// user S loops forever
-// #define SPAWN_T	//  X  .  X  X  .  .  .  X  .  X  .  .  .  .
-// #define SPAWN_U	//  X  .  X  X  .  .  .  X  X  X  .  .  .  .
+#define SPAWN_A	//  X  .  .  X  X  .  .  .  .  .  .  .  .  .
+#define SPAWN_B	//  X  .  .  X  X  .  .  .  .  .  .  .  .  .
+#define SPAWN_C	//  X  .  .  X  X  .  .  .  .  .  .  .  .  .
+#define SPAWN_D	//  X  .  .  X  X  .  X  .  .  .  .  .  .  .
+#define SPAWN_E	//  X  .  .  X  X  .  .  .  .  X  X  .  .  .
+#define SPAWN_F	//  X  .  .  X  X  .  .  .  .  X  X  .  .  .
+#define SPAWN_G	//  X  .  .  X  X  .  .  .  .  X  X  .  .  .
+#define SPAWN_H	//  .  .  .  X  X  .  .  .  .  .  .  .  .  .
+		// user H doesn't call exit()
+// no user I
+#define SPAWN_J	//  X  .  .  .  X  .  X  .  .  .  .  .  .  .
+		// user J tries to spawn() 2*N_PROCS children
+#define SPAWN_K	//  X  .  .  .  X  .  X  .  .  X  .  .  .  .
+#define SPAWN_L	//  X  .  .  X  X  .  .  .  .  .  .  .  X  .
+#define SPAWN_M	//  X  .  .  X  X  .  X  .  .  .  .  .  .  .
+#define SPAWN_N	//  X  .  .  X  X  .  X  .  .  .  .  .  .  .
+		// user N spawns W and Z at low priority
+// no user O
+#define SPAWN_P	//  X  .  .  X  X  .  .  .  .  X  .  .  X  .
+#define SPAWN_Q	//  X  .  .  X  X  .  .  .  .  .  .  .  .  .
+ 		// user Q makes a bogus system call
+#define SPAWN_R	//  X  .  X  X  X  .  .  .  .  X  .  .  .  .
+#define SPAWN_S	//  .  .  X  X  .  .  .  .  .  X  .  .  .  .
+		// user S loops forever
+#define SPAWN_T	//  X  .  X  X  .  .  .  X  .  X  .  .  .  .
+#define SPAWN_U	//  X  .  X  X  .  .  .  X  X  X  .  .  .  .
 // no user V
 
 /*

@@ -53,10 +53,7 @@ static VConChar *TEMP_CONSOLE_BUF = (VConChar*)0x4C00;
 static VCon CON;
 
 
-VConCtrl CIO_CONTROLLER = (VConCtrl){
-	.current = &CON,
-	.mode = VCON_MODE_VGATEXT
-};
+VConCtrl CIO_CONTROLLER = { .mode = VCON_MODE_VGATEXT };
 
 /*
 ** Support routines.
@@ -131,9 +128,6 @@ void c_setscroll( unsigned int s_min_x, unsigned int s_min_y, unsigned int s_max
 	// curr_y = scroll_min_y;
 	// __c_setcursor();
 	vcon_setScroll(&CON, s_min_x, s_min_y, s_max_x, s_max_y);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 
 /*
@@ -144,9 +138,6 @@ void c_moveto( unsigned int x, unsigned int y ){
 	// curr_y = bound( scroll_min_y, y + scroll_min_y, scroll_max_y );
 	// __c_setcursor();
 	vcon_setCursor(&CON, x, y);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 
 /*
@@ -179,9 +170,6 @@ void c_putchar_at( unsigned int x, unsigned int y, unsigned int c ){
 	// 	__c_putchar_at( x, y, c );
 	// }
 	vcon_putcharAt(&CON, c, x, y);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 
 #ifndef SA_DEBUG
@@ -223,9 +211,6 @@ void c_putchar( unsigned int c ){
 	// }
 	// __c_setcursor();
 	vcon_putchar(&CON, c);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 #endif
 
@@ -240,9 +225,6 @@ void c_puts_at( unsigned int x, unsigned int y, char *str ){
 	// 	x += 1;
 	// }
 	vcon_putsAt(&CON, str, x, y);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 
 #ifndef SA_DEBUG
@@ -253,9 +235,6 @@ void c_puts( char *str ){
 	// 	c_putchar( ch );
 	// }
 	vcon_puts(&CON, str);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 #endif
 
@@ -272,9 +251,6 @@ void c_clearscroll( void ){
 	// 	}
 	// }
 	vcon_clearScroll(&CON);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 
 void c_clearscreen( void ){
@@ -286,9 +262,6 @@ void c_clearscreen( void ){
 	// 	nchars -= 1;
 	// }
 	vcon_clear(&CON);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 
 
@@ -328,9 +301,6 @@ void c_scroll( unsigned int lines ){
 	// 	}
 	// }
 	vcon_scroll(&CON, lines);
-	if (CIO_CONTROLLER.current == &CON) {
-		vcon_redraw(&CIO_CONTROLLER);
-	}
 }
 
 char * cvtdec0( char *buf, int value ){
@@ -536,7 +506,7 @@ static void __c_do_printf( int x, int y, char **f ){
 					/* FALL THRU */
 
 				case '\r':
-					x = scroll_min_x;
+					x = CON.scrollMinX;
 					break;
 
 				default:
@@ -756,8 +726,10 @@ void c_io_init( void ){
 	// curr_y = min_y;
 	// curr_x = min_x;
 	// __c_setcursor();
+	CIO_CONTROLLER.current = &CON;
 
 	vcon_init(&CON, TEMP_CONSOLE_BUF, SCREEN_Y_SIZE, SCREEN_X_SIZE);
+	CON.controller = &CIO_CONTROLLER;
 	vcon_clear(&CON);
 	vcon_redraw(&CIO_CONTROLLER);
 

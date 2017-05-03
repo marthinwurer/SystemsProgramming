@@ -5,6 +5,7 @@
 #include <baseline/c_io.h>
 #include <stddef.h>
 
+#include <kern/video/color/color.h>
 #include <kern/video/fb/fb.h>
 #include <kern/vesa/edid.h>
 #include <kern/vesa/err.h>
@@ -77,6 +78,12 @@ int main(void) {
 	c_printf(" * Height: %d\n", mode.fb.height);
 	c_printf(" * Scanline: %d\n", mode.fb.pitch);
 	c_printf(" * BPP: %d\n", mode.fb.bpp);
+	c_printf(" * RGB: %d (%d) | %d (%d) | %d (%d)\n", mode.fb.colorspace[0].position,
+	                                                  mode.fb.colorspace[0].mask,
+													  mode.fb.colorspace[1].position,
+	                                                  mode.fb.colorspace[1].mask,
+													  mode.fb.colorspace[2].position,
+	                                                  mode.fb.colorspace[2].mask);
 
 	// __asm("hlt");
 
@@ -88,7 +95,22 @@ int main(void) {
 	// 	return EXIT_VIDEO_ERROR;
 	// }
 
-	// __asm("hlt");
+	// CIO_CONTROLLER.mode = VCON_MODE_GRAPHICS;
+	// PaintContext *ctx = &CIO_CONTROLLER.ctx;
+	// ctx->drawCol = color_getColor(mode.fb.colorspace, 255, 255, 255);
+	// ctx->fillCol = color_getColor(mode.fb.colorspace, 0, 0, 0);
+	// ctx->font.glyphs = 256;
+	// ctx->font.bytesPerGlyph = 16;
+	// ctx->font.height = 16;
+	// ctx->font.width = 8;
+	// ctx->font.glyphMap = VIDEO_FONTSET;
+	// ctx->fb = &VIDEO_MODE->fb;
+
+	// CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
+	// CIO_CONTROLLER.current->rows = mode.fb.height / ctx->font.height;
+
+	// vcon_redraw(&CIO_CONTROLLER);
+
 
 	return EXIT_SUCCESS;
 

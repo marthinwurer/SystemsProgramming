@@ -1,5 +1,6 @@
 
 #include <kern/vconsole/console.h>
+#include <kern/vconsole/control.h>
 #include <stddef.h>
 
 #define DEFAULT_COLOR 7
@@ -7,6 +8,11 @@
 #define NULL_CELL (VConChar){ .color = DEFAULT_COLOR, .character = ' ' }
 
 #define calcIndex(con, x, y) ((con->columns * y) + x)
+
+static void __redraw(VCon *con);
+
+static void __redrawCells(VCon *con, unsigned index, unsigned cells);
+
 
 int vcon_init(VCon *con, VConChar *buf, uint16_t rows, uint16_t columns) {
 	if (con == NULL || buf == NULL) {
@@ -22,6 +28,7 @@ int vcon_init(VCon *con, VConChar *buf, uint16_t rows, uint16_t columns) {
 	con->scrollMaxX = columns;
 	con->scrollMaxY = rows;
 	con->buf = buf;
+	con->controller = NULL;
 
 	return E_VCON_SUCCESS;
 }
@@ -39,6 +46,8 @@ int vcon_clear(VCon *con) {
 		*cellPtr++ = NULL_CELL;
 		--cellCount;
 	}
+
+	__redraw(con);
 
 	return E_VCON_SUCCESS;
 
@@ -63,6 +72,10 @@ int vcon_clearScroll(VCon *con) {
 		index += con->columns; // next line
 	}
 
+	__redrawCells(con, calcIndex(con, con->scrollMinX, con->scrollMaxX),
+	                   (con->scrollMaxX - con->scrollMinX) * (con->scrollMaxY - con->scrollMinY));
+
+
 	return E_VCON_SUCCESS;
 }
 
@@ -74,11 +87,13 @@ int vcon_putchar(VCon *con, char ch) {
 	VConChar cell = NULL_CELL;
 	int newrow = 0;  // 1 to move cursor to next row
 	int index = calcIndex(con, con->cursorX, con->cursorY);
+	unsigned cellsWritten = 0;
 
 	switch (ch) {
 		case '\n':
-			for (unsigned i = con->scrollMaxX - con->cursorX; i != 0; --i) {
-				con->buf[index++] = cell;
+			for (unsigned i = 0; i != con->scrollMaxX - con->cursorX; ++i) {
+				con->buf[index] = cell;
+				++cellsWritten;
 			}
 			con->cursorX = con->scrollMinX;
 			newrow = 1;
@@ -92,6 +107,7 @@ int vcon_putchar(VCon *con, char ch) {
 		default:
 			cell.character = ch;
 			con->buf[index] = cell;
+			++cellsWritten;
 			if (++con->cursorX == con->scrollMaxX) {
 				con->cursorX = con->scrollMinX;
 				newrow = 1;
@@ -107,6 +123,8 @@ int vcon_putchar(VCon *con, char ch) {
 		}
 	}
 
+	__redrawCells(con, index, cellsWritten);
+
 	return E_VCON_SUCCESS;
 }
 
@@ -114,16 +132,42 @@ int vcon_putcharAt(VCon *con, char ch, uint16_t x, uint16_t y) {
 	if (con == NULL) {
 		return E_VCON_ARGNULL;
 	}
-
 	if (x >= con->columns || y >= con->rows) {
 		return E_VCON_BOUNDS;
 	}
 
 	int index = calcIndex(con, x, y);
-	con->buf[index] = (VConChar){
-		.character = ch,
-		.color = DEFAULT_COLOR
-	};
+	unsigned cells = 0;
+
+	if (ch == '\n') {
+		unsigned limit;
+		if (x > con->scrollMaxX) {
+			limit = con->columns;
+		} else if (x >= con->scrollMinX) {
+			limit = con->scrollMaxX;
+		} else {
+			limit = con->scrollMinX - 1;
+		}
+
+		while (x <= limit) {
+			con->buf[index + cells] = NULL_CELL;
+			++x;
+			++cells;
+		}
+
+
+	} else {
+		con->buf[index] = (VConChar){
+			.character = ch,
+			.color = DEFAULT_COLOR
+		};
+
+		cells = 1;
+
+	}
+
+	__redrawCells(con, index, 1);
+
 
 	return E_VCON_SUCCESS;
 }
@@ -147,15 +191,15 @@ int vcon_putsAt(VCon *con, const char *str, uint16_t x, uint16_t y) {
 	}
 	
 	char ch;
-	int error;
+	int error = E_VCON_SUCCESS;
 	while ((ch = *str++) != '\0') {
 		error = vcon_putcharAt(con, ch, x, y);
 		if (++x == con->columns || error == E_VCON_BOUNDS) {
-			return E_VCON_BOUNDS;
+			break;
 		}
 	}
 
-	return E_VCON_SUCCESS;
+	return error;
 }
 
 int vcon_scroll(VCon *con, uint16_t lines) {
@@ -182,14 +226,17 @@ int vcon_scroll(VCon *con, uint16_t lines) {
 			}
 		}
 
-		for (; line != con->scrollMaxY; ++line) {
-			to = con->buf + ((line * con->columns) + con->scrollMinX);
-			for (uint16_t c = 0; c != nchars; ++c) {
-				*to++ = NULL_CELL;
-			}
-		}
+		// for (; line != con->scrollMaxY; ++line) {
+		// 	to = con->buf + ((line * con->columns) + con->scrollMinX);
+		// 	for (uint16_t c = 0; c != nchars; ++c) {
+		// 		*to++ = NULL_CELL;
+		// 	}
+		// }
 
 	}
+
+	__redrawCells(con, calcIndex(con, con->scrollMinX, con->scrollMaxX),
+	                   (con->scrollMaxX - con->scrollMinX) * (con->scrollMaxY - con->scrollMinY));
 
 	return E_VCON_SUCCESS;
 }
@@ -224,7 +271,20 @@ int vcon_setScroll(VCon *con, uint16_t minX, uint16_t minY, uint16_t maxX, uint1
 	con->scrollMinY = minY;
 	con->scrollMaxY = maxY;
 	con->cursorX = minX;
-	con->cursorY = maxY;
+	con->cursorY = minY;
 
 	return E_VCON_SUCCESS;
 }
+
+void __redraw(VCon *con) {
+	if (con->controller != NULL) {
+		vcon_redraw(con->controller);
+	}
+}
+
+void __redrawCells(VCon *con, unsigned index, unsigned cells) {
+	if (con->controller != NULL) {
+		vcon_redrawCells(con->controller, index, cells);
+	}
+}
+
