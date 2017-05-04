@@ -33,6 +33,8 @@
 // need the exit() and do_exit() prototypes
 #include <baseline/ulib.h>
 
+#include <kern/video/video.h>
+
 /*
 ** PRIVATE DEFINITIONS
 */
@@ -151,27 +153,28 @@ void _init( void ) {
 	** Console I/O system.
 	*/
 
-	c_io_init();
+	//c_io_init();
 	c_io_init_isr();
 
+	c_clearscreen();
 
-	disp_memory_map();
-	setup_page_availibility_table();
+	c_io_init_isr();
+	c_setscroll( 0, 7, CIO_CONTROLLER.current->columns, CIO_CONTROLLER.current->rows );
+	
+	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
+		c_putchar_at(i, 6, '=');
+	}
+	//c_puts_at( 0, 6, "================================================================================" );
 
 //	void * address = get_next_page();
 //
 //	c_printf("First Page:%x\n", address );
 //	c_printf("Next Page:%x\n",free_page(address));
 //	c_printf("Next Page:%x\n", get_next_page() );
-
 //
 //	__panic("lololol");
 //		c_getchar();
-
-
-
-	c_setscroll( 0, 7, 99, 99 );
-	c_puts_at( 0, 6, "================================================================================" );
+	video_dumpInfo(VIDEO_INFO);
 
 	/*
 	** 20165-SPECIFIC CODE STARTS HERE
@@ -186,7 +189,7 @@ void _init( void ) {
 
 	c_puts( "System initialization starting\n" );
 	c_puts( "------------------------------\n" );
-//	__delay( 200 );  // about 5 seconds
+	//__delay( 200 );  // about 5 seconds
 
 	c_puts( "Module init: " );
 
