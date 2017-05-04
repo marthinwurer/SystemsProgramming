@@ -33,27 +33,6 @@
 //
 int main(void) {
 
-	// VCon console;
-
-	// VConCtrl ctrl = (VConCtrl){
-	// 	.current = &console,
-	// 	.mode = VCON_MODE_VGATEXT
-	// };
-
-	// vcon_init(&console, (VConChar*)0x4C00, 25, 80);
-	// vcon_clear(&console);
-
-	// vcon_puts(&console, "Assfaggot bitch\n");
-	// vcon_puts(&console, "WHORE");
-
-	// vcon_putcharAt(&console, '9', 79, 24);
-	// vcon_scroll(&console, 1);
-	
-
-	// vcon_redraw(&ctrl);
-
-	// __asm("hlt");
-
 	get_memory_map();
 
 	// Initialize the video module
