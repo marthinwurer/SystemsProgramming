@@ -87,29 +87,29 @@ int main(void) {
 
 	// __asm("hlt");
 
-	// // Set the mode
+	// Set the mode
 
-	// errorcode = video_setMode(&mode);
-	// if (errorcode != E_VIDEO_SUCCESS) {
-	// 	c_printf("Failed to switch mode. Code %d\n", errorcode);
-	// 	return EXIT_VIDEO_ERROR;
-	// }
+	errorcode = video_setMode(&mode);
+	if (errorcode != E_VIDEO_SUCCESS) {
+		c_printf("Failed to switch mode. Code %d\n", errorcode);
+		return EXIT_VIDEO_ERROR;
+	}
 
-	// CIO_CONTROLLER.mode = VCON_MODE_GRAPHICS;
-	// PaintContext *ctx = &CIO_CONTROLLER.ctx;
-	// ctx->drawCol = color_getColor(mode.fb.colorspace, 255, 255, 255);
-	// ctx->fillCol = color_getColor(mode.fb.colorspace, 0, 0, 0);
-	// ctx->font.glyphs = 256;
-	// ctx->font.bytesPerGlyph = 16;
-	// ctx->font.height = 16;
-	// ctx->font.width = 8;
-	// ctx->font.glyphMap = VIDEO_FONTSET;
-	// ctx->fb = &VIDEO_MODE->fb;
+	CIO_CONTROLLER.mode = VCON_MODE_GRAPHICS;
+	PaintContext *ctx = &CIO_CONTROLLER.ctx;
+	ctx->drawCol = color_getColor(mode.fb.colorspace, 255, 255, 255);
+	ctx->fillCol = color_getColor(mode.fb.colorspace, 0, 0, 0);
+	ctx->font.glyphs = 256;
+	ctx->font.bytesPerGlyph = 16;
+	ctx->font.height = 16;
+	ctx->font.width = 8;
+	ctx->font.glyphMap = VIDEO_FONTSET;
+	ctx->fb = &VIDEO_MODE->fb;
 
-	// CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
-	// CIO_CONTROLLER.current->rows = mode.fb.height / ctx->font.height;
+	CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
+	CIO_CONTROLLER.current->rows = mode.fb.height / ctx->font.height;
 
-	// vcon_redraw(&CIO_CONTROLLER);
+	vcon_redraw(&CIO_CONTROLLER);
 
 
 	return EXIT_SUCCESS;

@@ -9,6 +9,9 @@
  */
 int vcon_switch(VConCtrl *ctrl, VCon *console);
 
+int vcon_drawCursor(VConCtrl *ctrl);
+
+
 /**
  * @brief Writes the current virtual console buffer to the screen
  *
@@ -17,9 +20,6 @@ int vcon_switch(VConCtrl *ctrl, VCon *console);
  * context.
  */
 int vcon_redraw(VConCtrl *ctrl);
-
-
-int vcon_redrawCells(VConCtrl *ctrl, unsigned index, unsigned cells);
 
 
 #endif

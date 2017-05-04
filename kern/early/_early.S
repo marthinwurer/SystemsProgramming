@@ -35,6 +35,24 @@ _early:
 	movl	$TARGET_STACK, %ebp
 	movl	%ebp, %esp
 
+#ifdef CLEAR_BSS_SEGMENT
+
+/*
+** Zero the BSS segment
+**
+** These symbols are defined automatically by the linker.
+*/
+	.globl	__bss_start,_end
+
+	movl	$__bss_start,%edi
+clearbss:
+	movl	$0,(%edi)
+	addl	$4,%edi
+	cmpl	$_end,%edi
+	jb	clearbss
+
+#endif
+
 	// initialize c_io
 	call	c_io_init
 	

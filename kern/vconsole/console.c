@@ -9,10 +9,7 @@
 
 #define calcIndex(con, x, y) ((con->columns * y) + x)
 
-static void __redraw(VCon *con);
-
-static void __redrawCells(VCon *con, unsigned index, unsigned cells);
-
+static void __markDirty(VCon *con);
 
 int vcon_init(VCon *con, VConChar *buf, uint16_t rows, uint16_t columns) {
 	if (con == NULL || buf == NULL) {
@@ -29,6 +26,7 @@ int vcon_init(VCon *con, VConChar *buf, uint16_t rows, uint16_t columns) {
 	con->scrollMaxY = rows;
 	con->buf = buf;
 	con->controller = NULL;
+
 
 	return E_VCON_SUCCESS;
 }
@@ -47,7 +45,7 @@ int vcon_clear(VCon *con) {
 		--cellCount;
 	}
 
-	__redraw(con);
+	//__redraw(con);
 
 	return E_VCON_SUCCESS;
 
@@ -72,8 +70,8 @@ int vcon_clearScroll(VCon *con) {
 		index += con->columns; // next line
 	}
 
-	__redrawCells(con, calcIndex(con, con->scrollMinX, con->scrollMaxX),
-	                   (con->scrollMaxX - con->scrollMinX) * (con->scrollMaxY - con->scrollMinY));
+	//__redrawCells(con, calcIndex(con, con->scrollMinX, con->scrollMaxX),
+	//                   (con->scrollMaxX - con->scrollMinX) * (con->scrollMaxY - con->scrollMinY));
 
 
 	return E_VCON_SUCCESS;
@@ -123,7 +121,8 @@ int vcon_putchar(VCon *con, char ch) {
 		}
 	}
 
-	__redrawCells(con, index, cellsWritten);
+	//__redrawCells(con, index, cellsWritten);
+	__markDirty(con);
 
 	return E_VCON_SUCCESS;
 }
@@ -166,8 +165,8 @@ int vcon_putcharAt(VCon *con, char ch, uint16_t x, uint16_t y) {
 
 	}
 
-	__redrawCells(con, index, 1);
-
+	//__redrawCells(con, index, cells);
+	__markDirty(con);
 
 	return E_VCON_SUCCESS;
 }
@@ -207,24 +206,74 @@ int vcon_scroll(VCon *con, uint16_t lines) {
 		return E_VCON_ARGNULL;
 	}
 	
+	uint16_t rows = con->scrollMaxY - con->scrollMinY;
+	uint16_t cols = con->scrollMaxX - con->scrollMinX;
+
 	if (lines > con->scrollMaxY - con->scrollMinY) {
 		vcon_clearScroll(con);
 		con->cursorX = con->scrollMinX;
 		con->cursorY = con->scrollMinY;
 	} else {
 
-		uint16_t line;
-		uint16_t lineCount = con->scrollMaxY - lines;
-		uint16_t nchars = con->scrollMaxX - con->scrollMinX + 1;
-		VConChar *from, *to;
+		uint16_t line = con->scrollMinY;
+		uint16_t lineEnd = con->scrollMaxY - lines;
+		VConChar *from = con->buf + ((line + lines) * con->columns) + con->scrollMinX;
+		VConChar *to = con->buf + (line * con->columns) + con->scrollMinX;
+		
+		uint16_t colsToNextLine = con->columns - con->scrollMaxX + con->scrollMinX;
 
-		for (line = con->scrollMinY; line != lineCount; ++line) {
-			from = con->buf + (((line + lines) * con->columns) + con->scrollMinX);
-			to = con->buf + ((line * con->columns) + con->scrollMinX);
-			for (uint16_t c = 0; c != nchars; ++c) {
+		for (; line != lineEnd; ++line) {
+			for (unsigned i = 0; i <= cols; ++i) {
 				*to++ = *from++;
 			}
+			to += colsToNextLine;
+			from += colsToNextLine;
 		}
+
+		for (; line != con->scrollMaxY; ++line) {
+			for (unsigned i = 0; i != cols; ++i) {
+				*to++ = NULL_CELL;
+			}
+			to += colsToNextLine;
+		}
+
+		// uint16_t index = calcIndex(con, con->scrollMinX, con->scrollMinY);
+		// for (unsigned i = 0; i != rows; ++i) {
+		// 	__redrawCells(con, index, cols);
+		// 	index += con->columns;
+		// }
+
+		
+
+
+		// VConChar *tempLines[lines];
+		// for (unsigned i = 0; i != lines; ++i) {
+		// 	tempLines[i] = con->buf.lineTable[i];
+		// }
+
+		// uint16_t lineCount = con->scrollMaxY - con->scrollMinY - lines;
+		// uint16_t nextIndex;
+		// for (unsigned i = 0; i ! lineCount; ++i) {
+		// 	nextIndex = i + lines;
+		// 	con->buf.lineTable[i] = con->buf.lineTable[nextIndex];
+		// }
+
+		// for (unsigned i = 0; i != lines; ++i) {
+		// 	con->buf.lineTable[lineCount + i] = tempLines[i];
+		// }
+
+		// uint16_t line;
+		// uint16_t lineCount = con->scrollMaxY - lines;
+		// uint16_t nchars = con->scrollMaxX - con->scrollMinX + 1;
+		// VConChar *from, *to;
+
+		// for (line = con->scrollMinY; line != lineCount; ++line) {
+		// 	from = con->buf + (((line + lines) * con->columns) + con->scrollMinX);
+		// 	to = con->buf + ((line * con->columns) + con->scrollMinX);
+		// 	for (uint16_t c = 0; c != nchars; ++c) {
+		// 		*to++ = *from++;
+		// 	}
+		// }
 
 		// for (; line != con->scrollMaxY; ++line) {
 		// 	to = con->buf + ((line * con->columns) + con->scrollMinX);
@@ -235,8 +284,9 @@ int vcon_scroll(VCon *con, uint16_t lines) {
 
 	}
 
-	__redrawCells(con, calcIndex(con, con->scrollMinX, con->scrollMaxX),
-	                   (con->scrollMaxX - con->scrollMinX) * (con->scrollMaxY - con->scrollMinY));
+	//__redraw(con);
+	__markDirty(con);
+	
 
 	return E_VCON_SUCCESS;
 }
@@ -276,15 +326,9 @@ int vcon_setScroll(VCon *con, uint16_t minX, uint16_t minY, uint16_t maxX, uint1
 	return E_VCON_SUCCESS;
 }
 
-void __redraw(VCon *con) {
+
+void __markDirty(VCon *con) {
 	if (con->controller != NULL) {
-		vcon_redraw(con->controller);
+		con->controller->dirty = 1;
 	}
 }
-
-void __redrawCells(VCon *con, unsigned index, unsigned cells) {
-	if (con->controller != NULL) {
-		vcon_redrawCells(con->controller, index, cells);
-	}
-}
-

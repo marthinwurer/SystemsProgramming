@@ -14,6 +14,8 @@
 
 #include <baseline/user.h>
 
+#include <baseline/c_io.h>
+
 /*
 ** Support functions
 */
@@ -913,6 +915,22 @@ int32_t idle( void *arg ) {
 }
 
 
+int32_t redrawProcess(void *arg) {
+
+	
+
+	for (;;) {
+		if (CIO_CONTROLLER.dirty) {
+			vcon_redraw(&CIO_CONTROLLER);
+			CIO_CONTROLLER.dirty = 0;
+		}
+		sleep(10);
+	}
+
+	return 0;
+}
+
+
 /*
 ** Initial process; it starts the other top-level user processes.
 **
@@ -938,6 +956,8 @@ int32_t init( void *arg ) {
 		cwrites( "init, spawn() IDLE failed\n" );
 	}
 	swritech( '+' );
+
+	spawn(redrawProcess, 0, P_SYSTEM);
 
 #ifdef SPAWN_A
 	pid = spawn( user_a, 0, P_HIGH );

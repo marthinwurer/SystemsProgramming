@@ -4,6 +4,7 @@
 typedef struct VCon_s VCon;
 
 
+#include <kern/vconsole/VConBuf.h>
 #include <kern/vconsole/VConCtrl.h>
 #include <kern/vconsole/VConChar.h>
 
