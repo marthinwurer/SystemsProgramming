@@ -160,6 +160,17 @@ void _init( void ) {
 	setup_page_availibility_table();
 	setup_initial_page_table();
 
+#if 0
+	for(;;){
+		uint32_t * data = get_next_page();
+		* data = (uint32_t) data;
+		c_printf("%x \n", *data);
+	}
+#endif
+
+	test_mmap();
+
+
 //	void * address = get_next_page();
 //
 //	c_printf("First Page:%x\n", address );
