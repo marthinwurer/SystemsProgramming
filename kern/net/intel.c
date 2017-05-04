@@ -15,7 +15,7 @@
 //
 // Static method declarations
 //
-static void* dumb_malloc(uint32_t size) __attribute__((unused));
+// static void* dumb_malloc(uint32_t size) __attribute__((unused));
 static void delay_10usec(uint32_t usec_10);
 static void print_mac_addr(uint8_t mac[]);
 static void dump_eeprom(struct nic_info* nic) __attribute__((unused));
@@ -42,17 +42,17 @@ static void mem_write8(void* addr, uint8_t value);
 // Holds info about the network interface
 static struct nic_info _nic;
 
-static uint32_t base_free = 0x3A00; // this seems safe...
-static uint32_t free_top = 0x7BFF;
+// static uint32_t base_free = 0x3A00; // this seems safe...
+// static uint32_t free_top = 0x7BFF;
 
-static void* dumb_malloc(uint32_t size) {
-	if(base_free + size > free_top) {
-		return NULL;
-	}
-	void* ret = (void*) base_free;
-	base_free += size;
-	return ret;
-}
+// static void* dumb_malloc(uint32_t size) {
+// 	if(base_free + size > free_top) {
+// 		return NULL;
+// 	}
+// 	void* ret = (void*) base_free;
+// 	base_free += size;
+// 	return ret;
+// }
 
 /**
  * Delay for 10 microseconds
@@ -267,51 +267,51 @@ static void recycle_command_blocks() {
 	}
 }
 
-// static char ascii_to_printable_char(char c) {
-// 	if(c  > 31 && c < 127) {
-// 		return c;
-// 	}
-// 	else {
-// 		return '.';
-// 	}
-// }
+static char ascii_to_printable_char(char c) {
+	if(c  > 31 && c < 127) {
+		return c;
+	}
+	else {
+		return '.';
+	}
+}
 
-// static void claim_rfd_data() {
-// 	struct rfd* rfd = _nic.next_rfd;
-// 	uint16_t byte_count = rfd->count & 0x3FFF;
-// 	c_printf("EOF=%c,F=%c,received %d bytes\n", 
-// 		(rfd->count & 0x8000) ? '1' : '0', 
-// 		(rfd->count & 0x4000) ? '1' : '0', 
-// 		byte_count);
-// 	for(uint16_t i = 0; i < byte_count; i+=8) {
-// 		c_printf("rx[%5d] = %02x%02x %02x%02x %02x%02x %02x%02x (%c%c%c%c %c%c%c%c)\n", i, 
-// 			rfd->data[i + 0], 
-// 			rfd->data[i + 1],
-// 			rfd->data[i + 2],
-// 			rfd->data[i + 3],
-// 			rfd->data[i + 4],
-// 			rfd->data[i + 5],
-// 			rfd->data[i + 6],
-// 			rfd->data[i + 7],
-// 			ascii_to_printable_char(rfd->data[i + 0]),
-// 			ascii_to_printable_char(rfd->data[i + 1]),
-// 			ascii_to_printable_char(rfd->data[i + 2]),
-// 			ascii_to_printable_char(rfd->data[i + 3]),
-// 			ascii_to_printable_char(rfd->data[i + 4]),
-// 			ascii_to_printable_char(rfd->data[i + 5]),
-// 			ascii_to_printable_char(rfd->data[i + 6]),
-// 			ascii_to_printable_char(rfd->data[i + 7]));
-// 	}
-// 	rfd->count &= ~0x8000; //clear EOF
-// 	rfd->count &= ~0x4000; //clear F
-// 	_nic.next_rfd = (struct rfd*) _nic.next_rfd->link;
-// }
+static void claim_rfd_data() {
+	struct rfd* rfd = _nic.next_rfd;
+	uint16_t byte_count = rfd->count & 0x3FFF;
+	c_printf("EOF=%c,F=%c,received %d bytes\n", 
+		(rfd->count & 0x8000) ? '1' : '0', 
+		(rfd->count & 0x4000) ? '1' : '0', 
+		byte_count);
+	for(uint16_t i = 0; i < byte_count; i+=8) {
+		c_printf("rx[%5d] = %02x%02x %02x%02x %02x%02x %02x%02x (%c%c%c%c %c%c%c%c)\n", i, 
+			rfd->data[i + 0], 
+			rfd->data[i + 1],
+			rfd->data[i + 2],
+			rfd->data[i + 3],
+			rfd->data[i + 4],
+			rfd->data[i + 5],
+			rfd->data[i + 6],
+			rfd->data[i + 7],
+			ascii_to_printable_char(rfd->data[i + 0]),
+			ascii_to_printable_char(rfd->data[i + 1]),
+			ascii_to_printable_char(rfd->data[i + 2]),
+			ascii_to_printable_char(rfd->data[i + 3]),
+			ascii_to_printable_char(rfd->data[i + 4]),
+			ascii_to_printable_char(rfd->data[i + 5]),
+			ascii_to_printable_char(rfd->data[i + 6]),
+			ascii_to_printable_char(rfd->data[i + 7]));
+	}
+	rfd->count &= ~0x8000; //clear EOF
+	rfd->count &= ~0x4000; //clear F
+	_nic.next_rfd = (struct rfd*) _nic.next_rfd->link;
+}
+
 
 /**
  * Gets the next command block from the nic_info
  *
- * @return next available command block,
- NULL if there aren't any
+ * @return next available command block, NULL if there aren't any
  */
 static struct cb* get_next_cb() {
 	if(!_nic.avail_cb) {
@@ -384,7 +384,7 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	memcpy(cb->u.tcb.eth_packet.data, data, length);
 
 	uint8_t status = mem_read8(&_nic.csr->scb.status);
-	c_printf("send_packet CU/RU status = 0x%02x\n", status);
+	c_printf("NIC: send_packet CU/RU status = 0x%02x\n", status);
 	if(((status & cu_mask) == cu_idle) 
 			|| ((status & cu_mask) == cu_suspended)) {
 		mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
@@ -511,13 +511,14 @@ void intel_nic_init() {
 	// 
 	// 
 	// TODO:
-	// o handle receive interrupts in addition to CU interrupts
+	// o write hexdump((void*) data, uint32_t length) using code from claim_rfd_data
 	// o write raw_tcb_tx()
 	// o finish send_arp(), and handle arp packets
 	// o IPv4 header insertion
 	// o mutex on doing anything with CB
 	// 
 	// TEST:
+	// o handle receive interrupts in addition to CU interrupts
 	// o enable receiving data by putting first RFD ptr into gen_ptr (pg 99)
 	// o configure receive buffers
 	// 
