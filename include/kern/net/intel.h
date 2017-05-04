@@ -58,6 +58,9 @@ struct nic_info {
 	struct cb* next_cb;
 	struct cb* cb_to_check;
 	struct rfd* next_rfd;
+	uint32_t rx_buf_count;
+	struct rx_buf* rx_buf_head;
+	struct rx_buf* next_rx_buf;
 };
 
 // MMIO Control Status Register
@@ -109,6 +112,13 @@ struct rfd {
 	uint16_t count;
 	uint16_t size;
 	uint8_t data[NET_INTEL_RFD_SIZE];
+};
+
+struct rx_buf {
+	struct rx_buf* next;
+	uint32_t length;
+	uint32_t curr_ptr;
+	void* data[3096];
 };
 
 // ARP packet
@@ -226,6 +236,15 @@ enum cb_status {
 
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length);
 void intel_nic_enable_rx();
+
+/**
+ * hexdump, only prints in multiples of 8 bytes, or it will overrun the
+ * data
+ *
+ * @param data pointer to data to print
+ * @param length bytes of data to print
+ */
+void hexdump(void* data, uint32_t length);
 void intel_nic_init();
 
 #endif

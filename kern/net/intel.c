@@ -28,9 +28,10 @@ static void init_rfa(struct nic_info* nic, uint32_t num_rfd);
 static void recycle_command_blocks();
 static char ascii_to_printable_char(char c);
 static void claim_rfd_data();
+static void add_to_rx_buf(void* data, uint32_t length);
+static void consume_rx_buf(void* buffer, uint32_t length);
 static struct cb* get_next_cb();
 static int32_t send_arp();
-
 
 static uint32_t mem_read32(void* addr) __attribute__((unused));
 static uint16_t mem_read16(void* addr) __attribute__((unused));
@@ -185,7 +186,7 @@ static void intel_nic_handler(int vector, int code) {
 	if(stat_ack & ack_cs_tno) c_printf("ack_cs_tno ");
 	if(stat_ack & ack_fr) {
 		c_printf("ack_fr ");
-		// claim_rfd_data();
+		claim_rfd_data();
 	}
 	if(stat_ack & ack_cna) c_printf("ack_cna ");
 	if(stat_ack & ack_rnr) c_printf("ack_rnr ");
@@ -253,13 +254,8 @@ static void init_rfa(struct nic_info* nic, uint32_t num_rfd) {
  * frees up command blocks (and associated buffers) for future use
  */
 static void recycle_command_blocks() {
-	// c_printf("NIC: first CB (0x%08x)\n", first_cbl);
-	// c_printf("NIC: begin recycle status (0x%08x)=0x%02x\n", 
-	// 	(uint32_t) _nic.cb_to_check, 
-	// 	_nic
-	// 	.cb_to_check->status);
 	while(_nic.cb_to_check->status & cb_c) {
-		c_printf("NIC: freeing command block: %08x\n", (uint32_t) _nic.cb_to_check);
+		// c_printf("NIC: freeing command block: %08x\n", (uint32_t) _nic.cb_to_check);
 		_nic.cb_to_check->status &= ~cb_c; // unset complete flag
 		_nic.cb_to_check->command &= 0;
 		_nic.avail_cb++; // increment available command blocks
@@ -279,33 +275,33 @@ static char ascii_to_printable_char(char c) {
 static void claim_rfd_data() {
 	struct rfd* rfd = _nic.next_rfd;
 	uint16_t byte_count = rfd->count & 0x3FFF;
-	c_printf("EOF=%c,F=%c,received %d bytes\n", 
+	c_printf("\nEOF=%c,F=%c,received %d bytes\n", 
 		(rfd->count & 0x8000) ? '1' : '0', 
 		(rfd->count & 0x4000) ? '1' : '0', 
 		byte_count);
-	for(uint16_t i = 0; i < byte_count; i+=8) {
-		c_printf("rx[%5d] = %02x%02x %02x%02x %02x%02x %02x%02x (%c%c%c%c %c%c%c%c)\n", i, 
-			rfd->data[i + 0], 
-			rfd->data[i + 1],
-			rfd->data[i + 2],
-			rfd->data[i + 3],
-			rfd->data[i + 4],
-			rfd->data[i + 5],
-			rfd->data[i + 6],
-			rfd->data[i + 7],
-			ascii_to_printable_char(rfd->data[i + 0]),
-			ascii_to_printable_char(rfd->data[i + 1]),
-			ascii_to_printable_char(rfd->data[i + 2]),
-			ascii_to_printable_char(rfd->data[i + 3]),
-			ascii_to_printable_char(rfd->data[i + 4]),
-			ascii_to_printable_char(rfd->data[i + 5]),
-			ascii_to_printable_char(rfd->data[i + 6]),
-			ascii_to_printable_char(rfd->data[i + 7]));
-	}
+	add_to_rx_buf(rfd->data, byte_count);
+	// for(uint16_t i = 0; i < byte_count; i+=1) {
+	// 	c_putchar(ascii_to_printable_char(rfd->data[i]));
+	// }
+	hexdump(rfd->data, byte_count);
 	rfd->count &= ~0x8000; //clear EOF
 	rfd->count &= ~0x4000; //clear F
 	_nic.next_rfd = (struct rfd*) _nic.next_rfd->link;
 }
+
+static void add_to_rx_buf(void* data, uint32_t length) {
+	// _nic.rx_buf_count++;
+	// _nic.next_rx_buf;
+}
+
+static void consume_rx_buf(void* out_buffer, uint32_t length) {
+	
+	
+	// _nic.rx_buf_count--;
+	// if(_nic.rx_buf_head->next) {
+	// 	_nic.rx_buf_head = _nic.rx_buf_head->next;
+	// }
+} 
 
 
 /**
@@ -322,7 +318,7 @@ static struct cb* get_next_cb() {
 		}
 	}
 	struct cb* cb = _nic.next_cb;
-	c_printf("NIC: get_next_cb = 0x%08x\n", (uint32_t) cb);
+	// c_printf("NIC: get_next_cb = 0x%08x\n", (uint32_t) cb);
 	_nic.next_cb = (struct cb*) cb->link;
 	_nic.avail_cb--;
 	return cb;
@@ -352,6 +348,7 @@ static struct cb* get_next_cb() {
 // 	// TODO attach these things together
 // 	// ethertype = 0x0806 for ARP
 // }
+// 
 
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	if(length > NET_INTEL_MAX_ETH_LENGTH) {
@@ -384,7 +381,7 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	memcpy(cb->u.tcb.eth_packet.data, data, length);
 
 	uint8_t status = mem_read8(&_nic.csr->scb.status);
-	c_printf("NIC: send_packet CU/RU status = 0x%02x\n", status);
+	// c_printf("NIC: send_packet CU/RU status = 0x%02x\n", status);
 	if(((status & cu_mask) == cu_idle) 
 			|| ((status & cu_mask) == cu_suspended)) {
 		mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
@@ -392,6 +389,29 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 		write_flush(&_nic);
 	}
 	return 0;
+}
+
+void hexdump(void* data, uint32_t length) {
+	uint8_t* data_ = (uint8_t*) data; 
+	for(uint16_t i = 0; i < length; i+=8) {
+		c_printf("rx[%5d] = %02x%02x %02x%02x %02x%02x %02x%02x (%c%c%c%c %c%c%c%c)\n", i, 
+			data_[i + 0],
+			data_[i + 1],
+			data_[i + 2],
+			data_[i + 3],
+			data_[i + 4],
+			data_[i + 5],
+			data_[i + 6],
+			data_[i + 7],
+			ascii_to_printable_char(data_[i + 0]),
+			ascii_to_printable_char(data_[i + 1]),
+			ascii_to_printable_char(data_[i + 2]),
+			ascii_to_printable_char(data_[i + 3]),
+			ascii_to_printable_char(data_[i + 4]),
+			ascii_to_printable_char(data_[i + 5]),
+			ascii_to_printable_char(data_[i + 6]),
+			ascii_to_printable_char(data_[i + 7]));
+	}
 }
 
 void intel_nic_init() {
@@ -437,19 +457,22 @@ void intel_nic_init() {
 	// 
 	// Connect interrupt handler
 	// 
-	uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
-	uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
+	// uint8_t interrupt_pin = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_PIN); // showing up as 0x01
+	// uint8_t interrupt_line = pci_cfg_read_byte(bus, slot, 0, PCI_INTERRUPT_LINE); // showing up as 0x0B
 	// c_printf("NIC: interrupt pin = 0x%02x\ninterrupt line = 0x%02x\n", interrupt_pin, interrupt_line);
 	__install_isr(NET_INTEL_INT_VECTOR, intel_nic_handler);
 
 	// 
-	// Setup the CBL and RFA
+	// Setup the CBL, RFA, and rx buffer
 	// 
 	c_printf("NIC: Initializing CBL\n");
 	init_cbl(&_nic, TOTAL_CB);
 	c_printf("NIC: Initializing RFA\n");
 	init_rfa(&_nic, TOTAL_RFD);
-
+	c_printf("NIC: Initializing RX buffer\n");
+	_nic.rx_buf_head = (struct rx_buf*) get_next_page();
+	_nic.next_rx_buf = _nic.rx_buf_head;
+	_nic.rx_buf_count = 1;
 
 	//
 	// Initial Configure command
@@ -511,18 +534,20 @@ void intel_nic_init() {
 	// 
 	// 
 	// TODO:
-	// o write hexdump((void*) data, uint32_t length) using code from claim_rfd_data
+	// o rx buffers, add_to_rx_buf((void*) data, uint32_t length), consume_rx_buf() function frees memory and transfers data to user
+	// o keep flag for rx_enable in _nic. with first call to receive, enable rx
 	// o write raw_tcb_tx()
-	// o finish send_arp(), and handle arp packets
+	// o finish send_arp(), and handle arp packets -- get IPs working so we can make some applications!
 	// o IPv4 header insertion
 	// o mutex on doing anything with CB
 	// 
 	// TEST:
+	// o write hexdump(void* data, uint32_t length) using code from claim_rfd_data
+	// 
+	// DONE:
 	// o handle receive interrupts in addition to CU interrupts
 	// o enable receiving data by putting first RFD ptr into gen_ptr (pg 99)
 	// o configure receive buffers
-	// 
-	// DONE:
 	// o make sure CRC is being inserted (ask other networking guy)
 	// o Write send_packet function (check on ethernet header)
 	// o configure IA
