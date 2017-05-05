@@ -1,6 +1,7 @@
 
 #include <kern/vconsole/console.h>
 #include <kern/vconsole/control.h>
+#include <kern/vconsole/buffer.h>
 #include <stddef.h>
 
 #define DEFAULT_COLOR 7
@@ -11,7 +12,7 @@
 
 static void __markDirty(VCon *con);
 
-int vcon_init(VCon *con, VConChar *buf, uint16_t rows, uint16_t columns) {
+int vcon_init(VCon *con, uint16_t rows, uint16_t columns) {
 	if (con == NULL || buf == NULL) {
 		return E_VCON_ARGNULL;
 	}
@@ -24,7 +25,10 @@ int vcon_init(VCon *con, VConChar *buf, uint16_t rows, uint16_t columns) {
 	con->scrollMinY = 0;
 	con->scrollMaxX = columns;
 	con->scrollMaxY = rows;
-	con->buf = buf;
+	con->buf = (VConBuf){
+		.lineTable = NULL,
+		.charTable = NULL
+	}
 	con->controller = NULL;
 
 
@@ -37,13 +41,18 @@ int vcon_clear(VCon *con) {
 		return E_VCON_ARGNULL;
 	}
 
-	uint32_t cellCount = con->columns * con->rows;
-	VConChar *cellPtr = con->buf;
+	vcon_buf_clearLineTable(&con->buf, 0, con->rows);
 
-	while (cellCount != 0) {
-		*cellPtr++ = NULL_CELL;
-		--cellCount;
-	}
+	con->cursorX = con->scrollMinX;
+	con->cursorY = con->scrollMinY;
+
+	// uint32_t cellCount = con->columns * con->rows;
+	// VConChar *cellPtr = con->buf;
+
+	// while (cellCount != 0) {
+	// 	*cellPtr++ = NULL_CELL;
+	// 	--cellCount;
+	// }
 
 	//__redraw(con);
 
@@ -56,19 +65,54 @@ int vcon_clearScroll(VCon *con) {
 		return E_VCON_ARGNULL;
 	}
 
-	if (con->scrollMinX >= con->scrollMaxX || con->scrollMinY >= con->scrollMaxY) {
-		return E_VCON_BADSCROLL;
+	unsigned scrollMinY = con->scrollMinY;
+	unsigned scrollMaxY = con->scrollMaxY;
+	unsigned columns = con->columns;
+	unsigned scrollCols = con->scrollMaxX - con->scrollMinX;
+
+	if (scrollCols == columns) {
+		// scroll area spans all columns
+		// we can just mark the lines as empty (length = 0, dirty = 1)
+		vcon_buf_clearLineTable(&con->buf, scrollMinY, scrollMaxY);
+	} else {
+
+		// set all cells in the scroll area to VCON_NULLCELL
+		// mark all lines in scroll area as dirty
+
+		unsigned index = scrollMinY * columns + con->scrollMinX;
+
+		for (unsigned r = scrollMinY; r != scrollMaxY; ++r) {
+			for (unsigned c = 0; c != scrollCols; ++c) {
+				con->buf.charTable[index + c] = VCON_NULLCELL;
+			}
+
+			// update the line length in the line table
+			vcon_buf_lineLen(&con->buf, r);
+
+			// mark the line as dirty
+			vcon_buf_markDirty(con.buf, r);
+
+			index += columns;
+		}
 	}
 
-	uint16_t cols = con->scrollMaxX - con->scrollMinX;
-	unsigned index = con->scrollMinY * con->columns;
+	con->cursorX = 0;
+	con->cursorY = 0;
+
+
+	// if (con->scrollMinX >= con->scrollMaxX || con->scrollMinY >= con->scrollMaxY) {
+	// 	return E_VCON_BADSCROLL;
+	// }
+
+	// uint16_t cols = con->scrollMaxX - con->scrollMinX;
+	// unsigned index = con->scrollMinY * con->columns;
 	
-	for (int r = con->scrollMinY; r != con->scrollMaxY; ++r) {
-		for (int c = 0; c != cols; c++) {
-			con->buf[index + c] = NULL_CELL;
-		}
-		index += con->columns; // next line
-	}
+	// for (int r = con->scrollMinY; r != con->scrollMaxY; ++r) {
+	// 	for (int c = 0; c != cols; c++) {
+	// 		con->buf[index + c] = NULL_CELL;
+	// 	}
+	// 	index += con->columns; // next line
+	// }
 
 	//__redrawCells(con, calcIndex(con, con->scrollMinX, con->scrollMaxX),
 	//                   (con->scrollMaxX - con->scrollMinX) * (con->scrollMaxY - con->scrollMinY));
@@ -89,10 +133,10 @@ int vcon_putchar(VCon *con, char ch) {
 
 	switch (ch) {
 		case '\n':
-			for (unsigned i = 0; i != con->scrollMaxX - con->cursorX; ++i) {
-				con->buf[index] = cell;
-				++cellsWritten;
-			}
+			// for (unsigned i = 0; i != con->scrollMaxX - con->cursorX; ++i) {
+			// 	con->buf[index] = cell;
+			// 	++cellsWritten;
+			// }
 			con->cursorX = con->scrollMinX;
 			newrow = 1;
 			break;

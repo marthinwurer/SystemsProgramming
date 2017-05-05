@@ -5,7 +5,7 @@
 #include <kern/vconsole/err.h>
 #include <kern/vconsole/VCon.h>
 
-int vcon_init(VCon *con, VConChar *buf, uint16_t rows, uint16_t columns);
+int vcon_init(VCon *con, uint16_t rows, uint16_t columns);
 
 int vcon_clear(VCon *con);
 

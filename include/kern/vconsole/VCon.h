@@ -3,9 +3,9 @@
 
 typedef struct VCon_s VCon;
 
-
-#include <kern/vconsole/VConCtrl.h>
+#include <kern/vconsole/VConBuf.h>
 #include <kern/vconsole/VConChar.h>
+#include <kern/vconsole/VConCtrl.h>
 
 #include <stdint.h>
 
@@ -35,7 +35,8 @@ struct VCon_s {
 	uint16_t scrollMaxX;
 	uint16_t scrollMaxY;
 	uint8_t tabSize;
-	VConChar *buf;
+	VConBuf buf;
+	//VConChar *buf;
 	VConCtrl *controller;
 };
 
