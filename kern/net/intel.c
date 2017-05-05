@@ -31,7 +31,7 @@ static void claim_rfd_data();
 static int32_t add_to_rx_buf(void* data, uint32_t length);
 static void consume_rx_buf(void* buffer, uint32_t length);
 static struct cb* get_next_cb();
-static int32_t send_arp();
+static int32_t send_grat_arp();
 
 static uint32_t mem_read32(void* addr) __attribute__((unused));
 static uint16_t mem_read16(void* addr) __attribute__((unused));
@@ -333,33 +333,48 @@ static struct cb* get_next_cb() {
 	return cb;
 }
 
-// static int32_t send_arp() {
-// 	struct cb* cb = get_next_cb();
-// 	if(cb == NULL) {
-// 		return -1;
-// 	}
-// 	struct arp arp; // TODO network byte order?
-// 	arp.hw_type = 0x0001; // ethernet
-// 	arp.protocol_type = 0x0800; // IPv4
-// 	arp.hw_addr_len = 0x06; // ethernet HW addr length
-// 	arp.protocol_addr_len = 0x04; // IPv4 addr length
-// 	arp.opcode = 0x01; // request
-// 	memcpy(arp.sender_hw_addr, _nic.mac, MAC_LENGTH_BYTES);
-// 	arp.sender_protocol_addr = 0xC4C4C4C4;
-// 	arp.target_hw_addr[0] = 0xFF;
-// 	arp.target_hw_addr[1] = 0xFF;
-// 	arp.target_hw_addr[2] = 0xFF;
-// 	arp.target_hw_addr[3] = 0xFF;
-// 	arp.target_hw_addr[4] = 0xFF;
-// 	arp.target_hw_addr[5] = 0xFF;
-// 	arp.target_protocol_addr = 0x00000000;
+static int32_t send_grat_arp(uint32_t my_ip_addr) {
+	struct cb* cb = get_next_cb();
+	if(cb == NULL) {
+		return -1;
+	}
+	cb->u.tcb.eth_packet.payload.arp.hw_type = 0x0001; // ethernet
+	cb->u.tcb.eth_packet.payload.arp.protocol_type = 0x0800; // IPv4
+	cb->u.tcb.eth_packet.payload.arp.hw_addr_len = 0x06; // ethernet HW addr length
+	cb->u.tcb.eth_packet.payload.arp.protocol_addr_len = 0x04; // IPv4 addr length
+	cb->u.tcb.eth_packet.payload.arp.opcode = 0x01; // request
 
-// 	// TODO attach these things together
-// 	// ethertype = 0x0806 for ARP
-// }
-// 
+	memcpy(cb->u.tcb.eth_packet.payload.arp.sender_hw_addr, _nic.mac, MAC_LENGTH_BYTES);
+	cb->u.tcb.eth_packet.payload.arp.sender_protocol_addr = my_ip_addr;
 
-int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
+	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[0] = 0xFF;
+	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[1] = 0xFF;
+	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[2] = 0xFF;
+	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[3] = 0xFF;
+	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[4] = 0xFF;
+	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[5] = 0xFF;
+	cb->u.tcb.eth_packet.payload.arp.target_protocol_addr = my_ip_addr;
+	cb->command = cb_el | cb_sf | cb_tx_cmd;
+	cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
+	cb->u.tcb.tcb_byte_count = (NET_INTEL_ARP_HEAD_LEN + NET_INTEL_ETH_HEAD_LEN)| 1 << 15; // bit15 = EOF flag
+	cb->u.tcb.threshold = 1; // transmit once you have (1 * 8 bytes) in the queue
+	cb->u.tcb.tbd_count = 0;
+	memcpy(cb->u.tcb.eth_packet.dst_mac, cb->u.tcb.eth_packet.payload.arp.target_hw_addr, MAC_LENGTH_BYTES);
+
+	cb->u.tcb.eth_packet.ethertype = ETHERTYPE_ARP; // network byte order
+	uint8_t status = mem_read8(&_nic.csr->scb.status);
+	// c_printf("NIC: send_packet CU/RU status = 0x%02x\n", status);
+	if(((status & cu_mask) == cu_idle) 
+			|| ((status & cu_mask) == cu_suspended)) {
+		mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) cb);
+		mem_write8(&_nic.csr->scb.command, cuc_start);
+		write_flush(&_nic);
+	}
+	return 0;
+}
+
+
+int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length) {
 	if(length > NET_INTEL_MAX_ETH_LENGTH) {
 		return -1;
 	}
@@ -373,7 +388,7 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	// ensure minimum frame size is met by padding from length of user data
 	// through 46 bytes
 	for (int i = length; i <= NET_INTEL_MIN_ETH_LENGTH; i++) {
-		cb->u.tcb.eth_packet.data[i] = 0;
+		cb->u.tcb.eth_packet.payload.data[i] = 0;
 	}
 
 	//
@@ -387,7 +402,7 @@ int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint32_t length) {
 	memcpy(cb->u.tcb.eth_packet.dst_mac, dst_hw_addr, MAC_LENGTH_BYTES);
 
 	cb->u.tcb.eth_packet.ethertype = ((tx_length >> 8) & 0x00FF) | (((tx_length << 8) & 0xFF00)); // network byte order
-	memcpy(cb->u.tcb.eth_packet.data, data, length);
+	memcpy(cb->u.tcb.eth_packet.payload.data, data, length);
 
 	uint8_t status = mem_read8(&_nic.csr->scb.status);
 	// c_printf("NIC: send_packet CU/RU status = 0x%02x\n", status);
@@ -538,12 +553,13 @@ void intel_nic_init() {
 	//
 	// ARP
 	//
-	// send_arp();
+	// send_grat_arp(0xC4C4C4C4);
 
 	// 
 	// 
 	// TODO:
 	// o merge from master
+	// o gratuitous ARP
 	// o rx buffers, add_to_rx_buf((void*) data, uint32_t length), consume_rx_buf() function frees memory and transfers data to user
 	// o keep flag for rx_enable in _nic. with first call to receive, enable rx
 	// o write raw_tcb_tx()
