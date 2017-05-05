@@ -47,6 +47,7 @@
 #define NET_INTEL_MAX_ETH_LENGTH 1500
 #define NET_INTEL_ETH_HEAD_LEN 14
 #define NET_INTEL_RFD_SIZE 3096
+#define NET_INTEL_RX_BUF_MAX_LEN 3096
 
 // Stores info about network interface
 struct nic_info {
@@ -118,7 +119,7 @@ struct rx_buf {
 	struct rx_buf* next;
 	uint32_t length;
 	uint32_t curr_ptr;
-	void* data[3096];
+	void* data[NET_INTEL_RX_BUF_MAX_LEN];
 };
 
 // ARP packet

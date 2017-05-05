@@ -28,7 +28,7 @@ static void init_rfa(struct nic_info* nic, uint32_t num_rfd);
 static void recycle_command_blocks();
 static char ascii_to_printable_char(char c);
 static void claim_rfd_data();
-static void add_to_rx_buf(void* data, uint32_t length);
+static int32_t add_to_rx_buf(void* data, uint32_t length);
 static void consume_rx_buf(void* buffer, uint32_t length);
 static struct cb* get_next_cb();
 static int32_t send_arp();
@@ -289,19 +289,28 @@ static void claim_rfd_data() {
 	_nic.next_rfd = (struct rfd*) _nic.next_rfd->link;
 }
 
-static void add_to_rx_buf(void* data, uint32_t length) {
+static int32_t add_to_rx_buf(void* data, uint32_t length) {
+	// if(length > NET_INTEL_RX_BUF_MAX_LEN) {
+	// 	return -1;
+	// }
+	// memcpy_nic.next_rx_buf->next = (struct rx_buf*) get_next_page();
+	// memcpy_nic.next_rx_buf->length = length;
+	// memcpy_nic.next_rx_buf->curr_ptr = 0;
+	// memcpy(memcpy_nic.next_rx_buf, data, length);
+
+	// memcpy_nic.next_rx_buf = memcpy_nic.next_rx_buf->next;
 	// _nic.rx_buf_count++;
-	// _nic.next_rx_buf;
 }
 
 static void consume_rx_buf(void* out_buffer, uint32_t length) {
-	
-	
-	// _nic.rx_buf_count--;
+	// TODO copy data from rx_buf_head into buffer
 	// if(_nic.rx_buf_head->next) {
+	// 	struct rx_buf* temp = _nic.rx_buf_head;
 	// 	_nic.rx_buf_head = _nic.rx_buf_head->next;
+	// 	_nic.rx_buf_count--;
+	// 	free_page(temp);
 	// }
-} 
+}
 
 
 /**
@@ -534,6 +543,7 @@ void intel_nic_init() {
 	// 
 	// 
 	// TODO:
+	// o merge from master
 	// o rx buffers, add_to_rx_buf((void*) data, uint32_t length), consume_rx_buf() function frees memory and transfers data to user
 	// o keep flag for rx_enable in _nic. with first call to receive, enable rx
 	// o write raw_tcb_tx()
