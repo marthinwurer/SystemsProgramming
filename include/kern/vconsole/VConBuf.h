@@ -3,12 +3,8 @@
 
 typedef struct VConBuf_s VConBuf;
 
-
-#define VCON_LINE_FLAG_MASK     0x3
-#define VCON_LINE_FLAG_DIRTY    0x1
-#define VCON_LINE_FLAG_RESERVED 0x2
-#define VCON_LINE_LENGTH_MASK   0xFFFC
-#define VCON_LINE_LENGTH_LOC    0x2
+#include <kern/vconsole/VConChar.h>
+#include <kern/vconsole/VConLine.h>
 
 
 /**
@@ -18,29 +14,9 @@ typedef struct VConBuf_s VConBuf;
  *
  * lineTable (Line Information Table)
  * ----------------------------------
- * The lineTable is an array of 16-bit words, with each word being a line (row)
- * in the console buffer. It is required that the table has enough space for
- * all rows for a virtual console. An entry in this table is setup as followed:
- *
- * 15                               2       0
- * +--------------------------------+-------+
- * | Line length                    | Flags |
- * +--------------------------------+-------+
- *
- * Flags (Bits 0-1)
- * --
- * The first 2 bits contain the flags. The flags provide information to the
- * console controller. The following flags are defined:
- *   Bit 0: Dirty bit, if set the line will need to be redrawn to framebuffer
- *   Bit 1: Reserved
- *
- * Line length (Bits 2-15)
- * --
- * Bits 2-15 contain the length (in columns) of the line. The length is an
- * unsigned integer that determines how many characters in the charTable are
- * set for this row. If the length is less than the maximum columns for a
- * console buffer, then the rest of the columns on this line are assumed to be
- * null cells (whitespace).
+ * The lineTable is an array of type VConLine (or a 32-bit word). This table is
+ * indexed by the rows/lines of the console. Therefore, it is required that the
+ * table has enough space for all rows in the console.
  *
  * charTable (Character Cell Table)
  * --------------------------------
@@ -49,7 +25,7 @@ typedef struct VConBuf_s VConBuf;
  * multiplied by the number of columns for a virtual console.
  */
 struct VConBuf_s {
-	uint16_t *lineTable;
+	VConLine *lineTable;
 	VConChar *charTable;
 };
 
