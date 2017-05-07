@@ -25,18 +25,14 @@ typedef struct VCon_s VCon;
 #define vcon_cursor(columns, row, col) (col + (row * columns))
 
 struct VCon_s {
-
 	uint16_t rows;
 	uint16_t columns;
 	uint16_t cursorX;
 	uint16_t cursorY;
-	uint16_t scrollMinX;
-	uint16_t scrollMinY;
-	uint16_t scrollMaxX;
-	uint16_t scrollMaxY;
+	uint16_t scrollStart;
+	uint16_t scrollEnd;
 	uint8_t tabSize;
 	VConBuf buf;
-	//VConChar *buf;
 	VConCtrl *controller;
 };
 

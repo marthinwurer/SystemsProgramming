@@ -10,6 +10,7 @@ KERN_OBJ := early/_early.o \
             graphics/text/text.o \
             memory/memory_map.o \
             util/marquee.o \
+            vconsole/buffer.o \
             vconsole/console.o \
             vconsole/control.o \
             vesa/edid.o \

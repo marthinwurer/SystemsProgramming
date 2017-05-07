@@ -67,7 +67,9 @@ int main(void) {
 													  mode.fb.colorspace[2].position,
 	                                                  mode.fb.colorspace[2].mask);
 
-	// __asm("hlt");
+	vcon_redraw(&CIO_CONTROLLER);
+
+	__asm("hlt");
 
 	// Set the mode
 

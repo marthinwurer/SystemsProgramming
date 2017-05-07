@@ -27,6 +27,8 @@ typedef struct VConBuf_s VConBuf;
 struct VConBuf_s {
 	VConLine *lineTable;
 	VConChar *charTable;
+	uint32_t lineTableSize; // size of the line table in bytes
+	uint32_t charTableSize; // size of the character table in bytes
 };
 
 

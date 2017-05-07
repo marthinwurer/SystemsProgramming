@@ -48,7 +48,9 @@ unsigned int	max_x, max_y;
 #include <kern/vconsole/console.h>
 #include <kern/vconsole/control.h>
 
-static VConChar *TEMP_CONSOLE_BUF = (VConChar*)0x4C00;
+static VConLine *TEMP_CONSOLE_LINETAB = (VConLine*)0x4C00;
+
+static VConChar *TEMP_CONSOLE_CHARTAB = (VConChar*)0x4D40;
 
 static VCon CON;
 
@@ -127,7 +129,7 @@ void c_setscroll( unsigned int s_min_x, unsigned int s_min_y, unsigned int s_max
 	// curr_x = scroll_min_x;
 	// curr_y = scroll_min_y;
 	// __c_setcursor();
-	vcon_setScroll(&CON, s_min_x, s_min_y, s_max_x, s_max_y);
+	vcon_setScroll(&CON, s_min_y, s_max_y);
 }
 
 /*
@@ -506,7 +508,7 @@ static void __c_do_printf( int x, int y, char **f ){
 					/* FALL THRU */
 
 				case '\r':
-					x = CON.scrollMinX;
+					x = 0;
 					break;
 
 				default:
@@ -728,7 +730,11 @@ void c_io_init( void ){
 	// __c_setcursor();
 	CIO_CONTROLLER.current = &CON;
 
-	vcon_init(&CON, TEMP_CONSOLE_BUF, SCREEN_Y_SIZE, SCREEN_X_SIZE);
+	vcon_init(&CON, SCREEN_Y_SIZE, SCREEN_X_SIZE);
+	CON.buf.lineTable = TEMP_CONSOLE_LINETAB;
+	CON.buf.charTable = TEMP_CONSOLE_CHARTAB;
+	vcon_buf_initLineTable(&CON);
+
 	CON.controller = &CIO_CONTROLLER;
 	vcon_clear(&CON);
 	vcon_redraw(&CIO_CONTROLLER);

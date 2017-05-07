@@ -23,7 +23,7 @@ int vcon_scroll(VCon *con, uint16_t lines);
 
 int vcon_setCursor(VCon *con, uint16_t x, uint16_t y);
 
-int vcon_setScroll(VCon *con, uint16_t minX, uint16_t minY, uint16_t maxX, uint16_t maxY);
+int vcon_setScroll(VCon *con, uint16_t start, uint16_t end);
 
 
 

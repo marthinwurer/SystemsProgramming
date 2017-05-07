@@ -3,7 +3,10 @@
 
 #include <stdint.h>
 
-#define VCON_NULLCELL ((VConChar){ .character = ' ', .color = 0x7 })
+// light-gray on black
+#define VCON_DEFAULT_COLOR 0x7
+
+#define VCON_NULLCELL ((VConChar){ .character = ' ', .color = VCON_DEFAULT_COLOR })
 
 
 /**
