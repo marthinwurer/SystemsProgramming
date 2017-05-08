@@ -19,10 +19,7 @@ int main(void) {
 
 
 	get_memory_map();
-    IO_INIT();
-    ramdisk_install();
-    raw_install();
-	
+    
 
 	return 0;
 
