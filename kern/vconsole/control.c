@@ -37,6 +37,9 @@ int vcon_redraw(VConCtrl *ctrl) {
 				memcpy((void*)0xB8000 + offset,
 				        buf.charTable + buf.lineTable[r].offset,
 					    length * sizeof(VConChar));
+				memset((void*)0xB8000 + offset + (length * sizeof(VConChar)),
+				        0,
+						(ctrl->current->columns - length) * sizeof(VConChar));
 				
 				offset += 160;
 			}

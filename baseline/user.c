@@ -920,10 +920,10 @@ int32_t redrawProcess(void *arg) {
 	
 
 	for (;;) {
-		if (CIO_CONTROLLER.dirty) {
+		//if (CIO_CONTROLLER.dirty) {
 			vcon_redraw(&CIO_CONTROLLER);
-			CIO_CONTROLLER.dirty = 0;
-		}
+		//	CIO_CONTROLLER.dirty = 0;
+		//}
 		sleep(10);
 	}
 

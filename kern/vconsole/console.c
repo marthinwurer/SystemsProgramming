@@ -187,41 +187,37 @@ int vcon_scroll(VCon *con, uint16_t lines) {
 	if (con == NULL) {
 		return E_VCON_ARGNULL;
 	}
+
+	uint16_t scrollHeight = con->scrollEnd - con->scrollStart;
+
+	if (lines >= scrollHeight) {
+		vcon_clearScroll(con);
+	} else if (lines != 0) {
+
+		VConLine oldLineBuf[lines];
+
+		VConLine line;
+		for (uint16_t i = 0; i != lines; ++i) {
+			line = con->buf.lineTable[i + con->scrollStart];
+			line.length = VCON_LINE_FLAG_DIRTY;
+			oldLineBuf[i] = line;
+		}
+
+		uint16_t stop = con->scrollEnd - lines;
+
+		// scroll by moving entries in the line table
+		for (uint16_t r = con->scrollStart; r != stop; ++r) {
+			line = con->buf.lineTable[r + lines];
+			line.length |= VCON_LINE_FLAG_DIRTY | VCON_LINE_FLAG_SCROLL;
+			con->buf.lineTable[r] = line;
+		}
+
+		for (uint16_t i = 0; i != lines; ++i) {
+			con->buf.lineTable[stop + i] = oldLineBuf[i];
+		}
+
+	}
 	
-	// uint16_t rows = con->scrollMaxY - con->scrollMinY;
-	// uint16_t cols = con->scrollMaxX - con->scrollMinX;
-
-	// if (lines > con->scrollMaxY - con->scrollMinY) {
-	// 	vcon_clearScroll(con);
-	// 	con->cursorX = con->scrollMinX;
-	// 	con->cursorY = con->scrollMinY;
-	// } else {
-
-	// 	uint16_t line = con->scrollMinY;
-	// 	uint16_t lineEnd = con->scrollMaxY - lines;
-	// 	VConChar *from = con->buf + ((line + lines) * con->columns) + con->scrollMinX;
-	// 	VConChar *to = con->buf + (line * con->columns) + con->scrollMinX;
-		
-	// 	uint16_t colsToNextLine = con->columns - con->scrollMaxX + con->scrollMinX;
-
-	// 	for (; line != lineEnd; ++line) {
-	// 		for (unsigned i = 0; i <= cols; ++i) {
-	// 			*to++ = *from++;
-	// 		}
-	// 		to += colsToNextLine;
-	// 		from += colsToNextLine;
-	// 	}
-
-	// 	for (; line != con->scrollMaxY; ++line) {
-	// 		for (unsigned i = 0; i != cols; ++i) {
-	// 			*to++ = NULL_CELL;
-	// 		}
-	// 		to += colsToNextLine;
-	// 	}
-
-	// }
-	
-
 	return E_VCON_SUCCESS;
 }
 
