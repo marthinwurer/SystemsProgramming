@@ -1,6 +1,8 @@
 #include <kern/early/realmode.h>
 #include <kern/early/memory_map_setup.h>
-
+#include "../drivers/ramdisk/ramdisk.h"
+#include "../drivers/rawfs/raw.h"
+#include "../io/router.h"
 
 
 //
@@ -17,7 +19,9 @@ int main(void) {
 
 
 	get_memory_map();
-
+    IO_INIT();
+    ramdisk_install();
+    raw_install();
 	
 
 	return 0;

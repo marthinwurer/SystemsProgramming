@@ -10,6 +10,11 @@
 #include "mount.h"
 #include "message.h"
 #pragma once
+
+/**
+ * \brief handles initialization of the IO subystem
+ */
+status_t IO_INIT();
 /**
  * \brief allocates space for an object and returns handle
  * \return status_t: E_SUCCESS or E_NO_MORE_HANDLES
