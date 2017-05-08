@@ -28,7 +28,7 @@
 ** Start of C-only definitions
 */
 
-#ifdef __SP_KERNEL__
+//#ifdef __SP_KERNEL__
 
 /*
 ** OS-only declarations
@@ -203,7 +203,7 @@ void _pcb_dump( const char *which, pcb_t *pcb );
 */
 void _context_dump( const char *which, context_t *context );
 
-#endif
+//#endif
 
 #endif
 

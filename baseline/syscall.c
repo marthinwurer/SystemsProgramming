@@ -544,6 +544,9 @@ static void _sys_fork( pcb_t *pcb ) {
 	// fix the child's EBP
 	REG(new,ebp) += offset;
 	
+	// fix the child's memory pointer
+	new->memory = pcb->memory;
+
 	// return values for the two processes
 	RET(new) = 0;
 	RET(pcb) = new->pid;
@@ -571,6 +574,12 @@ static void _sys_exec( pcb_t *pcb ) {
 	
 	// clean up the stack and set the new entry point
 	pcb->context = _stk_setup( pcb->stack, entry, arg );
+
+	// get the process a new address space and switch to it.
+	pcb->memory = new_page_directory();
+	c_printf("exec: PID: %d, PDE: %x\n", pcb->pid, pcb->memory);
+
+	set_page_directory(pcb->memory);
 
 	// question:  should we schedule and dispatch here?
 	// we choose not to, so the "new" program will

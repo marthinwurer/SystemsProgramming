@@ -108,6 +108,13 @@ isr_save:
 */
 	.globl	_current
 	.globl	_system_esp
+	.globl	last_pde
+	.globl	page_directory
+
+	movl	%cr3, %edx
+	movl	%edx, (last_pde)  // save the last page directory
+	movl	(page_directory), %edx
+	movl	%edx, %cr3 // switch to the identity-maped pde
 
 	movl	_current, %edx	// save context pointer for the current proc
 	movl	%esp, (%edx)	// (must be the first PCB field!)
@@ -137,6 +144,9 @@ __isr_restore:
 /*
 ** MOD for 20165 CSCI452
 */
+	movl	(last_pde), %ebx
+	movl	%ebx, %cr3 // switch back to the old page
+
 	movl	_current, %ebx	// return to user stack
 	movl	(%ebx), %esp	// ESP now points to context save area
 /*

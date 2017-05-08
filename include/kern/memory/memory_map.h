@@ -97,6 +97,11 @@ void setup_initial_page_table(void);
 address_space_t set_page_directory(address_space_t directory);
 
 /**
+ * Sets the address space that the ISRs will return to.
+ */
+void set_return_pde(address_space_t dir);
+
+/**
  * Map a section of physical memory to virtual memory. If pmem_start is null,
  * maps free pages from pmemstart on to fill out length.
  * length is in bytes. use the PAGE_SIZE macro and multiply by the number of pages.
@@ -111,6 +116,10 @@ void * mmap(uint32_t * vspace,
 		int * status);
 
 
+/**
+ * Creates a new page directory and returns it. The only mapped in it is the
+ * identity mapped 1st 1k pages.
+ */
 address_space_t new_page_directory(void);
 
 uint32_t * get_phys_address(address_space_t space, uint32_t * virtual_addr);

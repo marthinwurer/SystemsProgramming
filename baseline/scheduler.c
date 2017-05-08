@@ -120,4 +120,9 @@ void _dispatch( void ) {
 	// prepare to turn it loose
 	_current->state = PS_RUNNING;
 	_current->q_ticks = _current->q_default;
+
+	// change the virtual memory
+//	c_printf("dispatch: PID: %d, PDE: %x\n", _current->pid, _current->memory);
+	set_return_pde(_current->memory);
+
 }	

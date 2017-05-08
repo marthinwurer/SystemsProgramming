@@ -26,6 +26,7 @@
 
 // memory map stuff
 #include <kern/memory/memory_map.h>
+extern address_space_t page_directory;
 
 // need init() address
 #include <baseline/user.h>
@@ -160,27 +161,6 @@ void _init( void ) {
 	setup_page_availibility_table();
 	setup_initial_page_table();
 
-#if 0
-	for(;;){
-		uint32_t * data = get_next_page();
-		* data = (uint32_t) data;
-		c_printf("%x \n", *data);
-	}
-#endif
-
-	test_mmap();
-
-
-//	void * address = get_next_page();
-//
-//	c_printf("First Page:%x\n", address );
-//	c_printf("Next Page:%x\n",free_page(address));
-//	c_printf("Next Page:%x\n", get_next_page() );
-
-//
-//	__panic("lololol");
-//		c_getchar();
-
 
 
 	c_setscroll( 0, 7, 99, 99 );
@@ -251,6 +231,9 @@ void _init( void ) {
 		_kpanic( "_init", "init() stack setup failed" );
 	}
 
+	// give the initial process the identity pde
+	pcb->memory = page_directory;
+
 	// set up various PCB fields
 	pcb->pid = pcb->ppid = PID_INIT;
 	pcb->prio = P_SYSTEM;
@@ -280,6 +263,7 @@ void _init( void ) {
 
 	// dispatch the first user process
 
+	c_puts("dispatching first\n");
 	_dispatch();
 
 	/*

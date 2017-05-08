@@ -1,4 +1,6 @@
 
+#include <baseline/process.h>
+#include <baseline/scheduler.h>
 #include <kern/memory/memory_map.h>
 
 // to integer and to pointer
@@ -19,8 +21,24 @@ uint32_t mm_size = 0;
 address_space_t page_directory = 0;
 uint32_t * page_table;
 
+address_space_t last_pde = 0;
+
 
 static void __page_fault_isr( int vector, int code ){
+	/**
+	 * "When the CPU fires a page-not-present exception the CR2 register is
+	 *  populated with the linear address that caused the exception."
+	 */
+
+	uint32_t * address;
+
+	// get the address that caused the fault.
+	__asm__	__volatile__ ("movl %%cr2, %%ebx" : "=b"(address) : : );
+
+	c_printf("PID: %x\n",_current->pid);
+
+	c_printf("Code: %x\n", code);
+	c_printf("address: %x\n", address);
 	__panic("Page Fault received!");
 	(void) vector;
 	(void) code;
@@ -228,6 +246,10 @@ address_space_t set_page_directory(address_space_t directory){
 
 	c_printf("setting pd to %x\n", directory);
 
+	if(directory == NULL){
+		__panic("need a memory space!");
+	}
+
 	address_space_t old = NULL;
 
 
@@ -424,7 +446,9 @@ void test_mmap(void){
 //	__panic("lolol");
 }
 
-
+void set_return_pde(address_space_t dir){
+	last_pde = dir;
+}
 
 
 
