@@ -46,10 +46,11 @@
 #define NET_INTEL_RFD_SIZE 3096
 #define NET_INTEL_RX_BUF_MAX_LEN 3096
 
-#define ETHERTYPE_IPv4 0x0800
-#define ETHERTYPE_ARP 0x0806
-#define ETHERTYPE_IPX 0x8137
-#define ETHERTYPE_IPv 0x86dd
+// These are all in the correct network byte order
+#define ETHERTYPE_IPv4 0x0008
+#define ETHERTYPE_ARP 0x0608
+#define ETHERTYPE_IPX 0x3781
+#define ETHERTYPE_IPv 0xdd86
 
 // Stores info about network interface
 struct nic_info {
@@ -96,7 +97,7 @@ struct cb {
 			uint16_t tcb_byte_count;
 			uint8_t threshold;
 			uint8_t tbd_count;
-			struct {
+			struct eth_packet_t {
 				uint8_t dst_mac[MAC_LENGTH_BYTES];
 				// uint8_t src_mac[MAC_LENGTH_BYTES];
 				uint16_t ethertype; // under 1500 is payload length, above is type of payload header
@@ -109,9 +110,11 @@ struct cb {
 						uint8_t protocol_addr_len;
 						uint16_t opcode;
 						uint8_t sender_hw_addr[6];
-						uint32_t sender_protocol_addr; // unaligned
+						// uint32_t sender_protocol_addr; // unaligned
+						uint8_t sender_protocol_addr[4]; // aligned
+						// uint16_t sender_protocol_addr_hi; // aligned
 						uint8_t target_hw_addr[6];
-						uint32_t target_protocol_addr;
+						uint8_t target_protocol_addr[4];
 					} arp;
 				} payload;
 			} eth_packet;
@@ -135,6 +138,11 @@ struct rx_buf {
 	uint32_t length;
 	uint32_t curr_ptr;
 	void* data[NET_INTEL_RX_BUF_MAX_LEN];
+};
+
+enum arp_opcode {
+	arp_request = 0x0100,
+	arp_reply = 0x0200
 };
 
 // Constants to control EEPROM
@@ -237,6 +245,7 @@ enum cb_status {
 	// dma_addr_t dma_addr;
 	// struct sk_buff *skb;
 
+int32_t send_grat_arp();
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length);
 void intel_nic_enable_rx();
 

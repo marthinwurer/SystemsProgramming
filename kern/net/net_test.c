@@ -9,13 +9,11 @@
 
 
 int32_t net_test_main(void* args) {
-	(void) args; // surpress warnings
+	(void) args; // suppress warnings
 
-	// c_printf("enabling NIC rx in 5 sec...");
-	// sleep(5000);
 	intel_nic_enable_rx();
-	// c_printf(" enabled, waiting to tx for another 5 sec...\n");
-	// sleep(5000);
+	// send_grat_arp(0xA9FEA9B9);
+	// send_grat_arp(0xC0A88001);
 
 	//
 	// Do test things here...
@@ -37,11 +35,13 @@ int32_t net_test_main(void* args) {
 	uint32_t i;
 	for(i = 0; i < fast_packets; i++) { // test ring CBL
 		c_printf("Sending packet #%d\n", i);
+		my_data[0] = i;
 		send_packet(dst_mac, my_data, 0x80);
 		sleep(fast_interval_ms);
 	}
 
 	for(i = 0; i < slow_packets; i++) { // test ring CBL
+		my_data[0] = i + fast_packets;
 		c_printf("Sending packet #%d\n", i + fast_packets);
 		send_packet(dst_mac, my_data, 0x80);
 		sleep(slow_interval_ms);
