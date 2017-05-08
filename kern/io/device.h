@@ -1,5 +1,5 @@
 #include "io_types.h"
-
+#pragma once
 typedef struct _io_device {
     IOHANDLE        handle; ///< Handle associated with the device
     char*           name; ///< Name associated with the device
