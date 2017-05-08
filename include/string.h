@@ -28,6 +28,7 @@ char* strupper(char *str);
 
 char* strlower(char *str);
 
+int atoi(const char *str, int *value);
 
 #ifdef __cplusplus
 }

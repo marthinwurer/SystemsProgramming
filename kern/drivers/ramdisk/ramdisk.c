@@ -17,9 +17,9 @@ status_t ramdisk_install(){
         pages[i] = get_next_page();
     }
     //init handle
-    IO_PROTOTYPE(IO_OBJ_FILESYSTEM, &handle);
+    IO_PROTOTYPE(IO_OBJ_DEVICE, &handle);
     //fill in name
-    char* name = "RamFS";
+    char* name = "RamDisk";
     int32_t namesize = strlen(name);
     IO_UPDATE(handle, IOPROP_NAME, name, &namesize);
     //TODO fill in create date

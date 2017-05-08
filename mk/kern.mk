@@ -7,7 +7,7 @@
 # U_S_OBJ := realmode.o
 # U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 
-KERN_IO_OBJ := io/router.o io/device.o io/filesystem.o io/message.o io/middleware.o io/mount.o ioapi/file.o iopath/libpath.o drivers/ramdisk/ramdisk.o
+KERN_IO_OBJ := io/router.o io/device.o io/filesystem.o io/message.o io/middleware.o io/mount.o ioapi/file.o iopath/libpath.o drivers/ramdisk/ramdisk.o drivers/rawfs/raw.o
 KERN_IO_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_IO_OBJ))
 # EARLY_OBJ := _early.o realmode.o main.o gdt_init.o
 # EARLY_OBJ := $(addprefix $(BUILD_DIR)/kern/early/,$(EARLY_OBJ))

@@ -1,5 +1,5 @@
 #include "io_types.h"
-
+#pragma once
 typedef struct _io_message {
     IOHANDLE        handle; ///< Handle associated with the message
     char*           path; ///< Path for the message
