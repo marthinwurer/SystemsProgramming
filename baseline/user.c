@@ -14,6 +14,9 @@
 
 #include <baseline/user.h>
 
+#include <kern/net/net_test.h>
+#include <baseline/c_io.h>
+
 /*
 ** Support functions
 */
@@ -912,7 +915,20 @@ int32_t idle( void *arg ) {
 
 }
 
+int32_t redrawProcess(void *arg) {
 
+	
+
+	for (;;) {
+		if (CIO_CONTROLLER.dirty) {
+			vcon_redraw(&CIO_CONTROLLER);
+			CIO_CONTROLLER.dirty = 0;
+		}
+		sleep(10);
+	}
+
+	return 0;
+}
 /*
 ** Initial process; it starts the other top-level user processes.
 **
@@ -926,18 +942,26 @@ int32_t idle( void *arg ) {
 int32_t init( void *arg ) {
 	// cast away warnings
 	(void) arg;
-
 	pid_t pid;
 
 	cwrites( "Init started\n" );
 
 	swritech( '$' );
 
-	pid = spawn( idle, (void *) '.', P_MIN );
+	// pid = spawn( idle, (void *) '.', P_MIN );
+	pid = spawn( idle, 0, P_MIN );
 	if( pid < 0 ) {
 		cwrites( "init, spawn() IDLE failed\n" );
 	}
 	swritech( '+' );
+
+	// Launch test program for networking
+	//pid = spawn(net_test_main, 0, P_HIGH);
+	//if(pid < 0) {
+	//	cwrites("init, spawn() net_test_main failed\n");
+	//}
+	//swritech('{');
+	spawn(redrawProcess, 0, P_SYSTEM);
 
 #ifdef SPAWN_A
 	pid = spawn( user_a, 0, P_HIGH );

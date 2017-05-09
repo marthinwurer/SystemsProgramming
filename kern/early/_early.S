@@ -14,7 +14,7 @@
 	.arch i386
 	.code32
 
-	.globl main, init_int32, c_io_init, c_puts
+	.globl main, init_int32, c_io_init, c_puts, c_printf
 
 	.globl _start
 
@@ -35,6 +35,24 @@ _early:
 	movl	$TARGET_STACK, %ebp
 	movl	%ebp, %esp
 
+#ifdef CLEAR_BSS_SEGMENT
+
+/*
+** Zero the BSS segment
+**
+** These symbols are defined automatically by the linker.
+*/
+	.globl	__bss_start,_end
+
+	movl	$__bss_start,%edi
+clearbss:
+	movl	$0,(%edi)
+	addl	$4,%edi
+	cmpl	$_end,%edi
+	jb	clearbss
+
+#endif
+
 	// initialize c_io
 	call	c_io_init
 	
@@ -43,6 +61,8 @@ _early:
 
 	// call main
 	call	main
+	cmpl	$0, %eax
+	jnz		__early_fail
 	
 	// initialize the kernel GDT
 	call	gdt_init
@@ -66,12 +86,22 @@ _early:
 	cld
 	rep movsb*/
 
+__early_fail:
+	pushl	%eax
+	pushl	$failMsg
+	call	c_printf
+__early_fail_loop:
+	hlt
+	jmp		__early_fail_loop
+
 enterMsg:
 	.asciz "=== Entered early init ===\n"
 
 leaveMsg:
 	.asciz "=== Leaving early init ===\n"
-	
+
+failMsg:
+	.asciz "error: main() returned %d\nHalting...\n"
 
 
 /*

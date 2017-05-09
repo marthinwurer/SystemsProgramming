@@ -28,11 +28,16 @@
 #include <kern/memory/memory_map.h>
 extern address_space_t page_directory;
 
+// network stuff
+#include <kern/net/intel.h>
+
 // need init() address
 #include <baseline/user.h>
 
 // need the exit() and do_exit() prototypes
 #include <baseline/ulib.h>
+
+#include <kern/video/video.h>
 
 /*
 ** PRIVATE DEFINITIONS
@@ -152,9 +157,10 @@ void _init( void ) {
 	** Console I/O system.
 	*/
 
-	c_io_init();
+	//c_io_init();
 	c_io_init_isr();
 
+	c_clearscreen();
 
 	// set up the memory
 	disp_memory_map();
@@ -165,6 +171,14 @@ void _init( void ) {
 
 	c_setscroll( 0, 7, 99, 99 );
 	c_puts_at( 0, 6, "================================================================================" );
+	c_io_init_isr();
+	c_setscroll( 0, 7, CIO_CONTROLLER.current->columns, CIO_CONTROLLER.current->rows );
+	
+	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
+		c_putchar_at(i, 6, '=');
+	}
+
+	video_dumpInfo(VIDEO_INFO);
 
 	/*
 	** 20165-SPECIFIC CODE STARTS HERE
@@ -179,7 +193,7 @@ void _init( void ) {
 
 	c_puts( "System initialization starting\n" );
 	c_puts( "------------------------------\n" );
-//	__delay( 200 );  // about 5 seconds
+	//__delay( 200 );  // about 5 seconds
 
 	c_puts( "Module init: " );
 
@@ -190,11 +204,14 @@ void _init( void ) {
 	_sio_init();		// serial i/o
 	_sys_init();		// syscalls
 	_clk_init();		// clock
+	intel_nic_init();	// network
+
 
 
 
 	c_puts( "\nModule initialization complete\n" );
 	c_puts( "------------------------------\n" );
+
 
 	/*
 	** Create the initial system ESP
