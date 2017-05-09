@@ -1,8 +1,8 @@
 #include <kern/early/realmode.h>
 #include <kern/early/memory_map_setup.h>
-#include "../drivers/ramdisk/ramdisk.h"
-#include "../drivers/rawfs/raw.h"
-#include "../io/router.h"
+#include <kern/drivers/ramdisk/ramdisk.h>
+#include <kern/drivers/rawfs/raw.h>
+#include <kern/io/router.h>
 
 
 //
@@ -19,7 +19,18 @@ int main(void) {
 
 
 	get_memory_map();
-    
+    //c_puts("Starting IO Router...");
+    IO_INIT();
+    //c_puts("Returned IO Router...\n");
+    //c_puts("Installing RAMDisk...");
+    ramdisk_install();
+    //c_puts("Installed\n");
+    //c_puts("Installing RAWFS...");
+    raw_install();
+    //c_puts("Installed!\n");
+    while(1) { continue;}	
+	return 0;
+
 
 	return 0;
 

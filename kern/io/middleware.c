@@ -1,4 +1,4 @@
-#include "middleware.h"
+#include <kern/io/middleware.h>
 
 #define _MC_IO_MD_CNT 5
 

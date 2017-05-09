@@ -6,8 +6,8 @@
  */
 
 #include "file.h"
-#include "../io/router.h"
-#include "../iopath/libpath.h"
+#include <kern/io/router.h>
+#include <libpath.h>
 
 #define HANDLED(code) if((stat = code) != E_SUCCESS){ return stat; }
 #define THANDLED(type, code) length = sizeof(type); HANDLED(code)

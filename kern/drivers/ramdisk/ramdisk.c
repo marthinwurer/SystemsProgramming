@@ -2,9 +2,9 @@
  * \Author Nathan C. Castle
  * \brief implementation of the ramdisk in-memory IO backing store
  */
-#include "ramdisk.h"
-#include "../../io/router.h"
-#include "../../io/device.h"
+#include <kern/drivers/ramdisk/ramdisk.h>
+#include <kern/io/router.h>
+#include <kern/io/device.h>
 #include <kern/memory/memory_map.h>
 #include <baseline/common.h>
 #define PAGECOUNT 500

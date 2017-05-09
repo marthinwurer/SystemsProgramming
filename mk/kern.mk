@@ -7,7 +7,9 @@
 # U_S_OBJ := realmode.o
 # U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 
-KERN_IO_OBJ := io/router.o io/device.o io/filesystem.o io/message.o io/middleware.o io/mount.o ioapi/file.o iopath/libpath.o drivers/ramdisk/ramdisk.o drivers/rawfs/raw.o
+KERN_DRV_OBJ := ramdisk/ramdisk.o rawfs/raw.o
+KERN_DRV_OBJ := $(addprefix $(BUILD_DIR)/kern/drivers/, $(KERN_DRV_OBJ))
+KERN_IO_OBJ := io/router.o io/device.o io/filesystem.o io/message.o io/middleware.o io/mount.o ioapi/file.o
 KERN_IO_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_IO_OBJ))
 # EARLY_OBJ := _early.o realmode.o main.o gdt_init.o
 # EARLY_OBJ := $(addprefix $(BUILD_DIR)/kern/early/,$(EARLY_OBJ))
@@ -50,8 +52,8 @@ BASELINE_OBJ := $(addprefix $(BUILD_DIR)/baseline/,$(BASELINE_OBJ))
 
 # Collections of files
 
-#KERN_OBJECTS = $(S_OBJ) $(C_OBJ) $(U_C_OBJ) $(U_S_OBJ) $(KERN_IO_OBJ)
-PROG_OBJ := $(KERN_OBJ) $(KERN_IO_OBJ) $(BASELINE_OBJ)
+#KERN_OBJECTS = $(S_OBJ) $(C_OBJ) $(U_C_OBJ) $(U_S_OBJ) $(KERN_IO_OBJ) $(KERN_DRV_OBJ)
+PROG_OBJ := $(KERN_OBJ) $(KERN_IO_OBJ) $(KERN_DRV_OBJ) $(BASELINE_OBJ)
 
 $(BUILD_DIR)/prog.out: $(PROG_OBJ)
 	$(LD) $(LDFLAGS) -o $@ $+

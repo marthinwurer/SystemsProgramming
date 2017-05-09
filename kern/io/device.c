@@ -1,4 +1,4 @@
-#include "device.h"
+#include <kern/io/device.h>
 
 #define _MC_IO_DV_CNT 5
 

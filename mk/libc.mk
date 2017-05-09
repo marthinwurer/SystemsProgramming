@@ -12,7 +12,8 @@ LIBC_OBJS = string/memcmp.o \
             string/strlen.o \
             string/strcpy.o \
 			string/strpos.o \
-			string/atoi.o
+			string/atoi.o \
+			libpath.o
 
 LIBC_OBJS := $(addprefix $(BUILD_DIR)/libc/,$(LIBC_OBJS))
 LIBK_OBJS := $(LIBC_OBJS:.o=.libk.o)

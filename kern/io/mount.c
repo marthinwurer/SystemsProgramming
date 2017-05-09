@@ -1,4 +1,4 @@
-#include "mount.h"
+#include <kern/io/mount.h>
 
 #define _MC_IO_MP_CNT 5
 

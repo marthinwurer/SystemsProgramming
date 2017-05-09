@@ -126,6 +126,6 @@ int main(void) {
     c_puts("Installing RAWFS...");
     raw_install();
     c_puts("Installed!\n");
-	
+    while(1) { continue;}	
 	return 0;
 }

@@ -1,4 +1,4 @@
-#include "message.h"
+#include <kern/io/message.h>
 
 #define _MC_IO_MS_CNT 50
 

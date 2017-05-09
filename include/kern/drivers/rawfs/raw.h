@@ -3,9 +3,10 @@
  * \brief RAW File System; operates on a block-by-block basis
  *        Could theoretically be used by higher-level tooling in the absence of a proper filesystem
  */
-#include "../../io/io_types.h"
-#include "../../io/router.h"
-#include "../../iopath/libpath.h"
+#include <kern/io/io_types.h>
+#include <kern/io/router.h>
+#include <libpath.h>
+#pragma once
 
 /**
  * \brief called to install the fs at boot

@@ -3,7 +3,7 @@
  * \brief Implementation of the RAW Filesystem
  */
 
-#include "raw.h"
+#include <kern/drivers/rawfs/raw.h>
 #include <baseline/common.h>
 
 static IOHANDLE handle = -1;

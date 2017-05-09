@@ -4,7 +4,7 @@
  * @summary: primary I/O Manager implementation
  **/
 
-#include "router.h"
+#include <kern/io/router.h>
 
 #define IO_OBJ_COUNT 10
 
