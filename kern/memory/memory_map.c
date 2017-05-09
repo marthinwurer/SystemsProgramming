@@ -24,7 +24,7 @@ void disp_memory_map(void){
 
 
 	// get the memory map size
-	mm_size = map[0].base_l;
+	uint32_t mm_size = map[0].base_l;
 
 	c_printf("%d\n", mm_size);
 
@@ -79,27 +79,6 @@ void setup_page_availibility_table(void){
 	// zero the memory
 	_kmemset( page_availibility_table, pat_size, 0 );
 
-	// pages are 4KB
-//	size_t old_index = 0;
-//	for( uint32_t address = 0; address < 0xFFFFFFFF - PAGE_SIZE; address += PAGE_SIZE){
-//		size_t index = ((address >> 15) & 0xFFFFF);
-//		if( index % 0x8000 == 0){
-//			c_printf("%x\n", index);
-//		}
-//		if (index < old_index){
-//			c_printf("%x\n", index);
-//
-//			__panic("WE WRAPPED");
-//		}
-//		old_index = index;
-//
-//	}
-//	set_pat(PAGE_SIZE, 0xFF);
-	c_printf("%x\n", (((PAGE_SIZE * 8) >> 15) & 0xFFFFF));
-
-
-
-
 
 	// now that the table exists, actually set it up. if there is a 1, it is in use or dangerous.
 	for( uint32_t ii = 1; ii <= mm_size; ++ii){
@@ -123,7 +102,6 @@ void setup_page_availibility_table(void){
 		for(offset = 0; offset + max_address < MAX_MEM; offset += PAGE_SIZE ){
 			set_pat(offset + max_address + 1, 0xFF);
 		}
-		c_printf("%x\n", offset );
 	}else{
 		__panic("Couldn't mark upper memory as used!");
 	}
@@ -132,6 +110,8 @@ void setup_page_availibility_table(void){
 	for(uintptr_t offset = 0; offset < pat_size; offset += PAGE_SIZE ){
 		set_pat(((uintptr_t) page_availibility_table) + offset, 0xFF);
 	}
+
+	last_availible = 0;
 
 }
 

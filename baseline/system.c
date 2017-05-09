@@ -152,6 +152,11 @@ void _init( void ) {
 
 	__init_interrupts();	// IDT and PIC initialization
 
+	/**
+	 * set up memory
+	 */
+
+
 	/*
 	** Console I/O system.
 	*/
@@ -168,16 +173,18 @@ void _init( void ) {
 		c_putchar_at(i, 6, '=');
 	}
 	//c_puts_at( 0, 6, "================================================================================" );
+	setup_page_availibility_table();
 
-//	void * address = get_next_page();
-//
-//	c_printf("First Page:%x\n", address );
-//	c_printf("Next Page:%x\n",free_page(address));
-//	c_printf("Next Page:%x\n", get_next_page() );
 //
 //	__panic("lololol");
 //		c_getchar();
 	video_dumpInfo(VIDEO_INFO);
+
+	void * address = get_next_page();
+
+	c_printf("First Page:%x\n", address );
+	c_printf("Freed Page:%x\n",free_page(address));
+	c_printf("Next Page:%x\n", get_next_page() );
 
 	/*
 	** 20165-SPECIFIC CODE STARTS HERE

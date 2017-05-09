@@ -112,6 +112,8 @@ int main(void) {
 	CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
 	CIO_CONTROLLER.current->rows = mode.fb.height / ctx->font.height;
 
+	disp_memory_map();
+
 	vcon_redraw(&CIO_CONTROLLER);
 
 
