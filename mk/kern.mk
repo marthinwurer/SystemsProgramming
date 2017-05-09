@@ -1,15 +1,6 @@
 # mk/kern.mk
 # Makefile for the kern and baseline folders
 
-# U_C_OBJ := vga13/vga13.o vesa/vbe.o
-# U_C_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_C_OBJ))
-
-# U_S_OBJ := realmode.o
-# U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
-
-# EARLY_OBJ := _early.o realmode.o main.o gdt_init.o
-# EARLY_OBJ := $(addprefix $(BUILD_DIR)/kern/early/,$(EARLY_OBJ))
-
 KERN_OBJ := early/_early.o \
             early/realmode.o \
             early/main.o \
@@ -19,7 +10,18 @@ KERN_OBJ := early/_early.o \
             net/net_test.o \
             net/udp.o \
             early/memory_map_setup.o \
-            memory/memory_map.o
+            early/video.o \
+            graphics/text/text.o \
+            memory/memory_map.o \
+            util/marquee.o \
+            vconsole/console.o \
+            vconsole/control.o \
+            vesa/edid.o \
+            vesa/vbe.o \
+            video/color/color.o \
+            video/fb/fb.o \
+            video/globals.o \
+            video/video.o
 
 KERN_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_OBJ))
 
