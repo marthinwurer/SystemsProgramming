@@ -15,7 +15,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#define MY_MM_ADDRESS 0x3800
+#define MY_MM_ADDRESS 0x70000
+//#define MY_MM_ADDRESS 0x3800
 
 #define MB 			0x100000
 #define KB 			0x400
