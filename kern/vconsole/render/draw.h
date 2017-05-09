@@ -3,9 +3,9 @@
 
 #include "VConDrawFunc.h"
 
-int vga_draw(VCon *con, VConChar *start, VConLine line, uint16_t row);
+int vga_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row);
 
-int graphics_draw(VCon *con, VConChar *start, VConLine line, uint16_t row);
+int graphics_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row);
 
 
 #endif

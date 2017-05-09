@@ -50,7 +50,7 @@ int vcon_redraw(VConCtrl *ctrl) {
 
 		if (line.length & VCON_LINE_FLAG_DIRTY) {
 				// line is dirty, redraw it
-				drawFunc(con, buf.charTable + line.offset, line, r);
+				drawFunc(ctrl, buf.charTable + line.offset, line, r);
 				buf.lineTable[r].length &= ~VCON_LINE_FLAG_DIRTY;
 			}
 		// if (inScroll) {
