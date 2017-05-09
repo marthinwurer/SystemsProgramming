@@ -178,20 +178,20 @@ static void eeprom_load(struct nic_info *nic) {
  */
 static void intel_nic_handler(int vector, int code) {
 	(void) vector; (void) code;
-	c_printf("INTERRUPT(v=0x%02x, c=0x%02x) -- Intel NIC, ", vector, code);
+	// c_printf("INTERRUPT(v=0x%02x, c=0x%02x) -- Intel NIC, ", vector, code);
 	uint8_t stat_ack = mem_read8(&_nic.csr->scb.stat_ack);
-	c_printf("stat_ack=0x%02x ", stat_ack);
+	// c_printf("stat_ack=0x%02x ", stat_ack);
 
-	if(stat_ack & ack_cs_tno) c_printf("ack_cs_tno ");
+	// if(stat_ack & ack_cs_tno) c_printf("ack_cs_tno ");
 	if(stat_ack & ack_fr) {
 		c_printf("ack_fr ");
 		claim_rfd_data();
 	}
-	if(stat_ack & ack_cna) c_printf("ack_cna ");
-	if(stat_ack & ack_rnr) c_printf("ack_rnr ");
-	if(stat_ack & ack_mdi) c_printf("ack_mdi ");
-	if(stat_ack & ack_swi) c_printf("ack_swi ");
-	c_printf("\n");
+	// if(stat_ack & ack_cna) c_printf("ack_cna ");
+	// if(stat_ack & ack_rnr) c_printf("ack_rnr ");
+	// if(stat_ack & ack_mdi) c_printf("ack_mdi ");
+	// if(stat_ack & ack_swi) c_printf("ack_swi ");
+	// c_printf("\n");
 
 	recycle_command_blocks();
 
@@ -284,10 +284,10 @@ static char ascii_to_printable_char(char c) {
 static void claim_rfd_data() {
 	struct rfd* rfd = _nic.next_rfd;
 	uint16_t byte_count = rfd->count & 0x3FFF;
-	c_printf("\nEOF=%c,F=%c,received %d bytes\n", 
-		(rfd->count & 0x8000) ? '1' : '0', 
-		(rfd->count & 0x4000) ? '1' : '0', 
-		byte_count);
+	// c_printf("\nEOF=%c,F=%c,received %d bytes\n", 
+	// 	(rfd->count & 0x8000) ? '1' : '0', 
+	// 	(rfd->count & 0x4000) ? '1' : '0', 
+	// 	byte_count);
 	add_to_rx_buf(rfd->data, byte_count);
 	// hexdump(rfd->data, 64);
 
