@@ -22,6 +22,7 @@
  * RFD := Receive Frame Descriptor
  * RFA := Receive Frame Area
  * 
+ * ARP := Address Resolution Protocol
  * 
  */
 
@@ -46,13 +47,9 @@
 #define NET_INTEL_RFD_SIZE 3096
 #define NET_INTEL_RX_BUF_MAX_LEN 3096
 
-// These are all in the correct network byte order
-#define ETHERTYPE_IPv4 0x0008
-#define ETHERTYPE_ARP 0x0608
-#define ETHERTYPE_IPX 0x3781
-#define ETHERTYPE_IPv 0xdd86
-
-// Stores info about network interface
+/**
+ * Stores info about network interface
+ */
 struct nic_info {
 	struct csr * csr;
 	uint8_t mac[MAC_LENGTH_BYTES];
@@ -67,7 +64,9 @@ struct nic_info {
 	struct rx_buf* next_rx_buf;
 };
 
-// MMIO Control Status Register
+/**
+ * MMIO Control Status Register
+ */
 struct csr {
 	struct {
 		uint8_t status;
@@ -84,7 +83,9 @@ struct csr {
 	uint32_t rx_dma_byte_count;
 };
 
-// Command Block
+/**
+ * Command Block
+ */
 struct cb {
 	uint16_t status;
 	uint16_t command;
@@ -104,6 +105,22 @@ struct cb {
 				union {
 					uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
 					struct {
+						uint8_t version : 4;
+						uint8_t ihl : 4;
+						uint8_t dscp : 6;
+						uint8_t ecn : 2;
+						uint16_t total_len;
+						uint16_t id;
+						uint16_t flags : 3;
+						uint16_t frag_offset : 13;
+						uint8_t ttl;
+						uint8_t protocol;
+						uint16_t header_checksum;
+						uint8_t src_ip[4];
+						uint8_t dst_ip[4];
+						uint8_t ip_data[NET_INTEL_TCB_MAX_DATA_LEN - 5];
+					} ipv4;
+					struct {
 						uint16_t hw_type;
 						uint16_t protocol_type;
 						uint8_t hw_addr_len;
@@ -122,7 +139,10 @@ struct cb {
 	} u;
 };
 
-// Receive Frame Descriptor
+/**
+ * Receive Frame Descriptor is given to receive unit to store incoming
+ * transmissions. 
+ */
 struct rfd {
 	uint16_t status;
 	uint16_t command;
@@ -133,6 +153,9 @@ struct rfd {
 	uint8_t data[NET_INTEL_RFD_SIZE];
 };
 
+/**
+ * Buffer to store data in once received
+ */
 struct rx_buf {
 	struct rx_buf* next;
 	uint32_t length;
@@ -140,12 +163,28 @@ struct rx_buf {
 	void* data[NET_INTEL_RX_BUF_MAX_LEN];
 };
 
+/**
+ * ARP opcodes
+ */
 enum arp_opcode {
 	arp_request = 0x0100,
 	arp_reply = 0x0200
 };
 
-// Constants to control EEPROM
+/**
+ * Ethertype field for ethernet frame. These are all in the correct network
+ * byte order, and do not need to be changed before putting into a frame.
+ */
+enum ethertype_t {
+	ethertype_ipv4 = 0x0008,
+	ethertype_arp = 0x0608,
+	ethertype_ipx = 0x3781,
+	ethertype_ipv6 = 0xdd86
+};
+
+/**
+ * Constants to control EEPROM
+ */
 enum eeprom_lo_control {
 	EESK = 0x01, // Serial clock
 	EECS = 0x02, // Chip select
@@ -153,6 +192,9 @@ enum eeprom_lo_control {
 	EEDO = 0x08  // Serial data out
 };
 
+/**
+ * Status/ACK flags are set when an interrupt comes in.
+ */
 enum scb_stat_ack {
 	ack_cs_tno = 0x80, // CU finished executing CB with interrupt bit set
 	ack_fr = 0x40, // finished receiving
@@ -162,6 +204,9 @@ enum scb_stat_ack {
 	ack_swi = 0x04 // SW interrupt
 };
 
+/**
+ * Status flags for the System Control Block
+ */
 enum scb_status {
 	cu_mask = 0xC0,
 	ru_mask = 0x3C,
@@ -175,6 +220,10 @@ enum scb_status {
 	ru_ready = 0x10
 };
 
+
+/**
+ * Control opcodes for the System Control Block
+ */
 enum scb_control {
 	cuc_nop = 0x00,
 	cuc_start = 0x10,
@@ -193,6 +242,9 @@ enum scb_control {
 	ruc_load_ru_base = 0x06
 };
 
+/**
+ * EEPROM opcodes
+ */
 enum eeprom_opcodes {
 	op_write = 0x05,
 	op_read  = 0x06,
@@ -200,6 +252,9 @@ enum eeprom_opcodes {
 	op_ewen  = 0x13, // Erase/write enable
 };
 
+/**
+ * Command block commands
+ */
 enum cb_commands {
 	// common
 	cb_el = 0x8000, // end list (end of CBL, stop executing CBs)
@@ -217,46 +272,62 @@ enum cb_commands {
 	cb_tx_cmd = 0x0004 // transmit
 };
 
+/**
+ * Command block status codes
+ */
 enum cb_status {
 	cb_c = 0x8000,
 	cb_ok = 0x2000,
 	cb_u = 0x1000
 };
 
-	// union {
-	// 	u8 iaaddr[ETH_ALEN];
-	// 	__le32 ucode[UCODE_SIZE];
-	// 	struct config config;
-	// 	struct multi multi;
-	// 	struct {
-	// 		u32 tbd_array;
-	// 		u16 tcb_byte_count;
-	// 		u8 threshold;
-	// 		u8 tbd_count;
-	// 		struct {
-	// 			__le32 buf_addr;
-	// 			__le16 size;
-	// 			u16 eol;
-	// 		} tbd;
-	// 	} tcb;
-	// 	__le32 dump_buffer_addr;
-	// } u;
-	// struct cb *next, *prev;
-	// dma_addr_t dma_addr;
-	// struct sk_buff *skb;
+/**
+ * Sends a gratuitous ARP packet with a given IP
+ *
+ * @param sender_ip_addr sender's IP address
+ * @return 0 on success, otherwise failure
+ */
+int32_t send_grat_arp(uint32_t sender_ip_addr);
 
-int32_t send_grat_arp();
+/**
+ * Sends an ARP packet
+ *
+ * @param sender_ip_addr sender's IP address
+ * @param target_ip_addr target's IP address
+ * @param target_hw_addr target's HW address
+ * @param opcode type of arp (request/reply)
+ * @return 0 on success, otherwise failure
+ */
+int32_t send_arp(uint32_t sender_ip_addr, uint32_t target_ip_addr, uint8_t target_hw_addr[], enum arp_opcode opcode);
+
+/**
+ * Sends an ethernet packet (without an internal protocol). This should mainly
+ * be used for testing purposes
+ *
+ * @param dst_hw_addr destination hardware address
+ * @param data data to send
+ * @param length length of data to send
+ * @return 0 on success, otherwise failure
+ */
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length);
+
+/**
+ * Starts the receive unit
+ */
 void intel_nic_enable_rx();
 
 /**
- * hexdump, only prints in multiples of 8 bytes, or it will overrun the
- * data
+ * Prints out data in a readable format. This will round up the number of
+ * bytes processed to the nearest 8
  *
  * @param data pointer to data to print
- * @param length bytes of data to print
+ * @param length number of bytes to read from data pointer
  */
 void hexdump(void* data, uint32_t length);
+
+/**
+ * Initializes the network card on startup
+ */
 void intel_nic_init();
 
 #endif

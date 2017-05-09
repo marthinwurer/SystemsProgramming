@@ -249,6 +249,7 @@ static void init_rfa(struct nic_info* nic, uint32_t num_rfd) {
 	curr->link = (uint32_t) first; // complete the circle
 	nic->next_rfd = first;
 }
+
 /**
  * frees up command blocks (and associated buffers) for future use
  */
@@ -262,6 +263,12 @@ static void recycle_command_blocks() {
 	}
 }
 
+/**
+ * convert a char to an always printable character
+ *
+ * @param c char to convert
+ * @return printable char
+ */
 static char ascii_to_printable_char(char c) {
 	if(c  > 31 && c < 127) {
 		return c;
@@ -271,6 +278,9 @@ static char ascii_to_printable_char(char c) {
 	}
 }
 
+/**
+ * processes new data, called when frame is received
+ */
 static void claim_rfd_data() {
 	struct rfd* rfd = _nic.next_rfd;
 	uint16_t byte_count = rfd->count & 0x3FFF;
@@ -289,7 +299,7 @@ static void claim_rfd_data() {
 
 static int32_t add_to_rx_buf(void* data, uint32_t length) {	
 	struct eth_packet_t* packet = (struct eth_packet_t*) data;
-	if(packet->ethertype == ETHERTYPE_ARP) {
+	if(packet->ethertype == ethertype_arp) {
 		
 		if(packet->payload.arp.opcode == arp_request) {
 			// TODO ARP Reply
@@ -352,7 +362,18 @@ static struct cb* get_next_cb() {
 	return cb;
 }
 
-int32_t send_grat_arp(uint32_t my_ip_addr) {
+int32_t send_grat_arp(uint32_t sender_ip_addr) {
+	uint8_t target_hw_addr[6];
+	target_hw_addr[0] = 0xFF;
+	target_hw_addr[1] = 0xFF;
+	target_hw_addr[2] = 0xFF;
+	target_hw_addr[3] = 0xFF;
+	target_hw_addr[4] = 0xFF;
+	target_hw_addr[5] = 0xFF;
+	return send_arp(sender_ip_addr, sender_ip_addr, target_hw_addr, arp_request);
+}
+
+int32_t send_arp(uint32_t sender_ip_addr, uint32_t target_ip_addr, uint8_t target_hw_addr[], enum arp_opcode opcode) {
 	struct cb* cb = get_next_cb();
 	if(cb == NULL) {
 		return -1;
@@ -361,25 +382,25 @@ int32_t send_grat_arp(uint32_t my_ip_addr) {
 	cb->u.tcb.eth_packet.payload.arp.protocol_type = 0x0008; // IPv4 inn NBO
 	cb->u.tcb.eth_packet.payload.arp.hw_addr_len = 0x06; // ethernet HW addr length
 	cb->u.tcb.eth_packet.payload.arp.protocol_addr_len = 0x04; // IPv4 addr length
-	cb->u.tcb.eth_packet.payload.arp.opcode = arp_request; // request in NBO
+	cb->u.tcb.eth_packet.payload.arp.opcode = opcode; // request in NBO
 
 	memcpy(cb->u.tcb.eth_packet.payload.arp.sender_hw_addr, _nic.mac, MAC_LENGTH_BYTES);
 
 	uint8_t nbo_ip[4];
-	nbo_ip[0] = (uint8_t) (my_ip_addr >> 24);
-	nbo_ip[1] = (uint8_t) (my_ip_addr >> 16);
-	nbo_ip[2] = (uint8_t) (my_ip_addr >> 8);
-	nbo_ip[3] = (uint8_t) (my_ip_addr);
-
-	memcpy(cb->u.tcb.eth_packet.payload.arp.target_protocol_addr, nbo_ip, 4);
+	nbo_ip[0] = (uint8_t) (sender_ip_addr >> 24);
+	nbo_ip[1] = (uint8_t) (sender_ip_addr >> 16);
+	nbo_ip[2] = (uint8_t) (sender_ip_addr >> 8);
+	nbo_ip[3] = (uint8_t) (sender_ip_addr);
 	memcpy(cb->u.tcb.eth_packet.payload.arp.sender_protocol_addr, nbo_ip, 4);
 
-	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[0] = 0xFF;
-	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[1] = 0xFF;
-	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[2] = 0xFF;
-	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[3] = 0xFF;
-	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[4] = 0xFF;
-	cb->u.tcb.eth_packet.payload.arp.target_hw_addr[5] = 0xFF;
+	nbo_ip[0] = (uint8_t) (target_ip_addr >> 24);
+	nbo_ip[1] = (uint8_t) (target_ip_addr >> 16);
+	nbo_ip[2] = (uint8_t) (target_ip_addr >> 8);
+	nbo_ip[3] = (uint8_t) (target_ip_addr);
+	memcpy(cb->u.tcb.eth_packet.payload.arp.target_protocol_addr, nbo_ip, 4);
+
+	memcpy(cb->u.tcb.eth_packet.payload.arp.target_hw_addr, target_hw_addr, MAC_LENGTH_BYTES);
+
 	memcpy(cb->u.tcb.eth_packet.dst_mac, cb->u.tcb.eth_packet.payload.arp.target_hw_addr, MAC_LENGTH_BYTES);
 	cb->command = cb_el | cb_sf | cb_tx_cmd;
 	cb->u.tcb.tbd_array = 0xFFFFFFFF; // for simplified mode, tbd is 1's, data is in tcb
@@ -388,7 +409,7 @@ int32_t send_grat_arp(uint32_t my_ip_addr) {
 	cb->u.tcb.tbd_count = 0;
 	memcpy(cb->u.tcb.eth_packet.dst_mac, cb->u.tcb.eth_packet.payload.arp.target_hw_addr, MAC_LENGTH_BYTES);
 
-	cb->u.tcb.eth_packet.ethertype = ETHERTYPE_ARP; // network byte order
+	cb->u.tcb.eth_packet.ethertype = ethertype_arp; // network byte order
 	uint8_t status = mem_read8(&_nic.csr->scb.status);
 	// c_printf("NIC: send_packet CU/RU status = 0x%02x\n", status);
 	if(((status & cu_mask) == cu_idle) 
@@ -578,25 +599,20 @@ void intel_nic_init() {
 	mem_write8(&_nic.csr->scb.command, cuc_start);
 	write_flush(&_nic);
 
-	//
-	// ARP
-	//
-
-
 	// 
 	// 
 	// TODO:
-	// o merge from master
-	// o convert send_grat_arp() to send_arp(), so that it can handle sending arp requests/gratuitous/replies
+	// o merge into master
+	// o write send_ipv4()
 	// o receive ARP request, and reply to it
 	// o rx buffers, add_to_rx_buf((void*) data, uint32_t length), consume_rx_buf() function frees memory and transfers data to user
 	// o keep flag for rx_enable in _nic. with first call to receive, enable rx
-	// o write raw_tcb_tx()
-	// o finish send_arp(), and handle arp packets -- get IPs working so we can make some applications!
 	// o IPv4 header insertion
 	// o mutex on doing anything with CB
 	// 
 	// TEST:
+	// o finish send_arp(), and handle arp packets -- get IPs working so we can make some applications!
+	// o convert send_grat_arp() to send_arp(), so that it can handle sending arp requests/gratuitous/replies
 	// o gratuitous ARP
 	// 
 	// DONE:
