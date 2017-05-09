@@ -13,6 +13,8 @@ KERN_OBJ := early/_early.o \
             vconsole/buffer.o \
             vconsole/console.o \
             vconsole/control.o \
+            vconsole/render/draw.o \
+            vconsole/render/scroll.o \
             vesa/edid.o \
             vesa/vbe.o \
             video/color/color.o \
