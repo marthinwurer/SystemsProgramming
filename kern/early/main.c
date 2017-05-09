@@ -3,7 +3,7 @@
 #include <kern/drivers/ramdisk/ramdisk.h>
 #include <kern/drivers/rawfs/raw.h>
 #include <kern/io/router.h>
-
+#include <kern/ioapi/simple_mount.h>
 
 //
 // Main function for the early initialization routine. Any needed BIOS function
@@ -28,10 +28,11 @@ int main(void) {
     //c_puts("Installing RAWFS...");
     raw_install();
     //c_puts("Installed!\n");
-    while(1) { continue;}	
-	return 0;
-
-
+    IOHANDLE handledev = -1;
+    IOHANDLE handlefs = -1;
+    IO_ENUMERATE(IO_OBJ_DEVICE, 0, &handledev);
+    IO_ENUMERATE(IO_OBJ_FILESYSTEM, 0, &handlefs);
+    install_mount("m1", "ram", handledev, handlefs);
 	return 0;
 
 }
