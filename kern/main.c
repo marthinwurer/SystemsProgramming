@@ -116,16 +116,5 @@ int main(void) {
 		}
 
 	}
-    //INIT IO stack
-    c_puts("Starting IO Router...");
-    IO_INIT();
-    c_puts("Returned IO Router...\n");
-    c_puts("Installing RAMDisk...");
-    ramdisk_install();
-    c_puts("Installed\n");
-    c_puts("Installing RAWFS...");
-    raw_install();
-    c_puts("Installed!\n");
-    while(1) { continue;}	
 	return 0;
 }

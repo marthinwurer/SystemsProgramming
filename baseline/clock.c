@@ -24,6 +24,9 @@
 #include <baseline/sio.h>
 #include <baseline/syscall.h>
 
+#include <kern/util/marquee.h>
+#include <kern/buildinfo.h>
+
 /*
 ** PRIVATE DEFINITIONS
 */
@@ -39,7 +42,8 @@
 // pinwheel control variables
 
 static int32_t _pinwheel;	// pinwheel counter
-static uint32_t _pindex;	// index into pinwheel string
+//static uint32_t _pindex;	// index into pinwheel string
+
 
 /*
 ** PUBLIC GLOBAL VARIABLES
@@ -71,8 +75,9 @@ static void _clk_isr( int vector, int code ) {
 	++_pinwheel;
 	if( _pinwheel == (CLOCK_FREQUENCY / 10) ) {
 		_pinwheel = 0;
-		++_pindex;
-		c_putchar_at( 79, 0, "|/-\\"[ _pindex & 3 ] );
+		marquee_animate();
+		//++_pindex;
+		//c_putchar_at( 79, 0, "|/-\\"[ _pindex & 3 ] );
 	}
 
 	// increment the system time
@@ -157,7 +162,7 @@ void _clk_init( void ) {
 	// start the pinwheel
 
 	_pinwheel = (CLOCK_FREQUENCY / 10) - 1;
-	_pindex = 0;
+	//_pindex = 0;
 
 	// return to the epoch
 
@@ -169,6 +174,11 @@ void _clk_init( void ) {
 	__outb( TIMER_CONTROL_PORT, TIMER_0_LOAD | TIMER_0_SQUARE );
         __outb( TIMER_0_PORT, divisor & 0xff );        // LSB of divisor
         __outb( TIMER_0_PORT, (divisor >> 8) & 0xff ); // MSB of divisor
+
+	// marquee stuff
+
+	marquee_setText(BUILDINFO_STRING);
+	marquee_setRegion(0, 0, 80);
 
 	// register the ISR
 

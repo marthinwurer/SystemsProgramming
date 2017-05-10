@@ -18,6 +18,8 @@
 #include <x86arch.h>
 #include <baseline/bootstrap.h>
 
+#include <kern/vconsole/control.h>
+
 /*
 ** Global variables and local data types.
 */
@@ -215,6 +217,7 @@ static void init_idt( void ){
 void __panic( char *reason ){
 	__asm( "cli" );
 	c_printf( "\nPANIC: %s\nHalting...", reason );
+	vcon_redraw(&CIO_CONTROLLER);
 	for(;;){
 		;
 	}

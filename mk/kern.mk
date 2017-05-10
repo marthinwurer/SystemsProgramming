@@ -20,8 +20,23 @@ KERN_OBJ := early/_early.o \
             early/realmode.o \
             early/main.o \
             early/gdt_init.o \
+            pci/pci.o \
+            net/intel.o \
+            net/net_test.o \
+            net/udp.o \
             early/memory_map_setup.o \
-            memory/memory_map.o
+            early/video.o \
+            graphics/text/text.o \
+            memory/memory_map.o \
+            util/marquee.o \
+            vconsole/console.o \
+            vconsole/control.o \
+            vesa/edid.o \
+            vesa/vbe.o \
+            video/color/color.o \
+            video/fb/fb.o \
+            video/globals.o \
+            video/video.o
 
 KERN_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_OBJ))
 

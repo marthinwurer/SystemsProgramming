@@ -62,24 +62,6 @@ _start:
 	movl	$TARGET_STACK, %ebp	/* set up the system frame pointer */
 	movl	%ebp, %esp	/* and stack pointer */
 
-#ifdef CLEAR_BSS_SEGMENT
-
-/*
-** Zero the BSS segment
-**
-** These symbols are defined automatically by the linker.
-*/
-	.globl	__bss_start,_end
-
-	movl	$__bss_start,%edi
-clearbss:
-	movl	$0,(%edi)
-	addl	$4,%edi
-	cmpl	$_end,%edi
-	jb	clearbss
-
-#endif
-
 #ifdef SP_OS_CONFIG
 
 /*
