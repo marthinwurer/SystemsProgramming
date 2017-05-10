@@ -1,3 +1,4 @@
 #!/bin/sh
 BUILD_DIR="${BUILD_DIR:-./build}"
-exec qemu-system-i386 -drive file=$BUILD_DIR/usb.image,format=raw -d guest_errors,unimp -monitor stdio $@
+# exec qemu-system-i386 -drive file=$BUILD_DIR/usb.image,format=raw -d guest_errors,unimp -monitor stdio $@
+exec qemu-system-i386 -drive file=$BUILD_DIR/usb.image,format=raw -d guest_errors,unimp -device i82557a -monitor stdio $@
