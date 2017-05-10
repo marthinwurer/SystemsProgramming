@@ -85,11 +85,12 @@ int main(void) {
 	PaintContext *ctx = &CIO_CONTROLLER.ctx;
 	ctx->drawCol = color_getColor(mode.fb.colorspace, 255, 255, 255);
 	ctx->fillCol = color_getColor(mode.fb.colorspace, 0, 0, 0);
-	ctx->font.glyphs = 256;
-	ctx->font.bytesPerGlyph = 16;
-	ctx->font.height = 16;
-	ctx->font.width = 8;
-	ctx->font.glyphMap = VIDEO_FONTSET;
+	// ctx->font.glyphs = 256;
+	// ctx->font.bytesPerGlyph = 16;
+	// ctx->font.height = 16;
+	// ctx->font.width = 8;
+	// ctx->font.glyphMap = VIDEO_FONTSET;
+	video_defaultFont(&ctx->font);
 	ctx->fb = &VIDEO_MODE->fb;
 
 	CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;

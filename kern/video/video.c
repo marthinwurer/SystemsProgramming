@@ -151,6 +151,18 @@ int video_convertVBEMode(VBEModeInfo *vbe, VideoMode *mode) {
 	return E_VIDEO_SUCCESS;
 }
 
+
+int video_defaultFont(PSFont *font) {
+	font->glyphs = VIDEO_FONTSET_GLYPHS;
+	font->bytesPerGlyph = VIDEO_FONTSET_BYTES_PER_GLYPH;
+	font->height = VIDEO_FONTSET_HEIGHT;
+	font->width = VIDEO_FONTSET_WIDTH;
+	font->glyphMap = VIDEO_FONTSET;
+
+	return E_VIDEO_SUCCESS;
+}
+
+
 int video_dumpInfo(VideoInfo *info) {
 	c_puts("Video controller information:\n");
 	c_printf(" * VBE Version: %x\n", info->info.vbeVersion);
