@@ -34,6 +34,7 @@
 
 #define TOTAL_CB 0x80
 #define TOTAL_RFD 0x80
+#define ARP_CACHE_SIZE 256
 
 #define MAX_EEPROM_LENGTH 256
 #define MAC_LENGTH_BYTES 6
@@ -44,6 +45,7 @@
 #define NET_INTEL_MAX_ETH_LENGTH 1500
 #define NET_INTEL_ETH_HEAD_LEN 14
 #define NET_INTEL_ARP_HEAD_LEN 28
+#define IPV4_HEAD_LEN 20
 #define NET_INTEL_RFD_SIZE 3096
 #define NET_INTEL_RX_BUF_MAX_LEN 3096
 
@@ -62,6 +64,7 @@ struct nic_info {
 	uint32_t rx_buf_count;
 	struct rx_buf* rx_buf_head;
 	struct rx_buf* next_rx_buf;
+	uint8_t my_ip[4];
 };
 
 /**
@@ -100,7 +103,7 @@ struct cb {
 			uint8_t tbd_count;
 			struct eth_packet_t {
 				uint8_t dst_mac[MAC_LENGTH_BYTES];
-				// uint8_t src_mac[MAC_LENGTH_BYTES];
+				// uint8_t src_mac[MAC_LENGTH_BYTES]; // auto inserted
 				uint16_t ethertype; // under 1500 is payload length, above is type of payload header
 				union {
 					uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
@@ -154,6 +157,15 @@ struct rfd {
 };
 
 /**
+ * entry in the arp cache
+ */
+struct arp_entry {
+	uint16_t filled;
+	uint32_t ip_addr;
+	uint8_t hw_addr[6];
+};
+
+/**
  * Buffer to store data in once received
  */
 struct rx_buf {
@@ -161,6 +173,13 @@ struct rx_buf {
 	uint32_t length;
 	uint32_t curr_ptr;
 	void* data[NET_INTEL_RX_BUF_MAX_LEN];
+};
+
+enum ip_protocol {
+	ip_icmp = 0x01,
+	ip_igmp = 0x02,
+	ip_tcp = 0x06,
+	ip_udp = 0x11
 };
 
 /**
@@ -282,25 +301,6 @@ enum cb_status {
 };
 
 /**
- * Sends a gratuitous ARP packet with a given IP
- *
- * @param sender_ip_addr sender's IP address
- * @return 0 on success, otherwise failure
- */
-int32_t send_grat_arp(uint32_t sender_ip_addr);
-
-/**
- * Sends an ARP packet
- *
- * @param sender_ip_addr sender's IP address
- * @param target_ip_addr target's IP address
- * @param target_hw_addr target's HW address
- * @param opcode type of arp (request/reply)
- * @return 0 on success, otherwise failure
- */
-int32_t send_arp(uint32_t sender_ip_addr, uint32_t target_ip_addr, uint8_t target_hw_addr[], enum arp_opcode opcode);
-
-/**
  * Sends an ethernet packet (without an internal protocol). This should mainly
  * be used for testing purposes
  *
@@ -310,6 +310,13 @@ int32_t send_arp(uint32_t sender_ip_addr, uint32_t target_ip_addr, uint8_t targe
  * @return 0 on success, otherwise failure
  */
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length);
+
+/**
+ * Sets the IP address of the network card
+ *
+ * @param ip new ip address
+ */
+void set_ip(uint8_t ip[]);
 
 /**
  * Starts the receive unit

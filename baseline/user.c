@@ -956,10 +956,10 @@ int32_t init( void *arg ) {
 	swritech( '+' );
 
 	// Launch test program for networking
-	//pid = spawn(net_test_main, 0, P_HIGH);
-	//if(pid < 0) {
-	//	cwrites("init, spawn() net_test_main failed\n");
-	//}
+	pid = spawn(net_test_main, 0, P_HIGH);
+	if(pid < 0) {
+		cwrites("init, spawn() net_test_main failed\n");
+	}
 	//swritech('{');
 	spawn(redrawProcess, 0, P_SYSTEM);
 
