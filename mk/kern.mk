@@ -9,9 +9,9 @@
 
 KERN_DRV_OBJ := ramdisk/ramdisk.o rawfs/raw.o
 KERN_DRV_OBJ := $(addprefix $(BUILD_DIR)/kern/drivers/, $(KERN_DRV_OBJ))
-KERN_API_OBJ := simple_mount.o
+KERN_API_OBJ := simple_mount.o file.o
 KERN_API_OBJ := $(addprefix $(BUILD_DIR)/kern/ioapi/, $(KERN_API_OBJ))
-KERN_IO_OBJ := io/router.o io/device.o io/filesystem.o io/message.o io/middleware.o io/mount.o ioapi/file.o
+KERN_IO_OBJ := io/router.o io/device.o io/filesystem.o io/message.o io/middleware.o io/mount.o 
 KERN_IO_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(KERN_IO_OBJ))
 # EARLY_OBJ := _early.o realmode.o main.o gdt_init.o
 # EARLY_OBJ := $(addprefix $(BUILD_DIR)/kern/early/,$(EARLY_OBJ))
@@ -48,7 +48,8 @@ BASELINE_OBJ := startup.o \
                 syscall.o \
                 system.o \
                 ulibc.o \
-                user.o
+                user.o \
+				prettyprinter.o
 
 BASELINE_OBJ := $(addprefix $(BUILD_DIR)/baseline/,$(BASELINE_OBJ))
 

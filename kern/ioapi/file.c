@@ -5,11 +5,12 @@
  *        This is intended for consumption by user-mode apps
  */
 
-#include "file.h"
+#include <kern/ioapi/file.h>
 #include <kern/io/router.h>
 #include <libpath.h>
+#include <baseline/prettyprinter.h>
 
-#define HANDLED(code) if((stat = code) != E_SUCCESS){ return stat; }
+#define HANDLED(code) if((stat = code) != E_SUCCESS){ pretty_print(stat); return stat; }
 #define THANDLED(type, code) length = sizeof(type); HANDLED(code)
 #define SHANDLED(str, code) length = strlen(str); HANDLED(code);
 #define IGNORED(code) code
@@ -80,17 +81,19 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
     }
     //look for file
     IOHANDLE hMessage = -1;
-    status_t stat = IO_PROTOTYPE(IO_OBJ_MESSAGE, &hMessage);
+    status_t stat;
+    pretty_print(IO_PROTOTYPE(IO_OBJ_MESSAGE, &hMessage));
     FILETABLE[index].message_in = hMessage;
     int length = 0;
     IOCTL _ioctlvalue = IOCTL_IDENTIFY;
     SHANDLED(path, IO_UPDATE(hMessage, IOPROP_PATH, &path, &length));
     THANDLED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
     stat = IO_EXECUTE(hMessage);
+    pretty_print(stat);
     if (stat == E_SUCCESS){
         *out = index;
         return E_SUCCESS;
-    }
+    } 
     char newpath[strlen(path)]; //because we can't use variable allocation inside switch
     int mountindex = 0;
     //file not found, handle that
