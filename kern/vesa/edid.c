@@ -29,7 +29,7 @@ const VideoTiming const ESTABLISHED_TIMINGS2[] = {
 
 int edid_getRecord(EDIDRecord *record) {
 
-	regs16_t regs;
+	regs16_t regs = {0};
 	regs.eax = 0x4F15;
 	regs.ebx = 0x01;
 	regs.ecx = 0x0;
