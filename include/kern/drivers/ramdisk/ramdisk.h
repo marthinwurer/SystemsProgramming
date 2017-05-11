@@ -12,7 +12,7 @@
 status_t ramdisk_install(void);
 
 /**
- * \brief implements block-based reading from memory
+ * \brief implements byte-based reading from memory
  * \param offset [in] offset from start of tape (bytes)
  * \param length [in] size of buffer to read into (bytes)
  * \param length [out] size of data read (bytes)
@@ -21,7 +21,7 @@ status_t ramdisk_install(void);
 status_t ramdisk_read(BOFFSET offset, PBSIZE length, void* buffer);
 
 /**
- * \brief implements block-based writing to memory
+ * \brief implements byte-based writing to memory
  * \param offset [in] offset from start of tape (bytes)
  * \param length [in] size of data to write (bytes)
  * \param length [out] size of data written (bytes)

@@ -33,9 +33,6 @@ status_t ramdisk_install(){
     return E_SUCCESS;
 }
 
-//offset: block offset into data
-//length: number of blocks to read
-//buffer: storage
 status_t ramdisk_read(int offset, PBSIZE length, void* buffer){
     int32_t starting_length = *length;
     int32_t read_length = 0;
@@ -45,13 +42,16 @@ status_t ramdisk_read(int offset, PBSIZE length, void* buffer){
     if (offset + starting_length >= PAGECOUNT) {
         return E_OUT_OF_BOUNDS; //disallow reading out of bounds
     }
-    char* pointer_source = pages[offset];
+    char* pointer_source = pages[offset/4096];
     char* pointer_dest = buffer;
     while (read_length < starting_length){
-        memcpy(pointer_dest, pointer_source, 4096);
+        memcpy(pointer_dest, pointer_source, 1);
         *length = ++read_length; //keep up to date in case something goes wrong
-        pointer_dest += 4096;
-        pointer_source = pages[offset + read_length];
+        pointer_dest += 1;
+        pointer_source += 1;
+        if (read_length % 4096 ==0) {
+            pointer_source = pages[offset/4096 + read_length/4096];
+        }
     }
     return E_SUCCESS;
 }
@@ -66,12 +66,15 @@ status_t ramdisk_write(int offset, PBSIZE length, void* buffer){
         return E_OUT_OF_BOUNDS; //disallow
     }
     char* pointer_source = buffer;
-    char* pointer_dest = pages[offset];
+    char* pointer_dest = pages[offset/4096];
     while (write_length < starting_length) {
-        memcpy(pointer_dest, pointer_source, 4096);
+        memcpy(pointer_dest, pointer_source, 1);
         *length = ++write_length;
-        pointer_dest = pages[offset + write_length];
-        pointer_source += 4096;
+        pointer_dest += 1;
+        pointer_source += 1;
+        if (write_length % 4096 == 0) {
+            pointer_dest = pages[offset/4096 + write_length/4096];
+        }
     }
     return E_SUCCESS;
 }
