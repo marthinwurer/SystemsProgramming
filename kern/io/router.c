@@ -106,6 +106,17 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
     }
     return E_NO_MATCH;
 }
+
+int32_t _io_handle_is_valid(IOHANDLE handle) {
+    if (handle < 0 || handle > IO_HANDLE_MAX) {
+        return 0;
+    }
+    if (HANDLE_TABLE[handle].handle != handle) {
+        return 0;
+    }
+    return 1;
+}
+
 /** Public Functions **/
 
 status_t IO_INIT(){
@@ -187,38 +198,24 @@ status_t IO_PROTOTYPE(IO_OBJ_TYPE type, PIOHANDLE out_handle){
 
 status_t IO_UPDATE(IOHANDLE handle, IOPROP property, void* value, PBSIZE length){
     //verify handle
-    if (handle < 0 || handle > IO_HANDLE_MAX) {
-        return E_BAD_HANDLE;
-    }
-    struct _ioentry* handle_entry = &HANDLE_TABLE[handle];
-    if (handle_entry->handle != handle){
-        return E_BAD_HANDLE;
-    }
-    if (handle_entry->locked != 0){
-        return E_LOCKED;
-    }
-    status_t result;
+    if (!_io_handle_is_valid(handle)) { return E_BAD_HANDLE; }
+    if (HANDLE_TABLE[handle].locked != 0){ return E_LOCKED; }
+    _io_object_entry* handle_entry = &HANDLE_TABLE[handle];
     switch (handle_entry->type){
         case IO_OBJ_FILESYSTEM:
-            result = _io_fs_setprop(handle_entry->object, property, value, *length);
-            break;
+            return _io_fs_setprop(handle_entry->object, property, value, *length);
         case IO_OBJ_MOUNT:
-            result = _io_mp_setprop(handle_entry->object, property, value, *length);
-            break;
+            return _io_mp_setprop(handle_entry->object, property, value, *length);
         case IO_OBJ_DEVICE:
-            result = _io_dv_setprop(handle_entry->object, property, value, *length);
-            break;
+            return _io_dv_setprop(handle_entry->object, property, value, *length);
         case IO_OBJ_MESSAGE:
-            result = _io_msg_setprop(handle_entry->object, property, value, *length);
-            break;
+            return _io_msg_setprop(handle_entry->object, property, value, *length);
         case IO_OBJ_MIDDLEWARE:
-            result =_io_md_setprop(handle_entry->object, property, value, *length);
-            break;
+            return _io_md_setprop(handle_entry->object, property, value, *length);
         default:
-            result = E_NOT_IMPLEMENTED;
             break;
     }
-    return result;
+    return E_NOT_IMPLEMENTED;
 }
 
 status_t IO_UPDATE_VALINT(IOHANDLE handle, IOPROP property, int32_t value){
@@ -243,21 +240,14 @@ status_t IO_UPDATE_STR(IOHANDLE handle, IOPROP property, char* value) {
 
 status_t IO_DELETE(IOHANDLE handle){
     //verify handle
-    if (handle < 0 || handle > IO_HANDLE_MAX) {
-        return E_BAD_HANDLE;
-    }
-    struct _ioentry* handle_entry = &HANDLE_TABLE[handle];
-    if ((*handle_entry).handle != handle){
-        return E_BAD_HANDLE;
-    }
-    //identify object type
-    IO_OBJ_TYPE object_type = (*handle_entry).type;
-    //zero out entry
-    switch (object_type) {
+    if (!_io_handle_is_valid(handle)) { return E_BAD_HANDLE; }
+    _io_object_entry* handle_entry = &HANDLE_TABLE[handle];
+    switch (handle_entry->type) {
         case IO_OBJ_MESSAGE: ;
             PIO_MESSAGE p_o_m = handle_entry->object;
             free(p_o_m->path);
             *p_o_m = _io_msg_init_null();
+            break;
         case IO_OBJ_FILESYSTEM: ;
             PIO_FILESYSTEM p_o_f = handle_entry->object;
             free(p_o_f->name);
@@ -284,25 +274,16 @@ status_t IO_DELETE(IOHANDLE handle){
             break;
     }
     //reclaim handle & object table entries
-    (*handle_entry).handle = IOHANDLE_NULL;
-    (*handle_entry).locked = 0;
+    handle_entry->handle = IOHANDLE_NULL;
+    handle_entry->locked = 0;
     return E_NOT_IMPLEMENTED;
 }
 
 status_t IO_EXECUTE(IOHANDLE handle){
-    //verify handle
-    if (handle < 0 || handle > IO_HANDLE_MAX) {
-        return E_BAD_HANDLE;
-    }
+    if (!_io_handle_is_valid(handle)) { return E_BAD_HANDLE; }
     struct _ioentry* handle_entry = &HANDLE_TABLE[handle];
-    if (handle_entry->handle != handle){
-        return E_BAD_HANDLE;
-    }
-
     //ensure handle is IO Message
-    if (handle_entry->type != IO_OBJ_MESSAGE){
-        return E_BAD_HANDLE;
-    }
+    if (handle_entry->type != IO_OBJ_MESSAGE){ return E_BAD_HANDLE; }
     //associate file system & device
     PIOHANDLE fs = NULL;
     PIOHANDLE dev = NULL;
@@ -311,8 +292,8 @@ status_t IO_EXECUTE(IOHANDLE handle){
         return stat;
     }
     PIO_MESSAGE pmessage = handle_entry->object;
-    pmessage->device = dev;
-    pmessage->filesystem = fs;
+    pmessage->device = HANDLE_TABLE[*dev].object;
+    pmessage->filesystem = HANDLE_TABLE[*fs].object;
     //call all filters
     int32_t index = 0;
     while (call_filter(handle, index) == E_SUCCESS){
@@ -355,10 +336,8 @@ status_t IO_ENUMERATE(IO_OBJ_TYPE type, int index, PIOHANDLE object){
     return stat;
 }
 status_t IO_LOCK(IOHANDLE handle){
-    if (handle < 0) { return E_BAD_HANDLE; }
-    _io_object_entry* t = &HANDLE_TABLE[handle];
-    if ((*t).handle < 0) { return E_BAD_HANDLE; }
-    (*t).locked = 1;
+    if(!_io_handle_is_valid(handle)) { return E_BAD_HANDLE; }
+    HANDLE_TABLE[handle].locked = 1;
     return E_SUCCESS;
 }
 status_t IO_INTERROGATE(IOHANDLE handle, IOPROP prop, void* buffer, PBSIZE plength){
