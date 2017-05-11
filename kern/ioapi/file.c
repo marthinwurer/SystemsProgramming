@@ -86,7 +86,7 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
     int length = 0;
     IOCTL _ioctlvalue = IOCTL_IDENTIFY;
     IOHANDLE hMessage = fileatindex->message_in;
-    SHANDLED(path, IO_UPDATE(hMessage, IOPROP_PATH, &path, &length));
+    SHANDLED(path, IO_UPDATE(hMessage, IOPROP_PATH, path, &length));
     THANDLED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
     stat = IO_EXECUTE(hMessage);
     pretty_print(stat);
@@ -102,12 +102,12 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
             //strip last element from path
             io_path_disc_n_nodes(path, 1, newpath);
             //check for existence of new path
-            SHANDLED(newpath, IO_UPDATE(hMessage, IOPROP_PATH, &newpath, &length));
+            SHANDLED(newpath, IO_UPDATE(hMessage, IOPROP_PATH, newpath, &length));
             stat = IO_EXECUTE(hMessage);
             //if exists, create original path
             if (stat != E_SUCCESS) { fileatindex->handle = -1; return E_NO_MATCH; }
             length = strlen(path);
-            IGNORED(IO_UPDATE(hMessage, IOPROP_PATH, &path, &length));
+            IGNORED(IO_UPDATE(hMessage, IOPROP_PATH, path, &length));
             _ioctlvalue = IOCTL_CREATE;
             TIGNORED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
             stat = IO_EXECUTE(hMessage);
@@ -123,13 +123,11 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
             IOHANDLE mount = -1;
             while (stat == E_SUCCESS) {
                 stat = IO_ENUMERATE(IO_OBJ_MOUNT, mountindex, &mount);
-                length = strlen(path);
+                length = 0; //following E_MORE_DATA pattern
+                IGNORED(IO_INTERROGATE(mount, IOPROP_PATH, (void*)NULL, &length));
                 char outpath[length];
-                IGNORED(IO_INTERROGATE(mount, IOPROP_PATH, &outpath, &length));
-                if (io_path_canonicalized_compare(path, outpath) == 0){
-                    mountindex = -1;
-                    break;
-                } 
+                HANDLED(IO_INTERROGATE(mount, IOPROP_PATH, outpath, &length));
+                if (io_path_canonicalized_compare(path, outpath)){ mountindex = -1; break; } 
                 mountindex++;
             }
             if (mountindex < 0){
@@ -140,7 +138,7 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
                     length = strlen(path);
                     char outpath[length];
                     io_path_keep_n_nodes(path, pathind, outpath);
-                    HANDLED(IO_UPDATE(hMessage, IOPROP_PATH, &outpath, &length));
+                    HANDLED(IO_UPDATE(hMessage, IOPROP_PATH, outpath, &length));
                     _ioctlvalue = IOCTL_CREATE;
                     THANDLED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
                     stat = IO_EXECUTE(hMessage);
