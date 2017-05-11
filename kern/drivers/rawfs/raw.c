@@ -6,21 +6,20 @@
 #include <kern/drivers/rawfs/raw.h>
 #include <baseline/common.h>
 
-static IOHANDLE handle = -1;
+static IOHANDLE handle = IOHANDLE_NULL;
 
 status_t raw_install(void){
-    IO_PROTOTYPE(IO_OBJ_FILESYSTEM, &handle);
+    ENABLEHANDLERS
+    HANDLED(IO_PROTOTYPE(IO_OBJ_FILESYSTEM, &handle));
     char* name = "RawFS";
-    int32_t namesize = strlen(name);
-    IO_UPDATE(handle, IOPROP_NAME, name, &namesize);
+    HANDLED(IO_UPDATE_STR(handle, IOPROP_NAME, name));
     //TODO fill in create date
     //fill in execute
-    int32_t pointer_size = sizeof(void*);
-    IO_UPDATE(handle, IOPROP_INIT, &raw_init, &pointer_size);
+    HANDLED(IO_UPDATE_VOID(handle, IOPROP_INIT, &raw_init));
     //fill in init
-    IO_UPDATE(handle, IOPROP_EXECUTE, &raw_execute, &pointer_size);
+    HANDLED(IO_UPDATE_VOID(handle, IOPROP_EXECUTE, &raw_execute));
     //fill in finalize
-    IO_UPDATE(handle, IOPROP_FINALIZE, &raw_finalize, &pointer_size);
+    HANDLED(IO_UPDATE_VOID(handle, IOPROP_FINALIZE, &raw_finalize));
     return E_SUCCESS;
 }
 

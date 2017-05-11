@@ -9,9 +9,10 @@
 #include <baseline/common.h>
 #define PAGECOUNT 500
 static void* pages[PAGECOUNT]; //500 X 4Kb pages
-static IOHANDLE handle = -1;
+static IOHANDLE handle = IOHANDLE_NULL;
 
 status_t ramdisk_install(){
+    ENABLEHANDLERS
     //initialize ram space
     for(int i = 0; i < PAGECOUNT; i++){
         pages[i] = get_next_page();
@@ -20,16 +21,14 @@ status_t ramdisk_install(){
     IO_PROTOTYPE(IO_OBJ_DEVICE, &handle);
     //fill in name
     char* name = "RamDisk";
-    int32_t namesize = strlen(name);
-    IO_UPDATE(handle, IOPROP_NAME, name, &namesize);
+    HANDLED(IO_UPDATE_STR(handle, IOPROP_NAME, name));
     //TODO fill in create date
     //fill in read
-    int32_t pointer_size = sizeof(void*);
-    IO_UPDATE(handle, IOPROP_READ, &ramdisk_read,&pointer_size); 
+    HANDLED(IO_UPDATE_VOID(handle, IOPROP_READ, &ramdisk_read)); 
     //fill in write
-    IO_UPDATE(handle, IOPROP_WRITE, &ramdisk_write, &pointer_size);
+    HANDLED(IO_UPDATE_VOID(handle, IOPROP_WRITE, &ramdisk_write));
     //fill in finalize
-    IO_UPDATE(handle, IOPROP_FINALIZE, &ramdisk_finalize, &pointer_size);
+    HANDLED(IO_UPDATE_VOID(handle, IOPROP_FINALIZE, &ramdisk_finalize));
     IO_LOCK(handle); //we're done here
     return E_SUCCESS;
 }

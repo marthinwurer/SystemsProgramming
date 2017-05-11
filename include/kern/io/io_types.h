@@ -6,6 +6,14 @@
 #pragma once
 #include <string.h>
 #include <baseline/common.h>
+#include <baseline/prettyprinter.h>
+
+#define ENABLEHANDLERS status_t stat_h = E_SUCCESS;
+
+#define HANDLED(code) if((stat_h = code) != E_SUCCESS){ pretty_print(stat_h); return stat_h; }
+#define IGNORED(code) code
+#define RETURNED(code) return code
+
 typedef int32_t IOHANDLE, *PIOHANDLE; //handle to I/O objects
 typedef int32_t FILEHANDLE, *PFILEHANDLE; //handle to open files
 typedef int32_t BSIZE, *PBSIZE, BOFFSET, *PBOFFSET; //buffer size, bytes

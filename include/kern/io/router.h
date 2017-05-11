@@ -34,6 +34,27 @@ status_t IO_PROTOTYPE(IO_OBJ_TYPE type, PIOHANDLE handle);
  * */
 status_t IO_UPDATE(IOHANDLE handle, IOPROP property, void* value, PBSIZE length);
 
+/*
+ * wrapper around IO_UPDATE for int32_ts
+ */
+status_t IO_UPDATE_VALINT(IOHANDLE handle, IOPROP property, int32_t value);
+
+/*
+ * wrapper around IO_UPDATE for IOCTLs
+ */
+status_t IO_UPDATE_IOCTL(IOHANDLE handle, IOCTL value);
+
+/*
+ * wrapper around IO_UPDATE for raw pointer values
+ * Not for use with buffers that need a reliable length value
+ */
+status_t IO_UPDATE_VOID(IOHANDLE handle, IOPROP property, void* value);
+
+/**
+ * wrapper around IO_UPDATE for use with strings
+ */
+status_t IO_UPDATE_STR(IOHANDLE handle, IOPROP property, char* value);
+
 /**
  * \brief deletes an object; interpreted as cancel for IO Messages
  * \return status_t: E_SUCCESS or E_BAD_HANDLE

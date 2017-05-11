@@ -229,6 +229,26 @@ status_t IO_UPDATE(IOHANDLE handle, IOPROP property, void* value, PBSIZE length)
     return result;
 }
 
+status_t IO_UPDATE_VALINT(IOHANDLE handle, IOPROP property, int32_t value){
+    int32_t length = sizeof(int32_t);
+    return IO_UPDATE(handle, property, &value, &length);
+}
+
+status_t IO_UPDATE_IOCTL(IOHANDLE handle, IOCTL value) {
+    int32_t length = sizeof(IOCTL);
+    return IO_UPDATE(handle, IOPROP_IOCTL, &value, &length);
+}
+
+status_t IO_UPDATE_VOID(IOHANDLE handle, IOPROP property, void* buffer) {
+    int32_t length = sizeof(void*);
+    return IO_UPDATE(handle, property, buffer, &length);
+}
+
+status_t IO_UPDATE_STR(IOHANDLE handle, IOPROP property, char* value) {
+    int32_t length = strlen(value);
+    return IO_UPDATE(handle, property, value, &length);
+}
+
 status_t IO_DELETE(IOHANDLE handle){
     //verify handle
     if (handle < 0 || handle > IO_HANDLE_MAX) {
