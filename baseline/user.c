@@ -917,7 +917,8 @@ int32_t idle( void *arg ) {
 
 int32_t redrawProcess(void *arg) {
 
-	
+	// disable autoredraw, we will do the redrawing here
+	//c_set_auto_redraw(0);
 
 	for (;;) {
 		//if (CIO_CONTROLLER.dirty) {

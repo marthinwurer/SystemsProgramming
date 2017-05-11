@@ -71,6 +71,14 @@ void c_io_init( void );
 
 void c_io_init_isr(void);
 
+/**
+ * @brief Sets the auto redraw property.
+ *
+ * If set to nonzero, the console will be redrawn after every c_put* function.
+ * If set to zero, the console will need to be redrawn manually.
+ */
+void c_set_auto_redraw(int val);
+
 /*****************************************************************************
 **
 ** SCROLLING OUTPUT ROUTINES

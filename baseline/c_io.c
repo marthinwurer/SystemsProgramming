@@ -30,11 +30,11 @@
 #define	SCREEN_MAX_X	( SCREEN_X_SIZE - 1 )
 #define	SCREEN_MAX_Y	( SCREEN_Y_SIZE - 1 )
 
-unsigned int	scroll_min_x, scroll_min_y;
-unsigned int	scroll_max_x, scroll_max_y;
-unsigned int	curr_x, curr_y;
-unsigned int	min_x, min_y;
-unsigned int	max_x, max_y;
+// unsigned int	scroll_min_x, scroll_min_y;
+// unsigned int	scroll_max_x, scroll_max_y;
+// unsigned int	curr_x, curr_y;
+// unsigned int	min_x, min_y;
+// unsigned int	max_x, max_y;
 
 #ifdef	SA_DEBUG
 #include <stdio.h>
@@ -54,6 +54,8 @@ static VConChar *TEMP_CONSOLE_CHARTAB = (VConChar*)0x4D40;
 
 static VCon CON;
 
+static int autoRedraw;
+
 
 VConCtrl CIO_CONTROLLER = { .mode = VCON_MODE_VGATEXT };
 
@@ -65,31 +67,31 @@ VConCtrl CIO_CONTROLLER = { .mode = VCON_MODE_VGATEXT };
 ** __c_setcursor: set the cursor location (screen coordinates)
 ** __c_strlen: compute the length of a string
 */
-static unsigned int bound( unsigned int min, unsigned int value, unsigned int max ){
-	if( value < min ){
-		value = min;
-	}
-	if( value > max ){
-		value = max;
-	}
-	return value;
-}
+// static unsigned int bound( unsigned int min, unsigned int value, unsigned int max ){
+// 	if( value < min ){
+// 		value = min;
+// 	}
+// 	if( value > max ){
+// 		value = max;
+// 	}
+// 	return value;
+// }
 
-static void __c_setcursor( void ){
-	unsigned addr;
-	unsigned int	y = curr_y;
+// static void __c_setcursor( void ){
+// 	unsigned addr;
+// 	unsigned int	y = curr_y;
 
-	if( y > scroll_max_y ){
-		y = scroll_max_y;
-	}
+// 	if( y > scroll_max_y ){
+// 		y = scroll_max_y;
+// 	}
 
-	addr = (unsigned)( y * SCREEN_X_SIZE + curr_x );
+// 	addr = (unsigned)( y * SCREEN_X_SIZE + curr_x );
 
-	__outb( 0x3d4, 0xe );
-	__outb( 0x3d5, ( addr >> 8 ) & 0xff );
-	__outb( 0x3d4, 0xf );
-	__outb( 0x3d5, addr & 0xff );
-}
+// 	__outb( 0x3d4, 0xe );
+// 	__outb( 0x3d5, ( addr >> 8 ) & 0xff );
+// 	__outb( 0x3d4, 0xf );
+// 	__outb( 0x3d5, addr & 0xff );
+// }
 
 static unsigned int __c_strlen( char const *str ){
 	unsigned int	len = 0;
@@ -100,26 +102,26 @@ static unsigned int __c_strlen( char const *str ){
 	return len;
 }
 
-static void __c_putchar_at( unsigned int x, unsigned int y, unsigned int c ){
-	/*
-	** If x or y is too big or small, don't do any output.
-	*/
-	if( x <= max_x && y <= max_y ){
-		unsigned short *addr = VIDEO_ADDR( x, y );
+// static void __c_putchar_at( unsigned int x, unsigned int y, unsigned int c ){
+// 	/*
+// 	** If x or y is too big or small, don't do any output.
+// 	*/
+// 	if( x <= max_x && y <= max_y ){
+// 		unsigned short *addr = VIDEO_ADDR( x, y );
 
-		if( c > 0xff ) {
-			/*
-			** Use the given attributes
-			*/
-			*addr = (unsigned short)c;
-		} else {
-			/*
-			** Use attributes 0000 0111 (white on black)
-			*/
-			*addr = (unsigned short)c | 0x0700;
-		}
-	}
-}
+// 		if( c > 0xff ) {
+// 			/*
+// 			** Use the given attributes
+// 			*/
+// 			*addr = (unsigned short)c;
+// 		} else {
+// 			/*
+// 			** Use attributes 0000 0111 (white on black)
+// 			*/
+// 			*addr = (unsigned short)c | 0x0700;
+// 		}
+// 	}
+// }
 
 void c_setscroll( unsigned int s_min_x, unsigned int s_min_y, unsigned int s_max_x, unsigned int s_max_y ){
 	// scroll_min_x = bound( min_x, s_min_x, max_x );
@@ -172,6 +174,8 @@ void c_putchar_at( unsigned int x, unsigned int y, unsigned int c ){
 	// 	__c_putchar_at( x, y, c );
 	// }
 	vcon_putcharAt(&CON, c, x, y);
+	if (autoRedraw)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 #ifndef SA_DEBUG
@@ -213,6 +217,8 @@ void c_putchar( unsigned int c ){
 	// }
 	// __c_setcursor();
 	vcon_putchar(&CON, c);
+	if (autoRedraw)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 #endif
 
@@ -227,6 +233,8 @@ void c_puts_at( unsigned int x, unsigned int y, char *str ){
 	// 	x += 1;
 	// }
 	vcon_putsAt(&CON, str, x, y);
+	if (autoRedraw)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 #ifndef SA_DEBUG
@@ -237,6 +245,8 @@ void c_puts( char *str ){
 	// 	c_putchar( ch );
 	// }
 	vcon_puts(&CON, str);
+	if (autoRedraw)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 #endif
 
@@ -253,6 +263,8 @@ void c_clearscroll( void ){
 	// 	}
 	// }
 	vcon_clearScroll(&CON);
+	if (autoRedraw)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 void c_clearscreen( void ){
@@ -264,6 +276,8 @@ void c_clearscreen( void ){
 	// 	nchars -= 1;
 	// }
 	vcon_clear(&CON);
+	if (autoRedraw)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 
@@ -303,6 +317,8 @@ void c_scroll( unsigned int lines ){
 	// 	}
 	// }
 	vcon_scroll(&CON, lines);
+	if (autoRedraw)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 char * cvtdec0( char *buf, int value ){
@@ -739,6 +755,8 @@ void c_io_init( void ){
 	vcon_clear(&CON);
 	vcon_redraw(&CIO_CONTROLLER);
 
+	autoRedraw = 1;
+
 }
 
 void c_io_init_isr(void) {
@@ -746,6 +764,14 @@ void c_io_init_isr(void) {
 	** Set up the interrupt handler for the keyboard
 	*/
 	__install_isr( INT_VEC_KEYBOARD, __c_keyboard_isr );
+}
+
+void c_set_auto_redraw(int val) {
+	if (val) {
+		autoRedraw = 1;
+	} else {
+		autoRedraw = 0;
+	}
 }
 
 #ifdef SA_DEBUG

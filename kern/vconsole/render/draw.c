@@ -37,6 +37,4 @@ int graphics_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) 
 
 	return 0;
 
-
-	return 0;
 }

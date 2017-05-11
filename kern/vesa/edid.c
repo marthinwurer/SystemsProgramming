@@ -1,5 +1,6 @@
 
 #include <kern/early/realmode.h>
+#include <kern/vesa/vbe.h>
 #include <kern/vesa/edid.h>
 #include <kern/vesa/err.h>
 #include <string.h>
@@ -32,8 +33,8 @@ int edid_getRecord(EDIDRecord *record) {
 	regs16_t regs = {0};
 	regs.eax = 0x4F15;
 	regs.ebx = 0x01;
-	regs.ecx = 0x0;
-	regs.edx = 0x0;
+	regs.es = 0;
+	regs.edi = VBE_BLOCK_ADDRESS;
 	int32(0x10, &regs);
 
 	int errorcode = E_VESA_ERROR;

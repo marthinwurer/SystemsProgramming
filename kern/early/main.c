@@ -93,12 +93,16 @@ int main(void) {
 	video_defaultFont(&ctx->font);
 	ctx->fb = &VIDEO_MODE->fb;
 
-	CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
-	CIO_CONTROLLER.current->rows = mode.fb.height / ctx->font.height;
+	//CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
+	unsigned rows = mode.fb.height / ctx->font.height;
+	CIO_CONTROLLER.current->rows = rows;
 
-	vcon_redraw(&CIO_CONTROLLER);
+	CIO_CONTROLLER.current->buf.charTable = (VConChar*)(0x4C00 + (rows * sizeof(VConLine)));
 
-	//__asm("hlt");
+	vcon_buf_initLineTable(CIO_CONTROLLER.current);
+
+	//vcon_redraw(&CIO_CONTROLLER);
+	c_set_auto_redraw(0);
 
 	return EXIT_SUCCESS;
 
