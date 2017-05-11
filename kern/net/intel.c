@@ -575,8 +575,8 @@ int32_t nic_rx_daemon(void* arg) {
 			
 			if(packet->ethertype == ethertype_arp) {
 				if(packet->payload.arp.opcode == arp_request) {
-					c_printf("We should send an ARP reply...\n");
-					// send_arp_reply(packet->payload.arp.sender_protocol_addr, packet->payload.arp.sender_hw_addr);
+					// c_printf("We should send an ARP reply...\n");
+					send_arp_reply(packet->payload.arp.sender_protocol_addr, packet->payload.arp.sender_hw_addr);
 				}
 				else if(packet->payload.arp.opcode == arp_reply) {
 					// TODO
@@ -736,19 +736,19 @@ void intel_nic_init() {
 	// 
 	// 
 	// TODO:
-	// o add syscalls
-	// o write send_ipv4()
 	// o ICMP ping
 	// o ARP cache
+	// o add syscalls
+	// o write send_ipv4()
 	// o keep flag for rx_enable in _nic. with first call to receive, enable rx
 	// o mutex on doing anything with CB
 	// 
 	// TEST:
+	// 
+	// DONE:
 	// o add rx_daemon
 	// o receive ARP request, and reply to it
 	// o gratuitous ARP
-	// 
-	// DONE:
 	// o finish send_arp(), and handle arp packets -- get IPs working so we can make some applications!
 	// o convert send_grat_arp() to send_arp(), so that it can handle sending arp requests/gratuitous/replies
 	// o merge into master
