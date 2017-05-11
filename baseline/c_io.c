@@ -20,6 +20,8 @@
 #include <baseline/support.h>
 #include <x86arch.h>
 
+#include <kern/vconsole/buffer.h>
+
 /*
 ** Video parameters, and state variables
 */
@@ -131,6 +133,7 @@ void c_setscroll( unsigned int s_min_x, unsigned int s_min_y, unsigned int s_max
 	// curr_x = scroll_min_x;
 	// curr_y = scroll_min_y;
 	// __c_setcursor();
+	(void)s_min_x; (void)s_max_x;
 	vcon_setScroll(&CON, s_min_y, s_max_y);
 }
 

@@ -14,6 +14,7 @@
 
 #include <kern/vconsole/console.h>
 #include <kern/vconsole/control.h>
+#include <kern/vconsole/buffer.h>
 
 
 // Exit codes

@@ -1,6 +1,7 @@
 
 #include <kern/vesa/vbe.h>
 #include <kern/video/video.h>
+#include <kern/video/fb/fb.h>
 #include <stddef.h>
 #include <string.h>
 

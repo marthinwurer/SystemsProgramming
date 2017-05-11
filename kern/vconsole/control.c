@@ -39,11 +39,11 @@ int vcon_redraw(VConCtrl *ctrl) {
 	VConMode mode = ctrl->mode;
 	VConLine line;
 	uint16_t rows = con->rows;
-	uint16_t cols = con->columns;
-	int inScroll = 0;
+	//uint16_t cols = con->columns;
+	//int inScroll = 0;
 
 	VConDrawFunc drawFunc = DRAW_FUNC_TABLE[mode];
-	VConScrollFunc scrollFunc = SCROLL_FUNC_TABLE[mode];
+	//VConScrollFunc scrollFunc = SCROLL_FUNC_TABLE[mode];
 
 	for (unsigned r = 0; r != rows; ++r) {
 		line = buf.lineTable[r];

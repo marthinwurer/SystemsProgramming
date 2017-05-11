@@ -35,6 +35,27 @@ int graphics_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) 
 		p.x += fontWidth;
 	}
 
+	// VideoFb *fb = ctrl->ctx.fb;
+	// unsigned rowEnd = p.y + ctrl->ctx.font.height;
+	// unsigned row = p.y;
+
+	// unsigned col = p.x;
+	// unsigned colEnd = fb->width;
+
+	// unsigned dcol = fb->bpp / 8;
+	// unsigned pitch = fb->pitch;
+
+	// uint32_t offset = fb_offset(fb, p.x, p.y);
+
+	// do {
+	// 	fb_putpixelf(fb, offset, 0);
+	// 	if (++col == colEnd) {
+	// 		col = 0;
+	// 		++row;
+	// 		offset += 
+	// 	}
+	// } while (row != rowEnd);
+
 	return 0;
 
 }

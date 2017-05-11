@@ -16,6 +16,8 @@
 
 #include <baseline/c_io.h>
 
+#include <kern/vconsole/control.h>
+
 /*
 ** Support functions
 */
@@ -916,7 +918,7 @@ int32_t idle( void *arg ) {
 
 
 int32_t redrawProcess(void *arg) {
-
+	(void)arg;
 	// disable autoredraw, we will do the redrawing here
 	//c_set_auto_redraw(0);
 
