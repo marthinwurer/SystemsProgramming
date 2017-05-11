@@ -26,8 +26,6 @@ typedef struct _ioentry {
 static int32_t IO_HANDLE_NEXT = 0;
 static int32_t IO_HANDLE_MAX = 99;
 static _io_object_entry HANDLE_TABLE[100];
-
-static short     has_initted = 0; //false
 /** Private Functions **/
 
 status_t grab_handle(PIOHANDLE handle){
@@ -125,12 +123,8 @@ status_t IO_INIT(){
 }
 
 status_t IO_PROTOTYPE(IO_OBJ_TYPE type, PIOHANDLE out_handle){
-    // Make sure we've set up
-    if (!has_initted){
-        IO_INIT();
-    }
     //grab a handle
-    IOHANDLE handle;
+    IOHANDLE handle = IOHANDLE_NULL;
     status_t stat = grab_handle(&handle);
     if (stat != E_SUCCESS) {
         return stat;
