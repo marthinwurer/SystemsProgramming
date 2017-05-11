@@ -26,9 +26,9 @@ typedef struct _io_file_instance {
     BSIZE               length;
     pid_t               owner;
     BSIZE               cursor;
-    int32_t             created;
-    int32_t             written;
-    int32_t             read;
+    IO_UNIX_TS          created;
+    IO_UNIX_TS          written;
+    IO_UNIX_TS          read;
 } io_file_entry, *pio_file_entry;
 
 #define FILES_MAX 50
@@ -54,7 +54,7 @@ void _iofs_init() {
     _iofs_has_init = 1;
 }
 
-int _iofs_verify_handle(FILEHANDLE handle){
+int32_t _iofs_handle_is_valid(FILEHANDLE handle){
     if (handle < 0){
         return 0;
     }
@@ -173,7 +173,7 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
 
 status_t IoFileRead (FILEHANDLE hFile, BSIZE offset, PBSIZE plength, void* out){
     //verify handle
-    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    if (!_iofs_handle_is_valid(hFile)) { return E_BAD_HANDLE; }
     io_file_entry file = FILETABLE[hFile];
     //open or create IO Message
     status_t stat; //used by HANDLED
@@ -202,7 +202,7 @@ status_t IoFileRead (FILEHANDLE hFile, BSIZE offset, PBSIZE plength, void* out){
 
 status_t IoFileWrite (FILEHANDLE hFile, BSIZE offset, PBSIZE plength, void* in){
     //verify handle
-    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    if (!_iofs_handle_is_valid(hFile)) { return E_BAD_HANDLE; }
     //form IO request
     io_file_entry file = FILETABLE[hFile];
     status_t stat; //used by handled macros
@@ -227,7 +227,7 @@ status_t IoFileWrite (FILEHANDLE hFile, BSIZE offset, PBSIZE plength, void* in){
 }
 status_t IoFileSeek (FILEHANDLE hFile, BSIZE offset, PBSIZE poffset){
     //verify handle
-    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    if (!_iofs_handle_is_valid(hFile)) { return E_BAD_HANDLE; }
     io_file_entry file = FILETABLE[hFile];
     file.cursor = offset;
     status_t stat; //used by HANDLED macros
@@ -245,7 +245,7 @@ status_t IoFileSeek (FILEHANDLE hFile, BSIZE offset, PBSIZE poffset){
 }
 status_t IoFileQuery (FILEHANDLE hFile, IOPROP property, PBSIZE plength, void* out){
     //verify handle
-    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    if (!_iofs_handle_is_valid(hFile)) { return E_BAD_HANDLE; }
     io_file_entry file = FILETABLE[hFile];
     //open or create IO Message
     status_t stat; //used by HANDLED
@@ -267,7 +267,7 @@ status_t IoFileQuery (FILEHANDLE hFile, IOPROP property, PBSIZE plength, void* o
 }
 status_t IoFileSet (FILEHANDLE hFile, IOPROP property, PBSIZE plength, void* in){
     //verify handle
-    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    if (!_iofs_handle_is_valid(hFile)) { return E_BAD_HANDLE; }
     //update metadata block
     io_file_entry file = FILETABLE[hFile];
     status_t stat; //used by handled macros
@@ -287,7 +287,7 @@ status_t IoFileSet (FILEHANDLE hFile, IOPROP property, PBSIZE plength, void* in)
 }
 status_t IoFileDelete (FILEHANDLE hFile){
     //verify handle
-    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    if (!_iofs_handle_is_valid(hFile)) { return E_BAD_HANDLE; }
     status_t stat = E_SUCCESS;
     int length = 0;
     //build IO Message & send
@@ -310,7 +310,7 @@ status_t IoFileDelete (FILEHANDLE hFile){
 }
 status_t IoFileNextChild (FILEHANDLE hFile, int index, PBSIZE plength, char* out){
     //verify handle
-    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    if (!_iofs_handle_is_valid(hFile)) { return E_BAD_HANDLE; }
     io_file_entry file = FILETABLE[hFile];
     status_t stat = E_SUCCESS;
     int length = 0;
@@ -330,7 +330,7 @@ status_t IoFileNextChild (FILEHANDLE hFile, int index, PBSIZE plength, char* out
 }
 status_t IoFileClose (FILEHANDLE hFile){
     //verify handle
-    if (_iofs_verify_handle(hFile) == 0) { return E_BAD_HANDLE; }
+    if (!_iofs_handle_is_valid(hFile)) { return E_BAD_HANDLE; }
     status_t stat = E_SUCCESS;
     io_file_entry file = FILETABLE[hFile];
     IGNORED(IO_DELETE(file.message_out));

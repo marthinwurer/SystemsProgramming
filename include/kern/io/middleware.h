@@ -3,7 +3,6 @@
 typedef struct _io_middleware {
     IOHANDLE        handle; ///< Handle associated with the middleware object
     char*           name; ///< Name associated with the middleware
-    int32_t         created; ///< Datetime of creation
     status_t        (*execute)(void* msg); //Middleware function; takes PIO_MESSAGE
 } IO_MIDDLEWARE, *PIO_MIDDLEWARE;
 

@@ -20,8 +20,6 @@ status_t _io_md_setprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, int32_t len
         case IOPROP_NAME:
             strcpy((char*)value, md->name);
             break;
-        case IOPROP_CREATED:
-            return E_BAD_ARG;
         case IOPROP_EXECUTE:
             md->execute = value;
             break;
@@ -36,7 +34,6 @@ IO_MIDDLEWARE _io_md_init_null(){
     return (IO_MIDDLEWARE) {
         .handle = (IOHANDLE)-1,
         .name = (char*)NULL,
-        .created = (int32_t)NULL,
         .execute = NULL
     };
 }
@@ -45,7 +42,6 @@ IO_MIDDLEWARE _io_md_init_handle(IOHANDLE handle){
     return (IO_MIDDLEWARE) {
         .handle = handle,
         .name = (char*)NULL,
-        .created = (int32_t)NULL,
         .execute = NULL
     };
 }
@@ -101,10 +97,6 @@ status_t _io_md_getprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, PBSIZE plen
             *plength = length;
             strcpy(md->name, (char*)value);
             break;
-        case IOPROP_CREATED:
-            *plength = sizeof(int32_t);
-            *((int32_t*)value) = md->created;
-            return E_BAD_ARG;
         case IOPROP_EXECUTE:
             *plength = sizeof(void*);
             *((void**)value) = md->execute;

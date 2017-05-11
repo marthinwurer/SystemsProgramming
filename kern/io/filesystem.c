@@ -19,8 +19,6 @@ status_t _io_fs_setprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, int32_t len
         case IOPROP_NAME:
             strcpy((char*)value, fs->name);
             break;
-        case IOPROP_CREATED:
-            return E_BAD_ARG;
         case IOPROP_EXECUTE:
             fs->execute = value;
             break;
@@ -40,7 +38,6 @@ IO_FILESYSTEM _io_fs_init_null(){
     return (IO_FILESYSTEM) {
         .handle = (IOHANDLE)-1,
         .name = (char*)NULL,
-        .created = (int32_t)NULL,
         .execute = NULL,
         .init = NULL,
         .finalize = NULL
@@ -51,7 +48,6 @@ IO_FILESYSTEM _io_fs_init_handle(IOHANDLE handle) {
     return (IO_FILESYSTEM) {
         .handle = handle,
         .name = (char*)NULL,
-        .created = (int32_t)NULL,
         .execute = NULL,
         .init = NULL,
         .finalize = NULL
@@ -108,10 +104,6 @@ status_t _io_fs_getprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, PBSIZE plen
             }
             *plength = length;
             strcpy(fs->name, (char*)value);
-            return E_SUCCESS;
-        case IOPROP_CREATED:
-            *plength = sizeof(int32_t);
-            *((int32_t*)value) = fs->created;
             return E_SUCCESS;
         case IOPROP_EXECUTE:
             *((void**)value) = fs->execute;

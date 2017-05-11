@@ -31,10 +31,6 @@ status_t _io_mp_setprop(PIO_MOUNT mp, IOPROP prop, void* value, int32_t length){
             PIOHANDLE pvd = value;
             mp->device = *pvd;
             break;
-        case IOPROP_CREATED: ;
-            int32_t* pvc = value;
-            mp->created = *pvc;
-            break;
         default:
             return E_BAD_ARG;
     }
@@ -45,7 +41,6 @@ IO_MOUNT _io_mp_init_null(){
     return (IO_MOUNT) {
         .handle = (IOHANDLE)-1,
         .name = (char*)NULL,
-        .created = (int32_t)NULL,
         .path = (char*)NULL,
         .filesystem = (IOHANDLE)-1,
         .device = (IOHANDLE)-1
@@ -56,7 +51,6 @@ IO_MOUNT _io_mp_init_handle(IOHANDLE handle){
     return (IO_MOUNT) {
         .handle = handle,
         .name = (char*)NULL,
-        .created = (int32_t)NULL,
         .path = (char*)NULL,
         .filesystem = (IOHANDLE)-1,
         .device = (IOHANDLE)-1
@@ -131,10 +125,6 @@ status_t _io_mp_getprop(PIO_MOUNT mp, IOPROP prop, void* value, PBSIZE plength){
         case IOPROP_DEVICE: ;
             *plength = sizeof(IOHANDLE);
             *((IOHANDLE*)value) = mp->device;
-            break;
-        case IOPROP_CREATED: ;
-            *plength = sizeof(int32_t);
-            *((int32_t*)value) = mp->created;
             break;
         default:
             return E_BAD_ARG;

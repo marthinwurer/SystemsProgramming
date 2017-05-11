@@ -6,9 +6,10 @@
 #pragma once
 #include <string.h>
 #include <baseline/common.h>
-typedef int IOHANDLE, *PIOHANDLE; //handle to I/O objects
-typedef int FILEHANDLE, *PFILEHANDLE; //handle to open files
-typedef int BSIZE, *PBSIZE; //buffer size, bytes
+typedef int32_t IOHANDLE, *PIOHANDLE; //handle to I/O objects
+typedef int32_t FILEHANDLE, *PFILEHANDLE; //handle to open files
+typedef int32_t BSIZE, *PBSIZE, BOFFSET, *PBOFFSET; //buffer size, bytes
+typedef int32_t IO_UNIX_TS, *PIO_UNIX_TS;
 
 typedef enum _ioctl {
     IOCTL_READ,

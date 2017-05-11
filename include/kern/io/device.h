@@ -3,7 +3,6 @@
 typedef struct _io_device {
     IOHANDLE        handle; ///< Handle associated with the device
     char*           name; ///< Name associated with the device
-    int32_t         created; ///< Datetime of creation
     status_t        (*read)(int offset, PBSIZE length, void* buffer); ///< Pointer to function for reading bytes
     status_t        (*write)(int offset, PBSIZE length, void* buffer); ///< Pointer to function for writing bytes
     status_t        (*finalize)(); ///< Pointer to function for deconstructing the device

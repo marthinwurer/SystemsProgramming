@@ -20,8 +20,6 @@ status_t _io_dv_setprop(PIO_DEVICE dv, IOPROP prop, void* value, int32_t length)
         case IOPROP_NAME:
             strcpy((char*)value, dv->name);
             break;
-        case IOPROP_CREATED:
-            return E_BAD_ARG;
         case IOPROP_READ:
             dv->read = value;
             break;
@@ -41,7 +39,6 @@ IO_DEVICE _io_dv_init_null(){
     return (IO_DEVICE) {
         .handle = (IOHANDLE)-1,
         .name = (char*)NULL,
-        .created = (int32_t)NULL,
         .read = NULL,
         .write = NULL,
         .finalize = NULL
@@ -52,7 +49,6 @@ IO_DEVICE _io_dv_init_handle(IOHANDLE handle){
     return (IO_DEVICE) {
         .handle = handle,
         .name = (char*)NULL,
-        .created = (int32_t)NULL,
         .read = NULL,
         .write = NULL,
         .finalize = NULL
@@ -106,10 +102,6 @@ status_t _io_dv_getprop(PIO_DEVICE dv, IOPROP prop, void* value, PBSIZE plength)
             if (length > *plength) { return E_MORE_DATA; }
             *plength = length;
             strcpy(dv->name, (char*)value);
-            return E_SUCCESS;
-        case IOPROP_CREATED: 
-            *((int32_t*)value) = (int32_t)dv->created;
-            *plength = sizeof(int32_t);
             return E_SUCCESS;
         case IOPROP_READ:
             *plength = sizeof(void*);

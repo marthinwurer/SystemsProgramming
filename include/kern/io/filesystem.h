@@ -3,7 +3,6 @@
 typedef struct _io_filesystem {
     IOHANDLE        handle; ///< Handle associated with the filesystem
     char*           name; ///< Name associated with the filesystem
-    int32_t         created; ///< Datetime of creation of the fs
     status_t        (*execute)(void* msg); ///< Function for handling a message; takes a PIO_MESSAGE as input
     status_t        (*init)(); ///< Function for setting up the FS
     status_t        (*finalize)(); ///< Function for deconstructing the FS
