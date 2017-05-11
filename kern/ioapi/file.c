@@ -105,24 +105,18 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
             SHANDLED(newpath, IO_UPDATE(hMessage, IOPROP_PATH, &newpath, &length));
             stat = IO_EXECUTE(hMessage);
             //if exists, create original path
+            if (stat != E_SUCCESS) { fileatindex->handle = -1; return E_NO_MATCH; }
+            length = strlen(path);
+            IGNORED(IO_UPDATE(hMessage, IOPROP_PATH, &path, &length));
+            _ioctlvalue = IOCTL_CREATE;
+            TIGNORED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
+            stat = IO_EXECUTE(hMessage);
             if (stat == E_SUCCESS) {
-                length = strlen(path);
-                IGNORED(IO_UPDATE(hMessage, IOPROP_PATH, &path, &length));
-                _ioctlvalue = IOCTL_CREATE;
-                TIGNORED(IOCTL, IO_UPDATE(hMessage, IOPROP_IOCTL, &_ioctlvalue, &length));
-                stat = IO_EXECUTE(hMessage);
-                if (stat == E_SUCCESS) {
-                    *out = index;
-                } else {
-                    fileatindex->handle = -1;
-                    return stat;
-                }
-                return stat;
+                *out = index;
             } else {
                 fileatindex->handle = -1;
-                return E_NO_MATCH;
+                return stat;
             }
-            break;
         case IO_CP_CREATERECURSIVE: 
             mountindex = 0;
             //verify mount is valid
