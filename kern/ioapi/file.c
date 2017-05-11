@@ -76,8 +76,11 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
     ENABLEHANDLERS
     pretty_print(IO_PROTOTYPE(IO_OBJ_MESSAGE, &(fileatindex->message_in)));
     IOHANDLE hMessage = fileatindex->message_in;
+    cwrites("finished prototype\n");
     HANDLED(IO_UPDATE_STR(hMessage, IOPROP_PATH, path));
+    cwrites("updated path\n");
     HANDLED(IO_UPDATE_IOCTL(hMessage, IOCTL_IDENTIFY));
+    cwrites("updated IOCTL\n");
     stat = IO_EXECUTE(hMessage);
     pretty_print(stat);
     if (stat == E_SUCCESS){
@@ -105,6 +108,7 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out){
                 fileatindex->handle = -1;
                 return stat;
             }
+            break;
         case IO_CP_CREATERECURSIVE: 
             mountindex = 0;
             //verify mount is valid
@@ -161,7 +165,6 @@ status_t IoFileRead (FILEHANDLE hFile, BSIZE offset, PBSIZE plength, void* out){
         HANDLED(IO_PROTOTYPE(IO_OBJ_MESSAGE, &file->message_in));
         HANDLED(IO_UPDATE_STR(file->message_in, IOPROP_PATH, file->path));
     }
-    
     //update cursor
     file->cursor += offset;
     HANDLED(IO_UPDATE_VALINT(file->message_in, IOPROP_CURSOR_POSITION, file->cursor));

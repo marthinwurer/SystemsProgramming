@@ -89,6 +89,10 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
     int mismatch = 0;
     while (_io_mp_iterate(&mount_handle, iter_val) == E_SUCCESS) {
         char* mountpath = ((PIO_MOUNT)HANDLE_TABLE[mount_handle].object)->path;
+        cwrites(mountpath);
+        cwrites("-");
+        cwrites(path);
+        cwrites("\n");
         if (strlen(mountpath) == index) {
             for (unsigned int i=0; i < index; i++){
                 if (mountpath[i] != path[i]){
@@ -125,6 +129,16 @@ status_t IO_INIT(){
     stat += _io_init_messages();
     stat += _io_init_middlewares();
     stat += _io_init_mounts();
+    for (int i =0; i < IO_HANDLE_MAX; i++){
+        HANDLE_TABLE[i] = (struct _ioentry) {
+        .handle = IOHANDLE_NULL,
+        .type = IO_OBJ_UNKNOWN,
+        .locked = 0, //false
+        .object = NULL,
+        .owner = 0
+        };
+    }
+
     if (stat == E_SUCCESS) {
         return E_SUCCESS;
     } else {

@@ -68,6 +68,8 @@ status_t raw_execute(PIO_MESSAGE msg){
     io_path_disc_n_nodes(msg->path, 1, newpath);
     int32_t sector_id = -1;
     int32_t block_count = 4096; //gets us to 4Kb
+    cwrites(newpath);
+    cwrites("\n\n");
     status_t result = atoi(newpath, &sector_id);
     //verify path
     if (result != E_SUCCESS) { return result; }
@@ -93,7 +95,7 @@ status_t raw_execute(PIO_MESSAGE msg){
         case IOCTL_ENUMERATE:
             return E_BAD_ARG; //undefined behavior
         case IOCTL_IDENTIFY:
-            return E_BAD_ARG; //undefined behavior
+            return E_SUCCESS;
         default:
             return E_BAD_ARG;
     }

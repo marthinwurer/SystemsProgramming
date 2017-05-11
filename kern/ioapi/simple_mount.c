@@ -13,7 +13,7 @@ status_t install_mount(char* name, char* path, IOHANDLE device, IOHANDLE filesys
     HANDLED(IO_UPDATE_STR(handle, IOPROP_PATH, path));
     HANDLED(IO_UPDATE_VALINT(handle, IOPROP_DEVICE, (int32_t)device));
     HANDLED(IO_UPDATE_VALINT(handle, IOPROP_FILESYSTEM, filesystem));
-    HANDLED(IO_LOCK(handle));
+    //HANDLED(IO_LOCK(handle));
     return E_SUCCESS;
 }
 

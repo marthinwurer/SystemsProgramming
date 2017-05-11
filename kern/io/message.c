@@ -42,6 +42,9 @@ status_t _io_msg_setprop(PIO_MESSAGE msg, IOPROP prop, void* value, int32_t leng
         case IOPROP_PROP:
             msg->offset_prop.property = *(IOPROP*)value;
             break;
+        case IOPROP_IOCTL:
+            msg->ioctl = *(IOCTL*)value;
+            break;
         default:
             return E_BAD_ARG;
     }

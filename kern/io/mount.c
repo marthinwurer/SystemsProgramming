@@ -99,6 +99,9 @@ status_t _io_mp_iterate(PIOHANDLE out, int index) {
     if (index < 0) {
         return E_OUT_OF_BOUNDS;
     }
+    if (_IO_MP_TABLE[index].handle == IOHANDLE_NULL) {
+        return E_OUT_OF_BOUNDS;
+    }
     *out = _IO_MP_TABLE[index].handle;
     return E_SUCCESS;
 }

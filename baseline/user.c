@@ -16,7 +16,7 @@
 
 #include <kern/net/net_test.h>
 #include <baseline/c_io.h>
-
+#include <kern/ioapi/file.h>
 /*
 ** Support functions
 */
@@ -939,6 +939,18 @@ int32_t redrawProcess(void *arg) {
 ** with that child's exit status.
 */
 
+int32_t fs_demo (void *arg) {
+    FILEHANDLE file = -1;
+    IoFileOpen("\\raw\\0", IO_CP_FAIL, &file);
+    char* buffer = (char*)malloc(4096);
+    cwrites("continuing user stuff\n");
+    IoFileRead(file, 0, 4096, buffer);
+    buffer[0] = 0xAA;
+    IoFileWrite(file, 0, 2, buffer);
+    IoFileRead(file,0, 4096, buffer);
+    IoFileClose(file);
+    return 0;
+}
 int32_t init( void *arg ) {
 	// cast away warnings
 	(void) arg;
@@ -962,6 +974,12 @@ int32_t init( void *arg ) {
 	//}
 	//swritech('{');
 	spawn(redrawProcess, 0, P_SYSTEM);
+    
+    pid = spawn( fs_demo, 0, P_HIGH);
+    if( pid < 0 ) {
+		cwrites( "init, spawn() fsdemo failed\n" );
+	}
+	swritech( '+' );
 
 #ifdef SPAWN_A
 	pid = spawn( user_a, 0, P_HIGH );
