@@ -17,7 +17,14 @@ status_t _io_fs_setprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, int32_t len
     //update property
     switch (prop){
         case IOPROP_NAME:
-            strcpy((char*)value, fs->name);
+            length = strlen((char*)value);
+            if (fs->name == NULL) {
+                fs->name = malloc(length + 1);
+            } else if (strlen(fs->name) < length) {
+                free(fs->name);
+                fs->name = malloc(length + 1);
+            }
+            strcpy(fs->name, (char*)value);
             break;
         case IOPROP_EXECUTE:
             fs->execute = value;
@@ -103,7 +110,7 @@ status_t _io_fs_getprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, PBSIZE plen
                 return E_MORE_DATA;
             }
             *plength = length;
-            strcpy(fs->name, (char*)value);
+            strcpy((char*)value, fs->name);
             return E_SUCCESS;
         case IOPROP_EXECUTE:
             *((void**)value) = fs->execute;

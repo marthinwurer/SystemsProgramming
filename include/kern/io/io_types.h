@@ -7,6 +7,7 @@
 #include <string.h>
 #include <baseline/common.h>
 #include <baseline/prettyprinter.h>
+#include <kern/io/memshim.h>
 
 #define ENABLEHANDLERS status_t stat_h = E_SUCCESS;
 

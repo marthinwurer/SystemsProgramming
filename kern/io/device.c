@@ -18,7 +18,14 @@ status_t _io_dv_setprop(PIO_DEVICE dv, IOPROP prop, void* value, int32_t length)
     //update property
     switch (prop){
         case IOPROP_NAME:
-            strcpy((char*)value, dv->name);
+            length = strlen((char*)value);
+            if (dv->name == NULL) {
+                dv->name = malloc(length + 1);
+            } else if (strlen(dv->name) < length) {
+                free(dv->name);
+                dv->name = malloc(length + 1);
+            }
+            strcpy(dv->name, (char*)value);
             break;
         case IOPROP_READ:
             dv->read = value;
@@ -99,9 +106,12 @@ status_t _io_dv_getprop(PIO_DEVICE dv, IOPROP prop, void* value, PBSIZE plength)
     switch (prop){
         case IOPROP_NAME: ;
             int length = strlen(dv->name);
-            if (length > *plength) { return E_MORE_DATA; }
+            if (length > *plength) { 
+                *plength = length; 
+                return E_MORE_DATA; 
+            }
             *plength = length;
-            strcpy(dv->name, (char*)value);
+            strcpy((char*)value, dv->name);
             return E_SUCCESS;
         case IOPROP_READ:
             *plength = sizeof(void*);

@@ -18,10 +18,24 @@ status_t _io_mp_setprop(PIO_MOUNT mp, IOPROP prop, void* value, int32_t length){
     //update property
     switch (prop){
         case IOPROP_PATH:
-            strcpy((char*)value, mp->path);
+            length = strlen(value);
+            if (mp->path == NULL) {
+                mp->path = malloc(length + 1);
+            } else if (strlen(mp->path) < length) {
+                free(mp->path);
+                mp->path = malloc(length + 1);
+            }
+            strcpy(mp->path, (char*)value);
             break;
         case IOPROP_NAME:
-            strcpy((char*)value, mp->name);
+            length = strlen(value);
+            if (mp->name == NULL) {
+                mp->name = malloc(length + 1);
+            } else if (strlen(mp->name) < length) {
+                free(mp->name);
+                mp->name = malloc(length + 1);
+            }
+            strcpy(mp->name, (char*)value);
             break;
         case IOPROP_FILESYSTEM: ;
             PIOHANDLE pvf = value;
@@ -107,7 +121,7 @@ status_t _io_mp_getprop(PIO_MOUNT mp, IOPROP prop, void* value, PBSIZE plength){
                 return E_MORE_DATA;
             }
             *plength = length;
-            strcpy(mp->path, (char*)value);
+            strcpy((char*)value, mp->path);
             break;
         case IOPROP_NAME: ;
             length = strlen(mp->name);
@@ -116,7 +130,7 @@ status_t _io_mp_getprop(PIO_MOUNT mp, IOPROP prop, void* value, PBSIZE plength){
                 return E_MORE_DATA;
             }
             *plength = length;
-            strcpy(mp->name, (char*) value);
+            strcpy((char*) value, mp->path);
             break;
         case IOPROP_FILESYSTEM: ;
             *plength = sizeof(IOHANDLE);

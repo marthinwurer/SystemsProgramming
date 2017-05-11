@@ -18,7 +18,14 @@ status_t _io_msg_setprop(PIO_MESSAGE msg, IOPROP prop, void* value, int32_t leng
     //update property
     switch (prop){
         case IOPROP_PATH:
-            strcpy((char*)value, msg->path);
+            length = strlen((char*)value);
+            if (msg->path == NULL) {
+                msg->path = malloc(length + 1);
+            } else if (strlen(msg->path) < length) {
+                free(msg->path);
+                msg->path = malloc(length + 1);
+            }
+            strcpy(msg->path, (char*)value);
             break;
         case IOPROP_FILESYSTEM:
             msg->filesystem = value;
@@ -30,10 +37,10 @@ status_t _io_msg_setprop(PIO_MESSAGE msg, IOPROP prop, void* value, int32_t leng
             msg->buffer = value;
             break;
         case IOPROP_CURSOR_POSITION:
-            msg->offset_prop.offset = (int32_t)value;
+            msg->offset_prop.offset = *(int32_t*)value;
             break;
         case IOPROP_PROP:
-            msg->offset_prop.property = (IOPROP)value;
+            msg->offset_prop.property = *(IOPROP*)value;
             break;
         default:
             return E_BAD_ARG;
@@ -113,7 +120,7 @@ status_t _io_msg_getprop(PIO_MESSAGE msg, IOPROP prop, void* value, PBSIZE pleng
                 return E_MORE_DATA; 
             }
             *plength = length;
-            strcpy(msg->path, (char*) value);
+            strcpy((char*) value, msg->path);
             return E_SUCCESS;
         case IOPROP_FILESYSTEM:
             return E_BAD_ARG;

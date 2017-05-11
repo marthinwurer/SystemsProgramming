@@ -264,21 +264,27 @@ status_t IO_DELETE(IOHANDLE handle){
     switch (object_type) {
         case IO_OBJ_MESSAGE: ;
             PIO_MESSAGE p_o_m = handle_entry->object;
+            free(p_o_m->path);
             *p_o_m = _io_msg_init_null();
         case IO_OBJ_FILESYSTEM: ;
             PIO_FILESYSTEM p_o_f = handle_entry->object;
+            free(p_o_f->name);
             *p_o_f = _io_fs_init_null();
             break;
         case IO_OBJ_DEVICE: ;
             PIO_DEVICE p_o_d = handle_entry->object;
+            free(p_o_d->name);
             *p_o_d = _io_dv_init_null();
             break;
         case IO_OBJ_MOUNT: ;
             PIO_MOUNT p_o_o = handle_entry->object;
+            free(p_o_o->name);
+            free(p_o_o->path);
             *p_o_o = _io_mp_init_null();
             break;
         case IO_OBJ_MIDDLEWARE: ;//standard doesn't like assignments after label...
             PIO_MIDDLEWARE p_o_i = handle_entry->object;
+            free(p_o_i->name);
             *p_o_i = _io_md_init_null();
             break;
         default:

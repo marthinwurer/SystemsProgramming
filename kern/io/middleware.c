@@ -18,7 +18,13 @@ status_t _io_md_setprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, int32_t len
     //update property
     switch (prop){
         case IOPROP_NAME:
-            strcpy((char*)value, md->name);
+            if (md->name == NULL) {
+                md->name = malloc(length + 1);
+            } else if (strlen(md->name) < length) {
+                free(md->name);
+                md->name = malloc(length + 1);
+            }
+            strcpy(md->name, (char*)value);
             break;
         case IOPROP_EXECUTE:
             md->execute = value;
@@ -95,7 +101,7 @@ status_t _io_md_getprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, PBSIZE plen
                 return E_MORE_DATA;
             }
             *plength = length;
-            strcpy(md->name, (char*)value);
+            strcpy((char*)value, md->name);
             break;
         case IOPROP_EXECUTE:
             *plength = sizeof(void*);
