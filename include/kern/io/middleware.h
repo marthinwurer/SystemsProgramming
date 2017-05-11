@@ -11,9 +11,9 @@ typedef struct _io_middleware {
  * \param md [in] Pointer to IO_MIDDLEWARE Object
  * \param prop [in] Property to set
  * \param value [in] Pointer to the value to be set
- * \param length [in] Length of data specified by @value
+ * \param length [in] Length of data in bytes specified by @value
  */
-status_t _io_md_setprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, int32_t length);
+status_t _io_md_setprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, BSIZE length);
 
 /**
  * \brief function constructs a null IO_MIDDLEWARE object and returns it by value
@@ -49,6 +49,6 @@ status_t _io_md_iterate(PIOHANDLE out, int index);
  * \param md [in] Pointer to IO_MIDDLEWARE Object
  * \param prop [in] Property to get
  * \param value [out] Out pointer for returned value
- * \param plength [out] Length of data returned or available in case of E_MORE_DATA
+ * \param plength [out] Length of data in byts returned or available in case of E_MORE_DATA
  */
 status_t _io_md_getprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, PBSIZE plength);

@@ -13,9 +13,9 @@ typedef struct _io_filesystem {
  * \param fs [in] Pointer to IO_FILESYSTEM Object
  * \param prop [in] Property to set
  * \param value [in] Pointer to the value to be set
- * \param length [in] Length of data specified by @value
+ * \param length [in] Length in bytes of data specified by @value
  */
-status_t _io_fs_setprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, int32_t length);
+status_t _io_fs_setprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, BSIZE length);
 
 /**
  * \brief function constructs a null IO_FILESYSTEM object and returns it by value
@@ -51,6 +51,6 @@ status_t _io_fs_iterate(PIOHANDLE out, int index);
  * \param fs [in] Pointer to IO_FILESYSTEM Object
  * \param prop [in] Property to get
  * \param value [out] Pointer to the returned value
- * \param plength [out] Size of value returned or available in case of E_MORE_DATA
+ * \param plength [out] Size of value in bytes returned or available in case of E_MORE_DATA
  */
 status_t _io_fs_getprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, PBSIZE plength);

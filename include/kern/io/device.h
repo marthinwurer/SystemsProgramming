@@ -13,9 +13,9 @@ typedef struct _io_device {
  * \param dv [in] Pointer to IO DEVICE Object
  * \param prop [in] Property to set
  * \param value [in] Pointer to the value to be set
- * \param length [in] Length of data specified by @value
+ * \param length [in] Length of data specified by @value. bytes
  */
-status_t _io_dv_setprop(PIO_DEVICE dv, IOPROP prop, void* value, int32_t length);
+status_t _io_dv_setprop(PIO_DEVICE dv, IOPROP prop, void* value, BSIZE length);
 
 /**
  * \brief function constructs a null IO DEVICE object and returns it by value
@@ -51,6 +51,6 @@ status_t _io_dv_iterate(PIOHANDLE out, int index);
  * \param dv [in] Pointer to IO DEVICE Object
  * \param prop [in] Property to get
  * \param value [out] Pointer for returned value
- * \param plength [out] Size of returned data or available data in case of E_MORE_DATA
+ * \param plength [out] Size in bytes of returned data or available data in case of E_MORE_DATA
  */
 status_t _io_dv_getprop(PIO_DEVICE dv, IOPROP prop, void* value, PBSIZE plength);

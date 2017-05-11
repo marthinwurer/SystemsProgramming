@@ -13,9 +13,9 @@ typedef struct _io_mount {
  * \param mp [in] Pointer to IO_MOUNT Object
  * \param prop [in] Property to set
  * \param value [in] Pointer to the value to be set
- * \param length [in] Length of data specified by @value
+ * \param length [in] Length in bytes of data specified by @value
  */
-status_t _io_mp_setprop(PIO_MOUNT mp, IOPROP prop, void* value, int32_t length);
+status_t _io_mp_setprop(PIO_MOUNT mp, IOPROP prop, void* value, BSIZE length);
 
 /**
  * \brief function constructs a null IO_MOUNT object and returns it by value
@@ -51,6 +51,6 @@ status_t _io_mp_iterate(PIOHANDLE out, int index);
  * \param mp [in] Pointer to IO_MOUNT Object
  * \param prop [in] Property to get
  * \param value [out] Pointer for storing out value
- * \param plength [out] Length of data returned or available in case of E_MORE_DATA
+ * \param plength [out] Length in bytes of data returned or available in case of E_MORE_DATA
  */
 status_t _io_mp_getprop(PIO_MOUNT mp, IOPROP prop, void* value, PBSIZE plength);

@@ -6,7 +6,7 @@ typedef struct _io_message {
     void*           filesystem; ///< Reference to associated filesystem; PIO_FILESYSTEM
     void*           device; ///< Reference to associated device; PIO_DEVICE
     char*           buffer; ///< Data buffer for storing input/output data
-    int32_t         length; ///< Length of buffer
+    BSIZE           length; ///< Length of buffer
     status_t        status; ///< Current status of message; intended to support cancelation by middleware, etc.
     IOCTL           ioctl; ///< Operation to perform
     union POSITION {
@@ -20,9 +20,9 @@ typedef struct _io_message {
  * \param msg [in] Pointer to IO_MESSAGE Object
  * \param prop [in] Property to set
  * \param value [in] Pointer to the value to be set
- * \param length [in] Length of data specified by @value
+ * \param length [in] Length in byts of data specified by @value
  */
-status_t _io_msg_setprop(PIO_MESSAGE msg, IOPROP prop, void* value, int32_t blength);
+status_t _io_msg_setprop(PIO_MESSAGE msg, IOPROP prop, void* value, BSIZE blength);
 
 /**
  * \brief function constructs a null IO_MESSAGE object and returns it by value
@@ -58,6 +58,6 @@ status_t _io_msg_iterate(PIOHANDLE out, int index);
  * \param msg [in] Pointer to IO_MESSAGE Object
  * \param prop [in] Property to get
  * \param value [out] Out pointer for returned value
- * \param plength [out] Length of data returned or available in case of E_MORE_DATA
+ * \param plength [out] Length of data in bytes returned or available in case of E_MORE_DATA
  */
 status_t _io_msg_getprop(PIO_MESSAGE msg, IOPROP prop, void* value, PBSIZE plength);

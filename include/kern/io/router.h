@@ -91,6 +91,6 @@ status_t IO_LOCK(IOHANDLE handle);
  * \param handle [in] handle for which to read property
  * \param prop [in] property to read
  * \param buffer [out] buffer in which to write result data
- * \param plength [in] size of buffer to write to. [out] actual size of data
+ * \param plength [in] size of buffer to write to in bytes. [out] actual size of data in bytes
  */
 status_t IO_INTERROGATE(IOHANDLE handle, IOPROP prop, void* buffer, PBSIZE plength);
