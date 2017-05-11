@@ -28,7 +28,7 @@ status_t IoFileOpen (char* path, IOCREATEPOLICY strat, PFILEHANDLE out);
  * \param plength [in] max number of bytes to read. [out] number of bytes read
  * \param out [out] buffer in which read data is stored
  */
-status_t IoFileRead (FILEHANDLE file, BSIZE offset, PBSIZE plength, void* out);
+status_t IoFileRead (FILEHANDLE file, BOFFSET offset, PBSIZE plength, void* out);
 
 /**
  * \brief Writes the contents of a buffer to a file
@@ -40,7 +40,7 @@ status_t IoFileRead (FILEHANDLE file, BSIZE offset, PBSIZE plength, void* out);
  * \param plength [in] size of input buffer in bytes. [out] number of bytes successfully written.
  * \param in [in] data buffer to be written
  */
-status_t IoFileWrite (FILEHANDLE file, BSIZE offset, PBSIZE plength, void* in);
+status_t IoFileWrite (FILEHANDLE file, BOFFSET offset, PBSIZE plength, void* in);
 
 /**
  * \brief Advances (or rewinds) file cursor
@@ -50,7 +50,7 @@ status_t IoFileWrite (FILEHANDLE file, BSIZE offset, PBSIZE plength, void* in);
  * \post cursor = cursor + offset
  * \param poffset [out] new file cursor value
  */
-status_t IoFileSeek (FILEHANDLE file, BSIZE offset, PBSIZE poffset);
+status_t IoFileSeek (FILEHANDLE file, BOFFSET offset, PBSIZE poffset);
 
 /**
  * \brief Reads a file's metadata

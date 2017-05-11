@@ -13,21 +13,21 @@ status_t ramdisk_install(void);
 
 /**
  * \brief implements block-based reading from memory
- * \param offset [in] offset from start of tape (blocks)
- * \param length [in] size of buffer to read into (blocks)
- * \param length [out] size of data read (blocks)
+ * \param offset [in] offset from start of tape (bytes)
+ * \param length [in] size of buffer to read into (bytes)
+ * \param length [out] size of data read (bytes)
  * \param buffer [out] pointer to storage for read data
  */
-status_t ramdisk_read(int offset, PBSIZE length, void* buffer);
+status_t ramdisk_read(BOFFSET offset, PBSIZE length, void* buffer);
 
 /**
  * \brief implements block-based writing to memory
- * \param offset [in] offset from start of tape (blocks)
- * \param length [in] size of data to write (blocks)
- * \param length [out] size of data written (blocks)
+ * \param offset [in] offset from start of tape (bytes)
+ * \param length [in] size of data to write (bytes)
+ * \param length [out] size of data written (bytes)
  * \param buffer [in] pointer to data to write
  */
-status_t ramdisk_write(int offset, PBSIZE length, void* buffer);
+status_t ramdisk_write(BOFFSET offset, PBSIZE length, void* buffer);
 
 /**
  * \brief function destructs ramdisk, freeing any held resources
