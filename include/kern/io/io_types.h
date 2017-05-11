@@ -31,6 +31,8 @@ typedef enum _ioctl {
     IOCTL_QUERY,
     IOCTL_CREATE,
     IOCTL_ENUMERATE,
+    IOCTL_SHRINK,
+    IOCTL_GROW,
     IOCTL_IDENTIFY
 } IOCTL, *PIOCTL;
 
