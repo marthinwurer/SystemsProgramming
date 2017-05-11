@@ -11,7 +11,8 @@ MARKER = $$(@D)/$(MARKER_FILE)
 
 
 %/$(MARKER_FILE):
-	mkdir -p $(dir $@)
-	touch $@
+	@echo "    MKDIR $(dir $@)"
+	@mkdir -p $(dir $@)
+	@touch $@
 
 .PRECIOUS: %/$(MARKER_FILE)

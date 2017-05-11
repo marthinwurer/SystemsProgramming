@@ -57,13 +57,13 @@ BASELINE_OBJ := $(addprefix $(BUILD_DIR)/baseline/,$(BASELINE_OBJ))
 PROG_OBJ := $(KERN_OBJ) $(BASELINE_OBJ)
 
 $(BUILD_DIR)/prog.out: $(PROG_OBJ)
-	$(LD) $(LDFLAGS) -o $@ $+
+	$(LD_V) $(LDFLAGS) -o $@ $+
 
 $(BUILD_DIR)/prog.o: $(PROG_OBJ) $(LIBK)
-	$(LD) $(LDFLAGS) -o $@ -e _early -Ttext 0x10000 $+
+	$(LD_V) $(LDFLAGS) -o $@ -e _early -Ttext 0x10000 $+
 
 $(BUILD_DIR)/prog.b: $(BUILD_DIR)/prog.o
-	$(LD) $(LDFLAGS) -o $@ -s -e _early --oformat binary -Ttext 0x10000 $<
+	$(LD_V) $(LDFLAGS) -o $@ -s -e _early --oformat binary -Ttext 0x10000 $<
 
 #$(BUILD_DIR)/earlyprog.o: $(EARLY_OBJ)
 #	$(LD) $(LDFLAGS) -o $@ -Ttext 0x3000 -e _early $+
