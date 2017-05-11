@@ -111,18 +111,16 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
 /** Public Functions **/
 
 status_t IO_INIT(){
-    status_t stat = E_SUCCESS;
-    stat = _io_init_filesystems();
-    if (stat != E_SUCCESS) { return stat; }
-    stat = _io_init_devices();
-    if (stat != E_SUCCESS) { return stat; }
-    stat = _io_init_messages();
-    if (stat != E_SUCCESS) { return stat; }
-    stat = _io_init_middlewares();
-    if (stat != E_SUCCESS) { return stat; }
-    stat = _io_init_mounts();
-    if (stat != E_SUCCESS) { return stat; }
-    has_initted = 1; //true
+    status_t stat = _io_init_filesystems();
+    stat += _io_init_devices();
+    stat += _io_init_messages();
+    stat += _io_init_middlewares();
+    stat += _io_init_mounts();
+    if (stat == E_SUCCESS) {
+        return E_SUCCESS;
+    } else {
+        _kpanic("IO", "couldn't init");
+    }
     return E_SUCCESS;
 }
 
