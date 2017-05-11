@@ -50,6 +50,20 @@
 #define NET_INTEL_RX_BUF_MAX_LEN 3096
 
 /**
+ * Receive Frame Descriptor is given to receive unit to store incoming
+ * transmissions. 
+ */
+typedef struct {
+	uint16_t status;
+	uint16_t command;
+	uint32_t link;
+	uint32_t __pad1;
+	uint16_t count;
+	uint16_t size;
+	uint8_t data[NET_INTEL_RFD_SIZE];
+} rfd_t;
+
+/**
  * Stores info about network interface
  */
 struct nic_info {
@@ -60,10 +74,14 @@ struct nic_info {
 	uint32_t avail_cb;
 	struct cb* next_cb;
 	struct cb* cb_to_check;
-	struct rfd* next_rfd;
-	uint32_t rx_buf_count;
-	struct rx_buf* rx_buf_head;
-	struct rx_buf* next_rx_buf;
+	struct {
+		rfd_t* tail;
+		rfd_t* head;
+		rfd_t* next;
+	} rfa;
+	// uint32_t rx_buf_count;
+	// struct rx_buf* rx_buf_head;
+	// struct rx_buf* next_rx_buf;
 	uint8_t my_ip[4];
 };
 
@@ -87,6 +105,62 @@ struct csr {
 };
 
 /**
+ * Ethernet frame data payload
+ */
+typedef union {
+	uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
+	struct {
+		uint8_t version : 4;
+		uint8_t ihl : 4;
+		uint8_t dscp : 6;
+		uint8_t ecn : 2;
+		uint16_t total_len;
+		uint16_t id;
+		uint16_t flags : 3;
+		uint16_t frag_offset : 13;
+		uint8_t ttl;
+		uint8_t protocol;
+		uint16_t header_checksum;
+		uint8_t src_ip[4];
+		uint8_t dst_ip[4];
+		uint8_t ip_data[NET_INTEL_TCB_MAX_DATA_LEN - 5];
+	} ipv4;
+	struct {
+		uint16_t hw_type;
+		uint16_t protocol_type;
+		uint8_t hw_addr_len;
+		uint8_t protocol_addr_len;
+		uint16_t opcode;
+		uint8_t sender_hw_addr[6];
+		// uint32_t sender_protocol_addr; // unaligned
+		uint8_t sender_protocol_addr[4]; // aligned
+		// uint16_t sender_protocol_addr_hi; // aligned
+		uint8_t target_hw_addr[6];
+		uint8_t target_protocol_addr[4];
+	} arp;
+} eth_payload_t;
+
+/**
+ * Ethernet TX packet structure
+ */
+typedef struct {
+	uint8_t dst_mac[MAC_LENGTH_BYTES];
+	// uint8_t src_mac[MAC_LENGTH_BYTES]; // auto inserted
+	uint16_t ethertype; // under 1500 is payload length, above is type of payload header
+	eth_payload_t payload;
+} eth_packet_t;
+
+/**
+ * Ethernet RX packet structure
+ */
+typedef struct {
+	uint8_t dst_mac[MAC_LENGTH_BYTES];
+	uint8_t src_mac[MAC_LENGTH_BYTES];
+	uint16_t ethertype; // under 1500 is payload length, above is type of payload header
+	eth_payload_t payload;
+} eth_packet_rx_t;
+
+/**
  * Command Block
  */
 struct cb {
@@ -101,79 +175,29 @@ struct cb {
 			uint16_t tcb_byte_count;
 			uint8_t threshold;
 			uint8_t tbd_count;
-			struct eth_packet_t {
-				uint8_t dst_mac[MAC_LENGTH_BYTES];
-				// uint8_t src_mac[MAC_LENGTH_BYTES]; // auto inserted
-				uint16_t ethertype; // under 1500 is payload length, above is type of payload header
-				union {
-					uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
-					struct {
-						uint8_t version : 4;
-						uint8_t ihl : 4;
-						uint8_t dscp : 6;
-						uint8_t ecn : 2;
-						uint16_t total_len;
-						uint16_t id;
-						uint16_t flags : 3;
-						uint16_t frag_offset : 13;
-						uint8_t ttl;
-						uint8_t protocol;
-						uint16_t header_checksum;
-						uint8_t src_ip[4];
-						uint8_t dst_ip[4];
-						uint8_t ip_data[NET_INTEL_TCB_MAX_DATA_LEN - 5];
-					} ipv4;
-					struct {
-						uint16_t hw_type;
-						uint16_t protocol_type;
-						uint8_t hw_addr_len;
-						uint8_t protocol_addr_len;
-						uint16_t opcode;
-						uint8_t sender_hw_addr[6];
-						// uint32_t sender_protocol_addr; // unaligned
-						uint8_t sender_protocol_addr[4]; // aligned
-						// uint16_t sender_protocol_addr_hi; // aligned
-						uint8_t target_hw_addr[6];
-						uint8_t target_protocol_addr[4];
-					} arp;
-				} payload;
-			} eth_packet;
+			eth_packet_t eth_packet;
 		} tcb;
 	} u;
-};
-
-/**
- * Receive Frame Descriptor is given to receive unit to store incoming
- * transmissions. 
- */
-struct rfd {
-	uint16_t status;
-	uint16_t command;
-	uint32_t link;
-	uint32_t __pad1;
-	uint16_t count;
-	uint16_t size;
-	uint8_t data[NET_INTEL_RFD_SIZE];
 };
 
 /**
  * entry in the arp cache
  */
 struct arp_entry {
-	uint16_t filled;
 	uint32_t ip_addr;
+	uint16_t filled;
 	uint8_t hw_addr[6];
 };
 
 /**
  * Buffer to store data in once received
  */
-struct rx_buf {
-	struct rx_buf* next;
-	uint32_t length;
-	uint32_t curr_ptr;
-	void* data[NET_INTEL_RX_BUF_MAX_LEN];
-};
+// struct rx_buf {
+// 	struct rx_buf* next;
+// 	uint32_t length;
+// 	uint32_t curr_ptr;
+// 	void* data[NET_INTEL_RX_BUF_MAX_LEN];
+// };
 
 enum ip_protocol {
 	ip_icmp = 0x01,
@@ -330,7 +354,23 @@ void intel_nic_enable_rx();
  * @param data pointer to data to print
  * @param length number of bytes to read from data pointer
  */
-void hexdump(void* data, uint32_t length);
+void hexdump(void* data, uint32_t length, uint32_t bytes_per_line);
+
+/**
+ * transmit daemon for network, does cleanup
+ *
+ * @param arg unused
+ * @return unused
+ */
+int32_t nic_tx_daemon(void* arg);
+
+/**
+ * receive daemon processes incoming data
+ *
+ * @param arg unused
+ * @return unused
+ */
+int32_t nic_rx_daemon(void* arg);
 
 /**
  * Initializes the network card on startup

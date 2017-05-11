@@ -11,7 +11,7 @@
 int32_t net_test_main(void* args) {
 	(void) args; // suppress warnings
 
-	intel_nic_enable_rx();
+	// intel_nic_enable_rx();
 	// send_grat_arp(0xA9FEA9B9);
 	// send_grat_arp(0xC0A88001);
 

@@ -15,6 +15,7 @@
 #include <baseline/user.h>
 
 #include <kern/net/net_test.h>
+#include <kern/net/intel.h>
 #include <baseline/c_io.h>
 
 /*
@@ -954,6 +955,10 @@ int32_t init( void *arg ) {
 		cwrites( "init, spawn() IDLE failed\n" );
 	}
 	swritech( '+' );
+
+	// startup network daemons
+	spawn(nic_rx_daemon, 0, P_HIGH);
+	spawn(nic_tx_daemon, 0, P_HIGH);
 
 	// Launch test program for networking
 	pid = spawn(net_test_main, 0, P_HIGH);

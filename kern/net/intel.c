@@ -27,9 +27,7 @@ static void init_cbl(struct nic_info* nic, uint32_t num_cb);
 static void init_rfa(struct nic_info* nic, uint32_t num_rfd);
 static void recycle_command_blocks();
 static char ascii_to_printable_char(char c);
-static void claim_rfd_data();
-static int32_t add_to_rx_buf(void* data, uint32_t length);
-static void consume_rx_buf(void* buffer, uint32_t length);
+static rfd_t* make_new_tail();
 static struct cb* get_next_cb();
 static uint16_t ip_chksm(void* ip_head, int len);
 static int32_t send_grat_arp(uint8_t sender_ip_addr[]);
@@ -192,16 +190,26 @@ static void intel_nic_handler(int vector, int code) {
 
 	// if(stat_ack & ack_cs_tno) c_printf("ack_cs_tno ");
 	if(stat_ack & ack_fr) {
-		c_printf("ack_fr ");
-		claim_rfd_data();
+		rfd_t* rfd = _nic.rfa.next;
+		rfd->count &= ~0x8000; //clear EOF
+		rfd->count &= ~0x4000; //clear F
+		_nic.rfa.next = (rfd_t*) rfd->link;
+		// c_printf("ack_fr ");
+		// c_printf("claim_rfd_data: _nic.rfa.next=%08x\n", (uint32_t) _nic.rfa.next);
+		// c_printf("claim_rfd_data: 1\n");
+		// c_printf("claim_rfd_data: 2\n");
+		// c_printf("claim_rfd_data: 3\n");
+		// c_printf("claim_rfd_data: 4\n");
+		// c_printf("claim_rfd_data: 5\n");
+		// c_printf("claim_rfd_data: 6\n");
+		// c_printf("claim_rfd_data: 7\n");
+		// c_printf("claim_rfd_data: 8\n");
 	}
 	// if(stat_ack & ack_cna) c_printf("ack_cna ");
 	// if(stat_ack & ack_rnr) c_printf("ack_rnr ");
 	// if(stat_ack & ack_mdi) c_printf("ack_mdi ");
 	// if(stat_ack & ack_swi) c_printf("ack_swi ");
 	// c_printf("\n");
-
-	recycle_command_blocks();
 
 	// acknowledge status bits
 	mem_write8(&_nic.csr->scb.stat_ack, ~0);
@@ -238,24 +246,28 @@ static void init_cbl(struct nic_info* nic, uint32_t num_cb) {
 }
 
 /**
- * Initialize the NIC with a ring of receive frame descriptors
- *
+ * Initialize the NIC with a singly linked list of receive frame descriptors
+ * head=curr                                 tail
+ *  [] ---> [] ---> [] ---> [] ---> [] ---> [EL=1]
  * @param nic card to initialize the ring for
  * @param num_rfd number of receive frame descriptors to create
  */
 static void init_rfa(struct nic_info* nic, uint32_t num_rfd) {
-	struct rfd* first = (struct rfd*) get_next_page();
-	struct rfd* curr = first;
-	curr->size = NET_INTEL_RFD_SIZE;
-	curr->command = 1 << 3; // simplified mode
+	rfd_t* curr = (rfd_t*) get_next_page();
+	nic->rfa.head = curr;
+	nic->rfa.next = curr;
 	for(uint32_t i = 0; i < num_rfd; i++) {
-		curr->link = (uint32_t) get_next_page();
-		curr = (struct rfd*) curr->link;
+		memset(curr, 0, 16); // zero out the RFD header
 		curr->size = NET_INTEL_RFD_SIZE;
 		curr->command = 1 << 3; // simplified mode
+		
+		curr->link = (uint32_t) get_next_page();
+		curr = (rfd_t*) curr->link;
 	}
-	curr->link = (uint32_t) first; // complete the circle
-	nic->next_rfd = first;
+	memset(curr, 0, 16); // zero out the RFD header
+	curr->size = NET_INTEL_RFD_SIZE;
+	curr->command = 0x8000 | (1 << 3); // last in the list and simplified
+	nic->rfa.tail = curr;
 }
 
 /**
@@ -287,66 +299,16 @@ static char ascii_to_printable_char(char c) {
 }
 
 /**
- * processes new data, called when frame is received
+ * Create a new tail for the RFA list
+ *
+ * @return new tail for the list
  */
-static void claim_rfd_data() {
-	struct rfd* rfd = _nic.next_rfd;
-	uint16_t byte_count = rfd->count & 0x3FFF;
-
-	struct eth_packet_t* packet = (struct eth_packet_t*) rfd->data;
-	if(packet->ethertype == ethertype_arp) {
-		if(packet->payload.arp.opcode == arp_request) {
-			send_arp_reply(packet->payload.arp.sender_protocol_addr, packet->payload.arp.sender_hw_addr);
-		}
-		// else if(packet->payload.arp.opcode == arp_request) {
-
-		// }
-	}
-	else if(packet->ethertype == ethertype_ipv4) {
-		add_to_rx_buf((void*) &(packet->payload.ipv4), byte_count);		
-	}
-	else { // if(packet->ethertype < 1500) {
-		add_to_rx_buf((void*) &(packet->payload.data), byte_count);		
-	}
-
-	// c_printf("\nEOF=%c,F=%c,received %d bytes\n", 
-	// 	(rfd->count & 0x8000) ? '1' : '0', 
-	// 	(rfd->count & 0x4000) ? '1' : '0', 
-	// 	byte_count);
-	// hexdump(rfd->data, 64);
-
-	// hexdump(rfd->data, byte_count);
-	
-	rfd->count &= ~0x8000; //clear EOF
-	rfd->count &= ~0x4000; //clear F
-	_nic.next_rfd = (struct rfd*) _nic.next_rfd->link;
-}
-
-static int32_t add_to_rx_buf(void* data, uint32_t length) {	
-	
-	// TODO
-
-	// if(length > NET_INTEL_RX_BUF_MAX_LEN) {
-	// 	return -1;
-	// }
-	// memcpy_nic.next_rx_buf->next = (struct rx_buf*) get_next_page();
-	// memcpy_nic.next_rx_buf->length = length;
-	// memcpy_nic.next_rx_buf->curr_ptr = 0;
-	// memcpy(memcpy_nic.next_rx_buf, data, length);
-
-	// memcpy_nic.next_rx_buf = memcpy_nic.next_rx_buf->next;
-	// _nic.rx_buf_count++;
-	return 0;
-}
-
-static void consume_rx_buf(void* out_buffer, uint32_t length) {
-	// TODO copy data from rx_buf_head into buffer
-	// if(_nic.rx_buf_head->next) {
-	// 	struct rx_buf* temp = _nic.rx_buf_head;
-	// 	_nic.rx_buf_head = _nic.rx_buf_head->next;
-	// 	_nic.rx_buf_count--;
-	// 	free_page(temp);
-	// }
+static rfd_t* make_new_tail() {
+	rfd_t* curr = (rfd_t*) get_next_page();
+	memset(curr, 0, 16); // zero out the RFD header
+	curr->size = NET_INTEL_RFD_SIZE;
+	curr->command = 0x8000 | (1 << 3);
+	return curr;
 }
 
 /**
@@ -418,23 +380,8 @@ static int32_t send_arp(uint8_t sender_ip_addr[], uint8_t target_ip_addr[], uint
 	cb->u.tcb.eth_packet.payload.arp.opcode = opcode; // request in NBO
 
 	memcpy(cb->u.tcb.eth_packet.payload.arp.sender_hw_addr, _nic.mac, MAC_LENGTH_BYTES);
-
 	memcpy(cb->u.tcb.eth_packet.payload.arp.sender_protocol_addr, sender_ip_addr, 4);
 	memcpy(cb->u.tcb.eth_packet.payload.arp.target_protocol_addr, target_ip_addr, 4);
-
-	// uint8_t nbo_ip[4];
-	// nbo_ip[0] = (uint8_t) (sender_ip_addr >> 24);
-	// nbo_ip[1] = (uint8_t) (sender_ip_addr >> 16);
-	// nbo_ip[2] = (uint8_t) (sender_ip_addr >> 8);
-	// nbo_ip[3] = (uint8_t) (sender_ip_addr);
-	// memcpy(cb->u.tcb.eth_packet.payload.arp.sender_protocol_addr, nbo_ip, 4);
-
-	// nbo_ip[0] = (uint8_t) (target_ip_addr >> 24);
-	// nbo_ip[1] = (uint8_t) (target_ip_addr >> 16);
-	// nbo_ip[2] = (uint8_t) (target_ip_addr >> 8);
-	// nbo_ip[3] = (uint8_t) (target_ip_addr);
-	// memcpy(cb->u.tcb.eth_packet.payload.arp.target_protocol_addr, nbo_ip, 4);
-
 	memcpy(cb->u.tcb.eth_packet.payload.arp.target_hw_addr, target_hw_addr, MAC_LENGTH_BYTES);
 
 	memcpy(cb->u.tcb.eth_packet.dst_mac, cb->u.tcb.eth_packet.payload.arp.target_hw_addr, MAC_LENGTH_BYTES);
@@ -527,8 +474,6 @@ int32_t send_ipv4(uint8_t dst_ip[], void* data, uint32_t length) {
 
 
 
-
-
 	//
 	// Get HW addr
 	//
@@ -576,27 +521,100 @@ void set_ip(uint8_t ip[]) {
 	memcpy(_nic.my_ip, ip, 4);
 }
 
-void hexdump(void* data, uint32_t length) {
-	uint8_t* data_ = (uint8_t*) data; 
-	for(uint16_t i = 0; i < length; i+=8) {
-		c_printf("[%5x] %02x%02x %02x%02x %02x%02x %02x%02x (%c%c%c%c %c%c%c%c)\n", i, 
-			data_[i + 0],
-			data_[i + 1],
-			data_[i + 2],
-			data_[i + 3],
-			data_[i + 4],
-			data_[i + 5],
-			data_[i + 6],
-			data_[i + 7],
-			ascii_to_printable_char(data_[i + 0]),
-			ascii_to_printable_char(data_[i + 1]),
-			ascii_to_printable_char(data_[i + 2]),
-			ascii_to_printable_char(data_[i + 3]),
-			ascii_to_printable_char(data_[i + 4]),
-			ascii_to_printable_char(data_[i + 5]),
-			ascii_to_printable_char(data_[i + 6]),
-			ascii_to_printable_char(data_[i + 7]));
+void hexdump(void* data, uint32_t length, uint32_t bytes_per_line) {
+	uint8_t* data_ = (uint8_t*) data;
+	c_printf("hexdump(data=0x%08x, length=%d, bytes_per_line=%d):\n", (uint32_t) data, length, bytes_per_line);
+	for(uint32_t i = 0; i < length; i+=bytes_per_line) {
+		c_printf("[%5x]", i);
+		for(uint32_t n = 0; n < bytes_per_line; n++) {
+			if(n % 2 == 0) {
+				c_printf(" ");
+			}
+			if(n + i >= length) {
+				c_printf("  ");
+			}
+			else {
+				c_printf("%02x", data_[n + i]);
+			}
+		}
+		c_printf("  |");
+		for(uint32_t n = 0; n < bytes_per_line; n++) {
+			if(n % 8 == 0) {
+				c_printf(" ");
+			}
+			if(n + i >= length) {
+				c_printf(" ");
+			}
+			else {
+				c_printf("%c", ascii_to_printable_char(data_[n + i]));
+			}
+		}
+		c_printf(" |\n");
 	}
+}
+
+int32_t nic_tx_daemon(void* arg) {
+	for(;;) {
+		recycle_command_blocks();
+		sleep(500);
+	}
+}
+
+int32_t nic_rx_daemon(void* arg) {
+	(void) arg;
+	intel_nic_enable_rx();
+	for(;;) {
+		// sleep(200);
+		// c_printf("rfa.head=0x%08x, rfa.next=0x%08x, rfa.tail=0x%08x\n", _nic.rfa.head, _nic.rfa.next, _nic.rfa.tail);
+		while(_nic.rfa.head != _nic.rfa.next) {
+			rfd_t* rfd = _nic.rfa.head;
+			uint16_t byte_count = rfd->count & 0x3FFF;
+			eth_packet_rx_t* packet = (eth_packet_rx_t*) rfd->data;
+			hexdump(rfd->data, byte_count, 16);
+			// hexdump(rfd->data, byte_count, 32);
+			
+			if(packet->ethertype == ethertype_arp) {
+				if(packet->payload.arp.opcode == arp_request) {
+					c_printf("We should send an ARP reply...\n");
+					// send_arp_reply(packet->payload.arp.sender_protocol_addr, packet->payload.arp.sender_hw_addr);
+				}
+				else if(packet->payload.arp.opcode == arp_reply) {
+					// TODO
+				}
+			}
+			else if(packet->ethertype == ethertype_ipv4) {
+				switch(packet->payload.ipv4.protocol) {
+					case ip_icmp:
+						// do icmp things
+						break;
+
+					case ip_igmp:
+						// do igmp things
+						break;
+
+					case ip_tcp:
+						// don't do tcp things
+						break;
+
+					case ip_udp:
+						// maybe do udp things
+						break;
+
+					default:
+						break;
+				}
+			}
+			else { // if(packet->ethertype < 1500) {
+
+			}
+			_nic.rfa.head = (rfd_t*) rfd->link;
+			free_page(rfd);
+			_nic.rfa.tail->link = (uint32_t) make_new_tail();
+			_nic.rfa.tail->command &= ~(0x8000); // unset EL
+			_nic.rfa.tail = (uint32_t) _nic.rfa.tail->link;
+		} // while(_nic.rfa.head != _nic.rfa.next)
+	} // for(;;)
+	return 0;
 }
 
 void intel_nic_init() {
@@ -653,10 +671,6 @@ void intel_nic_init() {
 	init_cbl(&_nic, TOTAL_CB);
 	c_printf("NIC: Initializing RFA\n");
 	init_rfa(&_nic, TOTAL_RFD);
-	c_printf("NIC: Initializing RX buffer\n");
-	_nic.rx_buf_head = (struct rx_buf*) get_next_page();
-	_nic.next_rx_buf = _nic.rx_buf_head;
-	_nic.rx_buf_count = 1;
 	c_printf("NIC: Initializing ARP cache\n");
 	_arp_cache = (struct arp_entry*) get_next_page();
 	memset(_arp_cache, 0, PAGE_SIZE);
@@ -716,27 +730,28 @@ void intel_nic_init() {
 	// Set a default IP address
 	//
 	// uint8_t ip[4] = {0xC0, 0xA8, 0x80, 0x01};
-	uint8_t ip[4] = {0x01, 0x80, 0xA8, 0xC0};
+	uint8_t ip[4] = {0xA9, 0xFE, 0xA9, 0xB9};
 	set_ip(ip);
 
 	// 
 	// 
 	// TODO:
-	// o write send_ipv4()
-	// o ARP cache
 	// o add syscalls
+	// o write send_ipv4()
+	// o ICMP ping
+	// o ARP cache
 	// o keep flag for rx_enable in _nic. with first call to receive, enable rx
 	// o mutex on doing anything with CB
 	// 
 	// TEST:
+	// o add rx_daemon
 	// o receive ARP request, and reply to it
-	// o rx buffers, add_to_rx_buf((void*) data, uint32_t length), consume_rx_buf() function frees memory and transfers data to user
-	// o merge into master
-	// o finish send_arp(), and handle arp packets -- get IPs working so we can make some applications!
-	// o convert send_grat_arp() to send_arp(), so that it can handle sending arp requests/gratuitous/replies
 	// o gratuitous ARP
 	// 
 	// DONE:
+	// o finish send_arp(), and handle arp packets -- get IPs working so we can make some applications!
+	// o convert send_grat_arp() to send_arp(), so that it can handle sending arp requests/gratuitous/replies
+	// o merge into master
 	// o write hexdump(void* data, uint32_t length) using code from claim_rfd_data
 	// o handle receive interrupts in addition to CU interrupts
 	// o enable receiving data by putting first RFD ptr into gen_ptr (pg 99)
@@ -758,7 +773,7 @@ void intel_nic_init() {
 }
 
 void intel_nic_enable_rx() {
-	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) _nic.next_rfd);
+	mem_write32(&_nic.csr->scb.gen_ptr, (uint32_t) _nic.rfa.next);
 	mem_write8(&_nic.csr->scb.command, ruc_start);
 }
 
