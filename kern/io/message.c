@@ -43,7 +43,7 @@ status_t _io_msg_setprop(PIO_MESSAGE msg, IOPROP prop, void* value, int32_t leng
 
 IO_MESSAGE _io_msg_init_null(){
     return (IO_MESSAGE) {
-        .handle = (IOHANDLE)-1,
+        .handle = IOHANDLE_NULL,
         .path = (char*)NULL,
         .filesystem = (void*)NULL,
         .device = (void*)NULL,
@@ -73,7 +73,7 @@ status_t _io_init_messages() {
 
 status_t _io_grab_next_message(PIO_MESSAGE* out_p_msg){
     int cursor = _io_msg_next;
-    while (_IO_MSG_TABLE[cursor].handle != -1){
+    while (_IO_MSG_TABLE[cursor].handle != IOHANDLE_NULL){
         cursor = (cursor + 1) % _io_msg_count;
         if (cursor == _io_msg_next){ //we've tried everything; no more space
             return E_OUT_OF_OBJECTS;

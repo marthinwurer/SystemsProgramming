@@ -11,6 +11,8 @@ typedef int32_t FILEHANDLE, *PFILEHANDLE; //handle to open files
 typedef int32_t BSIZE, *PBSIZE, BOFFSET, *PBOFFSET; //buffer size, bytes
 typedef int32_t IO_UNIX_TS, *PIO_UNIX_TS;
 
+#define IOHANDLE_NULL (IOHANDLE)-1
+
 typedef enum _ioctl {
     IOCTL_READ,
     IOCTL_APPEND,

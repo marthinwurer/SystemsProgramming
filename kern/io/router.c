@@ -32,7 +32,7 @@ static short     has_initted = 0; //false
 
 status_t grab_handle(PIOHANDLE handle){
     int32_t proto_handle = IO_HANDLE_NEXT;
-    while(HANDLE_TABLE[proto_handle].handle != -1){
+    while(HANDLE_TABLE[proto_handle].handle != IOHANDLE_NULL){
         proto_handle++;
         if (proto_handle > IO_HANDLE_MAX){
             proto_handle = 0;
@@ -62,7 +62,7 @@ status_t grab_handle(PIOHANDLE handle){
  * @pre-condition: handle is valid and refers to an IO_MESSAGE
  * */
 status_t call_filter(IOHANDLE handle, int32_t index){
-    IOHANDLE middleware_handle = -1;
+    IOHANDLE middleware_handle = IOHANDLE_NULL;
     status_t stat = _io_md_iterate(&middleware_handle, index);
     if (stat != E_SUCCESS) { return stat; }
     PIO_MIDDLEWARE filter= HANDLE_TABLE[middleware_handle].object;
@@ -87,7 +87,7 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
     unsigned int index = strpos(path, '\\', 0);
     //iterate through entries in mount table
     int iter_val = 0;
-    IOHANDLE mount_handle = -1;
+    IOHANDLE mount_handle = IOHANDLE_NULL;
     int mismatch = 0;
     while (_io_mp_iterate(&mount_handle, iter_val) == E_SUCCESS) {
         char* mountpath = ((PIO_MOUNT)HANDLE_TABLE[mount_handle].object)->path;
@@ -266,7 +266,7 @@ status_t IO_DELETE(IOHANDLE handle){
             break;
     }
     //reclaim handle & object table entries
-    (*handle_entry).handle = -1;
+    (*handle_entry).handle = IOHANDLE_NULL;
     (*handle_entry).locked = 0;
     return E_NOT_IMPLEMENTED;
 }
@@ -311,7 +311,7 @@ status_t IO_EXECUTE(IOHANDLE handle){
 }
 
 status_t IO_ENUMERATE(IO_OBJ_TYPE type, int index, PIOHANDLE object){
-    IOHANDLE result = -1;
+    IOHANDLE result = IOHANDLE_NULL;
     status_t stat = E_SUCCESS;
     switch (type){
         case IO_OBJ_FILESYSTEM:

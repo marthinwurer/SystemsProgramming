@@ -32,7 +32,7 @@ status_t _io_md_setprop(PIO_MIDDLEWARE md, IOPROP prop, void* value, int32_t len
 
 IO_MIDDLEWARE _io_md_init_null(){
     return (IO_MIDDLEWARE) {
-        .handle = (IOHANDLE)-1,
+        .handle = IOHANDLE_NULL,
         .name = (char*)NULL,
         .execute = NULL
     };
@@ -55,7 +55,7 @@ status_t _io_init_middlewares() {
 
 status_t _io_grab_next_middleware(PIO_MIDDLEWARE* out_p_middleware){
     int cursor = _io_md_next;
-    while (_IO_MD_TABLE[cursor].handle != -1){
+    while (_IO_MD_TABLE[cursor].handle != IOHANDLE_NULL){
         cursor = (cursor + 1) % _io_md_count;
         if (cursor == _io_md_next){ //we've tried everything; no more space
             return E_OUT_OF_OBJECTS;

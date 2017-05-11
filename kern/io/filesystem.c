@@ -36,7 +36,7 @@ status_t _io_fs_setprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, int32_t len
 
 IO_FILESYSTEM _io_fs_init_null(){
     return (IO_FILESYSTEM) {
-        .handle = (IOHANDLE)-1,
+        .handle = IOHANDLE_NULL,
         .name = (char*)NULL,
         .execute = NULL,
         .init = NULL,
@@ -63,7 +63,7 @@ status_t _io_init_filesystems() {
 
 status_t _io_grab_next_filesystem(PIO_FILESYSTEM* out_p_filesystem){
     int cursor = _io_fs_next;
-    while (_IO_FS_TABLE[cursor].handle != -1){
+    while (_IO_FS_TABLE[cursor].handle != IOHANDLE_NULL){
         cursor = (cursor + 1) % _io_fs_count;
         if (cursor == _io_fs_next){ //we've tried everything; no more space
             return E_OUT_OF_OBJECTS;
@@ -98,7 +98,7 @@ status_t _io_fs_getprop(PIO_FILESYSTEM fs, IOPROP prop, void* value, PBSIZE plen
     switch (prop){
         case IOPROP_NAME: ;
             int length = strlen(fs->name);
-            if (length > plength) {
+            if (length > *plength) {
                 *plength = length;
                 return E_MORE_DATA;
             }

@@ -37,7 +37,7 @@ status_t _io_dv_setprop(PIO_DEVICE dv, IOPROP prop, void* value, int32_t length)
 
 IO_DEVICE _io_dv_init_null(){
     return (IO_DEVICE) {
-        .handle = (IOHANDLE)-1,
+        .handle = IOHANDLE_NULL,
         .name = (char*)NULL,
         .read = NULL,
         .write = NULL,
@@ -64,7 +64,7 @@ status_t _io_init_devices() {
 
 status_t _io_grab_next_device(PIO_DEVICE* out_p_device){
     int cursor = _io_dev_next;
-    while (_IO_DV_TABLE[cursor].handle != -1){
+    while (_IO_DV_TABLE[cursor].handle != IOHANDLE_NULL){
         cursor = (cursor + 1) % _io_dev_count;
         if (cursor == _io_dev_next){ //we've tried everything; no more space
             return E_OUT_OF_OBJECTS;

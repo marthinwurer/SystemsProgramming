@@ -39,11 +39,11 @@ status_t _io_mp_setprop(PIO_MOUNT mp, IOPROP prop, void* value, int32_t length){
 
 IO_MOUNT _io_mp_init_null(){
     return (IO_MOUNT) {
-        .handle = (IOHANDLE)-1,
+        .handle = IOHANDLE_NULL,
         .name = (char*)NULL,
         .path = (char*)NULL,
-        .filesystem = (IOHANDLE)-1,
-        .device = (IOHANDLE)-1
+        .filesystem = IOHANDLE_NULL,
+        .device = IOHANDLE_NULL
     };
 }
 
@@ -52,8 +52,8 @@ IO_MOUNT _io_mp_init_handle(IOHANDLE handle){
         .handle = handle,
         .name = (char*)NULL,
         .path = (char*)NULL,
-        .filesystem = (IOHANDLE)-1,
-        .device = (IOHANDLE)-1
+        .filesystem = IOHANDLE_NULL,
+        .device = IOHANDLE_NULL
     };
 }
 
@@ -66,7 +66,7 @@ status_t _io_init_mounts() {
 
 status_t _io_grab_next_mount(PIO_MOUNT* out_p_mount){
     int cursor = _io_mp_next;
-    while (_IO_MP_TABLE[cursor].handle != -1){
+    while (_IO_MP_TABLE[cursor].handle != IOHANDLE_NULL){
         cursor = (cursor + 1) % _io_mp_count;
         if (cursor == _io_mp_next){ //we've tried everything; no more space
             return E_OUT_OF_OBJECTS;
