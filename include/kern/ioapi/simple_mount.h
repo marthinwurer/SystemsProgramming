@@ -11,3 +11,8 @@
  * \param filesystem [in] handle to the filesystem to associate with the mount
  */
 status_t install_mount(char* name, char* path, IOHANDLE device, IOHANDLE filesystem);
+
+/**
+ * \brief uninstalls the specified mount
+ */
+status_t uninstall_mount(IOHANDLE handle);

@@ -16,3 +16,7 @@ status_t install_mount(char* name, char* path, IOHANDLE device, IOHANDLE filesys
     HANDLED(IO_LOCK(handle));
     return E_SUCCESS;
 }
+
+status_t uninstall_mount(IOHANDLE handle) {
+    return IO_DELETE(handle);
+}
