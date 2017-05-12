@@ -7,6 +7,7 @@ KERN_OBJ := early/_early.o \
             early/gdt_init.o \
             early/memory_map_setup.o \
             early/video.o \
+            graphics/shapes/rect.o \
             graphics/text/text.o \
             memory/memory_map.o \
             util/marquee.o \
