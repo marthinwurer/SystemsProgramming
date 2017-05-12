@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <kern/graphics/text/text.h>
+#include <kern/graphics/shapes/rect.h>
 
 int vga_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) {
 	
@@ -25,15 +26,25 @@ int graphics_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) 
 
 	unsigned length = line.length >> VCON_LINE_LENGTH_LOC;
 
-	Point p = { .x = 0, .y = row * ctrl->ctx.font.height };
-	unsigned fontWidth = ctrl->ctx.font.width;
-
+	PaintContext *ctx = &ctrl->ctx;
+	unsigned fontWidth = ctx->font.width;
+	unsigned fontHeight = ctx->font.height;
+	Point p = { .x = 0, .y = row * fontHeight };
+	
 	VConChar ch;
 	for (unsigned i = 0; i != length; ++i) {
 		ch = *start++;
-		graphics_drawChar(&ctrl->ctx, &p, ch.character);
+		graphics_drawChar(ctx, &p, ch.character);
 		p.x += fontWidth;
 	}
+
+	Rect rect;
+	rect.loc = p;
+	rect.size.width = (ctrl->current->columns - length) * fontWidth;
+	rect.size.height = fontHeight;
+
+	ctx->fillCol = 0;
+	graphics_fillRect(ctx, &rect);
 
 	// VideoFb *fb = ctrl->ctx.fb;
 	// unsigned rowEnd = p.y + ctrl->ctx.font.height;
