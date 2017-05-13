@@ -153,20 +153,6 @@ void _init( void ) {
 	** Console I/O system.
 	*/
 
-	// alloc a contiguous list of pages for the line and character table
-	// this code should be replaced by kmalloc
-
-	// unsigned lineTableSize = CIO_CONTROLLER.current->rows * sizeof(VConLine);
-	// unsigned charTableSize = CIO_CONTROLLER.current->rows *
-	//                          CIO_CONTROLLER.current->columns * sizeof(VConChar);
-	// unsigned tableTotal = lineTableSize + charTableSize;
-	// unsigned pagesNeeded = tableTotal / PAGE_SIZE;
-	// if (tableTotal % PAGE_SIZE != 0) {
-	// 	++pagesNeeded;
-	// }
-
-
-
 	c_io_init_isr();
 
 	c_clearscreen();
@@ -176,7 +162,6 @@ void _init( void ) {
 	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
 		c_putchar_at(i, 6, '=');
 	}
-	//c_puts_at( 0, 6, "================================================================================" );
 
 //	void * address = get_next_page();
 //
@@ -292,4 +277,7 @@ void _init( void ) {
 
 	c_puts( "System initialization complete.\n" );
 	c_puts( "-------------------------------\n" );
+
+	// disable autoflush, the redrawProcess will handle flushing
+	CIO_AUTOFLUSH = 0;
 }

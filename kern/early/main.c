@@ -61,18 +61,6 @@ int main(void) {
 	c_printf(" * Height: %d\n", mode.fb.height);
 	c_printf(" * Scanline: %d\n", mode.fb.pitch);
 	c_printf(" * BPP: %d\n", mode.fb.bpp);
-	c_printf(" * RGB: %d (%d) | %d (%d) | %d (%d)\n", mode.fb.colorspace[0].position,
-	                                                  mode.fb.colorspace[0].mask,
-													  mode.fb.colorspace[1].position,
-	                                                  mode.fb.colorspace[1].mask,
-													  mode.fb.colorspace[2].position,
-	                                                  mode.fb.colorspace[2].mask);
-
-	// vcon_scroll(CIO_CONTROLLER.current, 2);
-
-	// vcon_redraw(&CIO_CONTROLLER);
-
-	// __asm("hlt");
 
 	// Set the mode
 
@@ -86,24 +74,8 @@ int main(void) {
 	PaintContext *ctx = &CIO_CONTROLLER.ctx;
 	ctx->drawCol = color_getColor(mode.fb.colorspace, 255, 255, 255);
 	ctx->fillCol = color_getColor(mode.fb.colorspace, 0, 0, 0);
-	// ctx->font.glyphs = 256;
-	// ctx->font.bytesPerGlyph = 16;
-	// ctx->font.height = 16;
-	// ctx->font.width = 8;
-	// ctx->font.glyphMap = VIDEO_FONTSET;
 	video_defaultFont(&ctx->font);
 	ctx->fb = &VIDEO_MODE->fb;
-
-	//CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
-	//unsigned rows = mode.fb.height / ctx->font.height;
-	//CIO_CONTROLLER.current->rows = rows;
-
-	//CIO_CONTROLLER.current->buf.charTable = (VConChar*)(0x4C00 + (rows * sizeof(VConLine)));
-
-	//vcon_buf_initLineTable(CIO_CONTROLLER.current);
-
-	//vcon_redraw(&CIO_CONTROLLER);
-	CIO_AUTOFLUSH = 0;
 
 	vcon_resize(CIO_CONTROLLER.current, mode.fb.height / ctx->font.height,
 	                                    mode.fb.width / ctx->font.width);

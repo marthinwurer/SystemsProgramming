@@ -532,28 +532,7 @@ int c_input_queue( void ){
 ** Initialization routines
 */
 void c_io_init( void ){
-	// /*
-	// ** Screen dimensions
-	// */
-	// min_x  = SCREEN_MIN_X;	
-	// min_y  = SCREEN_MIN_Y;
-	// max_x  = SCREEN_MAX_X;
-	// max_y  = SCREEN_MAX_Y;
-
-	// /*
-	// ** Scrolling region
-	// */
-	// scroll_min_x = SCREEN_MIN_X;
-	// scroll_min_y = SCREEN_MIN_Y;
-	// scroll_max_x = SCREEN_MAX_X;
-	// scroll_max_y = SCREEN_MAX_Y;
-
-	// /*
-	// ** Initial cursor location
-	// */
-	// curr_y = min_y;
-	// curr_x = min_x;
-	// __c_setcursor();
+	
 	CIO_CONTROLLER.current = &CON;
 
 	vcon_init(&CON, SCREEN_Y_SIZE, SCREEN_X_SIZE);
@@ -576,33 +555,3 @@ void c_io_init_isr(void) {
 	__install_isr( INT_VEC_KEYBOARD, __c_keyboard_isr );
 }
 
-
-#ifdef SA_DEBUG
-int main(){
-	c_printf( "%d\n", 123 );
-	c_printf( "%d\n", -123 );
-	c_printf( "%d\n", 0x7fffffff );
-	c_printf( "%d\n", 0x80000001 );
-	c_printf( "%d\n", 0x80000000 );
-	c_printf( "x%14dy\n", 0x80000000 );
-	c_printf( "x%-14dy\n", 0x80000000 );
-	c_printf( "x%014dy\n", 0x80000000 );
-	c_printf( "x%-014dy\n", 0x80000000 );
-	c_printf( "%s\n", "xyz" );
-	c_printf( "|%10s|\n", "xyz" );
-	c_printf( "|%-10s|\n", "xyz" );
-	c_printf( "%c\n", 'x' );
-	c_printf( "|%4c|\n", 'y' );
-	c_printf( "|%-4c|\n", 'y' );
-	c_printf( "|%04c|\n", 'y' );
-	c_printf( "|%-04c|\n", 'y' );
-	c_printf( "|%3d|\n", 5 );
-	c_printf( "|%3d|\n", 54321 );
-	c_printf( "%x\n", 0x123abc );
-	c_printf( "|%04x|\n", 20 );
-	c_printf( "|%012x|\n", 0xfedcba98 );
-	c_printf( "|%-012x|\n", 0x76543210 );
-}
-
-int curr_x, curr_y, max_x, max_y;
-#endif
