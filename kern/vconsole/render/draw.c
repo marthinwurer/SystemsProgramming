@@ -6,7 +6,7 @@
 #include <kern/graphics/text/text.h>
 #include <kern/graphics/shapes/rect.h>
 
-int vga_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) {
+int vcon_vga_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) {
 	
 	uint16_t columns = ctrl->current->columns;
 	unsigned length = line.length >> VCON_LINE_LENGTH_LOC;
@@ -22,7 +22,7 @@ int vga_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) {
 	return 0;
 }
 
-int graphics_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) {
+int vcon_graphics_draw(VConCtrl *ctrl, VConChar *start, VConLine line, uint16_t row) {
 
 	unsigned length = line.length >> VCON_LINE_LENGTH_LOC;
 

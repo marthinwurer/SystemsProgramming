@@ -22,7 +22,7 @@ int vcon_buf_initLineTable(VCon *con) {
 		return E_VCON_ARGNULL;
 	}
 
-	unsigned lineSize = con->columns * sizeof(VConChar);
+	unsigned lineSize = con->columns;// * sizeof(VConChar);
 	unsigned offset = 0;
 	unsigned rows = con->rows;
 

@@ -19,6 +19,8 @@ int vcon_puts(VCon *con, const char *str);
 
 int vcon_putsAt(VCon *con, const char *str, uint16_t c, uint16_t y);
 
+int vcon_resize(VCon *con, uint16_t rows, uint16_t columns);
+
 int vcon_scroll(VCon *con, uint16_t lines);
 
 int vcon_setCursor(VCon *con, uint16_t x, uint16_t y);

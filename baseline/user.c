@@ -921,10 +921,12 @@ int32_t redrawProcess(void *arg) {
 	(void)arg;
 	// disable autoredraw, we will do the redrawing here
 	//c_set_auto_redraw(0);
+	//CIO_AUTOFLUSH = 0;
 
 	for (;;) {
+		c_flush();
 		//if (CIO_CONTROLLER.dirty) {
-			vcon_redraw(&CIO_CONTROLLER);
+			//vcon_redraw(&CIO_CONTROLLER);
 		//	CIO_CONTROLLER.dirty = 0;
 		//}
 		sleep(10);

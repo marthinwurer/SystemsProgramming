@@ -11,8 +11,8 @@
 #include "render/scroll.h"
 
 static const VConDrawFunc DRAW_FUNC_TABLE[] = {
-	vga_draw,
-	graphics_draw
+	vcon_vga_draw,
+	vcon_graphics_draw
 };
 
 static const VConScrollFunc SCROLL_FUNC_TABLE[] = {

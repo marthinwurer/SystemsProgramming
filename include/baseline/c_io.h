@@ -60,6 +60,8 @@
 
 extern VConCtrl CIO_CONTROLLER;
 
+extern int CIO_AUTOFLUSH;
+
 
 /*
 ** Name:	c_io_init
@@ -71,13 +73,11 @@ void c_io_init( void );
 
 void c_io_init_isr(void);
 
+
 /**
- * @brief Sets the auto redraw property.
- *
- * If set to nonzero, the console will be redrawn after every c_put* function.
- * If set to zero, the console will need to be redrawn manually.
+ * @brief Flush the CIO VCon to the screen
  */
-void c_set_auto_redraw(int val);
+void c_flush(void);
 
 /*****************************************************************************
 **

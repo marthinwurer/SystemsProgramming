@@ -16,8 +16,8 @@ typedef struct VCon_s VCon;
 // once this branch merges with master this maximum will go away
 // since we can dynamically allocate memory as much as needed.
 
-#define VCON_COLUMNS_MAX 128
-#define VCON_ROWS_MAX 48
+#define VCON_COLUMNS_MAX 100
+#define VCON_ROWS_MAX 60
 
 #define CONSOLE_BUF_ADDRESS 0x4C00
 

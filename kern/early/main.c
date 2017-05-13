@@ -95,15 +95,18 @@ int main(void) {
 	ctx->fb = &VIDEO_MODE->fb;
 
 	//CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
-	unsigned rows = mode.fb.height / ctx->font.height;
-	CIO_CONTROLLER.current->rows = rows;
+	//unsigned rows = mode.fb.height / ctx->font.height;
+	//CIO_CONTROLLER.current->rows = rows;
 
-	CIO_CONTROLLER.current->buf.charTable = (VConChar*)(0x4C00 + (rows * sizeof(VConLine)));
+	//CIO_CONTROLLER.current->buf.charTable = (VConChar*)(0x4C00 + (rows * sizeof(VConLine)));
 
-	vcon_buf_initLineTable(CIO_CONTROLLER.current);
+	//vcon_buf_initLineTable(CIO_CONTROLLER.current);
 
 	//vcon_redraw(&CIO_CONTROLLER);
-	c_set_auto_redraw(0);
+	CIO_AUTOFLUSH = 0;
+
+	vcon_resize(CIO_CONTROLLER.current, mode.fb.height / ctx->font.height,
+	                                    mode.fb.width / ctx->font.width);
 
 	return EXIT_SUCCESS;
 

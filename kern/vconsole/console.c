@@ -183,6 +183,35 @@ int vcon_putsAt(VCon *con, const char *str, uint16_t x, uint16_t y) {
 	return error;
 }
 
+int vcon_resize(VCon *con, uint16_t rows, uint16_t columns) {
+	if (con == NULL) {
+		return E_VCON_ARGNULL;
+	}
+
+	// clamp arguments to temporary maximums
+
+	if (rows > VCON_ROWS_MAX) {
+		rows = VCON_ROWS_MAX;
+	}
+
+	if (columns > VCON_COLUMNS_MAX) {
+		columns = VCON_COLUMNS_MAX;
+	}
+
+	con->rows = rows;
+	con->columns = columns;
+
+	con->buf.lineTableSize = rows * sizeof(VConLine);
+	con->buf.charTableSize = rows * columns * sizeof(VConChar);
+
+	con->buf.charTable = (VConChar*)(con->buf.lineTable + rows);
+
+	vcon_buf_initLineTable(con);
+
+
+	return E_VCON_SUCCESS;
+}
+
 int vcon_scroll(VCon *con, uint16_t lines) {
 	if (con == NULL) {
 		return E_VCON_ARGNULL;
