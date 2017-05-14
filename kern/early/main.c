@@ -70,6 +70,8 @@ int main(void) {
 		return EXIT_VIDEO_ERROR;
 	}
 
+	fb_clear(&mode.fb, color_getColor(mode.fb.colorspace, 0xF1, 0x31, 0x27));
+
 	CIO_CONTROLLER.mode = VCON_MODE_GRAPHICS;
 	PaintContext *ctx = &CIO_CONTROLLER.ctx;
 	ctx->drawCol = color_getColor(mode.fb.colorspace, 255, 255, 255);
