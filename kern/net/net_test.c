@@ -11,6 +11,15 @@
 int32_t net_test_main(void* args) {
 	(void) args; // suppress warnings
 
+	c_printf("%d:%d\n", 15, __builtin_bswap32(15));
+	c_printf("%d:%d\n", 15, __builtin_bswap16(15));
+
+	for(int i = 0; i < 100; i++) {
+		send_ipv4(0xA9FEA9B8, "hello, how are you doing today", 31, ip_udp);
+		sleep(1000);
+	}
+	exit(EXIT_SUCCESS);
+
 	// intel_nic_enable_rx();
 	// send_grat_arp(0xA9FEA9B9);
 	// send_grat_arp(0xC0A88001);

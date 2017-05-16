@@ -84,10 +84,8 @@ struct nic_info {
 		rfd_t* head;
 		rfd_t* next;
 	} rfa;
-	// uint32_t rx_buf_count;
-	// struct rx_buf* rx_buf_head;
-	// struct rx_buf* next_rx_buf;
-	uint8_t my_ip[4];
+	// uint8_t my_ip[4];
+	uint32_t my_ip;
 };
 
 /**
@@ -110,8 +108,8 @@ struct csr {
 };
 
 typedef struct {
-	uint8_t version : 4;
 	uint8_t ihl : 4;
+	uint8_t version : 4;
 	uint8_t dscp : 6;
 	uint8_t ecn : 2;
 	uint16_t total_len;
@@ -121,8 +119,10 @@ typedef struct {
 	uint8_t ttl;
 	uint8_t protocol;
 	uint16_t header_checksum;
-	uint8_t src_ip[4];
-	uint8_t dst_ip[4];
+	uint32_t src_ip;
+	uint32_t dst_ip;
+	// uint8_t src_ip[4];
+	// uint8_t dst_ip[4];
 	uint8_t ip_data[NET_INTEL_TCB_MAX_DATA_LEN - 5];
 } ipv4_t;
 
@@ -133,12 +133,12 @@ typedef struct {
 	uint8_t protocol_addr_len;
 	uint16_t opcode;
 	uint8_t sender_hw_addr[6];
-	// uint32_t sender_protocol_addr; // unaligned
-	uint8_t sender_protocol_addr[4]; // aligned
-	// uint16_t sender_protocol_addr_hi; // aligned
+	uint32_t sender_protocol_addr; // unaligned
+	// uint8_t sender_protocol_addr[4]; // aligned
 	uint8_t target_hw_addr[6];
-	uint8_t target_protocol_addr[4];
-} arp_t;
+	// uint8_t target_protocol_addr[4];
+	uint32_t target_protocol_addr;
+} __attribute__((packed)) arp_t;
 
 /**
  * Ethernet frame data payload
@@ -167,7 +167,7 @@ typedef struct {
 	uint8_t src_mac[MAC_LENGTH_BYTES];
 	uint16_t ethertype; // under 1500 is payload length, above is type of payload header
 	eth_payload_t payload;
-} eth_packet_rx_t;
+} __attribute__((packed)) eth_packet_rx_t;
 
 /**
  * Command Block
@@ -218,12 +218,12 @@ typedef struct {
 // 	void* data[NET_INTEL_RX_BUF_MAX_LEN];
 // };
 
-enum ip_protocol {
+typedef enum {
 	ip_icmp = 0x01,
 	ip_igmp = 0x02,
 	ip_tcp = 0x06,
 	ip_udp = 0x11
-};
+} ip_protocol_t;
 
 /**
  * ARP opcodes
@@ -344,9 +344,8 @@ enum cb_status {
 };
 
 /**
- * Sends an ethernet packet (without an internal protocol). This should mainly
- * be used for testing purposes
- *
+ * Sends an ethernet frame.
+ * 
  * @param dst_hw_addr destination hardware address
  * @param data data to send
  * @param length length of data to send
@@ -355,11 +354,21 @@ enum cb_status {
 int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length, ethertype_t ethertype);
 
 /**
+ * Sends an ipv4 packet
+ *
+ * @param dst_ip destination IP address
+ * @param data data to send
+ * @param length length of data to send
+ * @return 0 on success, otherwise failure
+ */
+int32_t send_ipv4(uint32_t dst_ip, void* data, uint32_t length, ip_protocol_t protocol);
+
+/**
  * Sets the IP address of the network card
  *
  * @param ip new ip address
  */
-void set_ip(uint8_t ip[]);
+void set_ip(uint32_t ip);
 
 /**
  * Starts the receive unit

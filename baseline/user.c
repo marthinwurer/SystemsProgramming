@@ -957,11 +957,11 @@ int32_t init( void *arg ) {
 	swritech( '+' );
 
 	// startup network daemons
-	spawn(nic_rx_daemon, 0, P_HIGH);
-	spawn(nic_tx_daemon, 0, P_HIGH);
+	spawn(nic_rx_daemon, 0, P_SYSTEM);
+	spawn(nic_tx_daemon, 0, P_SYSTEM);
 
 	// Launch test program for networking
-	pid = spawn(net_test_main, 0, P_HIGH);
+	pid = spawn(net_test_main, 0, P_SYSTEM);
 	if(pid < 0) {
 		cwrites("init, spawn() net_test_main failed\n");
 	}
