@@ -127,4 +127,7 @@ uint32_t * get_phys_address(address_space_t space, uint32_t * virtual_addr);
 
 void test_mmap(void);
 
+address_space_t get_identity_mapped(void);
+
+
 #endif

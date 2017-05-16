@@ -446,6 +446,9 @@ void set_return_pde(address_space_t dir){
 }
 
 
+address_space_t get_identity_mapped(void){
+	return page_directory;
+}
 
 
 

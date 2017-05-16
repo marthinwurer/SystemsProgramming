@@ -576,7 +576,12 @@ static void _sys_exec( pcb_t *pcb ) {
 	pcb->context = _stk_setup( pcb->stack, entry, arg );
 
 	// get the process a new address space and switch to it.
-	pcb->memory = new_page_directory();
+	// if the process is system priority, give it the identity mapped pde
+	if( pcb->prio == 0){
+		pcb->memory = get_identity_mapped();
+	}else{
+		pcb->memory = new_page_directory();
+	}
 	c_printf("exec: PID: %d, PDE: %x\n", pcb->pid, pcb->memory);
 
 	set_page_directory(pcb->memory);
