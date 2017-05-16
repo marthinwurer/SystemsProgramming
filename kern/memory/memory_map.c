@@ -40,6 +40,20 @@ static void __page_fault_isr( int vector, int code ){
 	c_printf("Code: %x\n", code);
 	c_printf("address: %x\n", address);
 	__panic("Page Fault received!");
+//	_sys_kill(_current);
+
+	c_printf("\nSEGFAULT - Core dumped\n");
+
+	// kill the segfaulter - code taken from _sys_kill
+	_current->state = PS_KILLED;
+	_current->exitstatus = EXIT_KILLED;
+
+	// determine the final disposition of this process
+	_zombify( _current );
+
+	// if it was us, we no longer have a running process, so pick one
+	_dispatch();
+
 	(void) vector;
 	(void) code;
 }
@@ -168,6 +182,8 @@ void * get_next_page(void){
 			// set the index again
 			last_availible = index;
 
+			// zero the page
+			memset((void *)address, 0, PAGE_SIZE);
 			return (void *)address;
 
 
@@ -276,6 +292,8 @@ address_space_t set_page_directory(address_space_t directory){
 	c_printf("paging done\n");
 //	__panic("done with paging setup");
 
+	c_printf("last: %x\n\n", get_return_pde());
+	c_printf("Current: %x\n\n", get_current_pde());
 
 
 	return old;
@@ -290,7 +308,6 @@ uint32_t * disable_paging(void){
 
 uint32_t * new_page_table(void){
 	uint32_t * table = get_next_page();
-	memset(table, 0, PAGE_SIZE);
 	return table;
 }
 
@@ -298,7 +315,7 @@ uint32_t * new_page_table(void){
  * Map a section of physical memory to virtual memory. If pmem_start is null,
  * maps free pages from pmemstart on to fill out length.
  */
-void * mmap(uint32_t * vspace,
+void * _k_mmap(uint32_t * vspace,
 		void * vmem_start,
 		void * pmem_start,
 		size_t length,
@@ -407,7 +424,7 @@ void test_mmap(void){
 	uint32_t * second = (uint32_t *) SECOND_PDE;
 	address_space_t process_addr = new_page_directory();
 	int status = 0;
-	mmap(process_addr, second, NULL, PAGE_SIZE, &status);
+	_k_mmap(process_addr, second, NULL, PAGE_SIZE, &status);
 
 	c_printf("Physical address: %x\n", get_phys_address(process_addr, second));
 
@@ -424,7 +441,7 @@ void test_mmap(void){
 
 	// remap second to another page
 	uint32_t * new_map = get_next_page();
-	mmap(process_addr, second, new_map, PAGE_SIZE, &status);
+	_k_mmap(process_addr, second, new_map, PAGE_SIZE, &status);
 
 	set_page_directory(process_addr);
 	(void)identity;
@@ -450,8 +467,24 @@ address_space_t get_identity_mapped(void){
 	return page_directory;
 }
 
+address_space_t get_return_pde(void){
+	return last_pde;
+}
 
+uint32_t get_current_pde(void){
+	uint32_t old;
+	__asm__
+	__volatile__      /* optional */
+	(
+		"movl %%cr3, %%ebx\n"
+			:"=b"(old) /*output operands optional */
+			  :
+				: //clobber list    /* optional */
+	);
 
+	return old;
+
+}
 
 
 

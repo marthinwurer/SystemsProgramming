@@ -15,20 +15,11 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <kern/memory/memory_constants.h>
+
 #define MY_MM_ADDRESS 0x3400
 //#define MY_MM_ADDRESS 0x3800
 
-#define MB 			0x100000
-#define KB 			0x400
-#define PAGE_SIZE	(4 * KB)
-#define SECOND_PDE	(PAGE_SIZE << 10)
-#define MAX_MEM		0xFFFFFFFF
-#define ALIGN_MASK	0x00000FFF
-#define KB_MASK		0x000003FF
-#define PAGE_FLAGS	0b000000000011
-
-#define	FREE_TYPE		1
-#define	RESERVED_TYPE	2
 
 struct memory_map__32_s{
 	uint32_t base_l;
@@ -102,6 +93,8 @@ address_space_t set_page_directory(address_space_t directory);
  */
 void set_return_pde(address_space_t dir);
 
+address_space_t get_return_pde(void);
+
 /**
  * Map a section of physical memory to virtual memory. If pmem_start is null,
  * maps free pages from pmemstart on to fill out length.
@@ -110,7 +103,7 @@ void set_return_pde(address_space_t dir);
  * if you are memory mapping in the kernel, make sure that you make a new address space
  * and switch to and from it to keep the main 1:1 paging intact.
  */
-void * mmap(uint32_t * vspace,
+void * _k_mmap(uint32_t * vspace,
 		void * vmem_start,
 		void * pmem_start,
 		size_t length,
@@ -129,5 +122,6 @@ void test_mmap(void);
 
 address_space_t get_identity_mapped(void);
 
+uint32_t get_current_pde(void);
 
 #endif

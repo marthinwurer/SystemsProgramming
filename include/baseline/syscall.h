@@ -33,8 +33,10 @@
 #define	SYS_getppid	9
 #define	SYS_gettime	10
 #define	SYS_getstatus	11
+#define	SYS_mmap	11
 
-#define	N_SYSCALLS	12
+
+#define	N_SYSCALLS	13
 
 // dummy system call code to test the ISR
 
