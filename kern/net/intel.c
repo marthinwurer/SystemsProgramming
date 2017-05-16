@@ -34,7 +34,7 @@ static struct cb* get_next_cb();
 static uint16_t ip_chksm(void* ip_head, int len);
 static int32_t save_hw_addr(uint32_t ip, uint8_t hw_addr[]);
 static int32_t get_hw_addr(uint32_t ip, uint8_t hw_addr_out[]);
-static int32_t send_grat_arp(uint32_t sender_ip_addr);
+static int32_t send_grat_arp(uint32_t sender_ip_addr) __attribute__((unused));
 static int32_t send_arp_reply(uint32_t target_ip_addr, uint8_t target_hw_addr[]);
 static int32_t send_arp_request(uint32_t target_ip_addr);
 static int32_t send_arp(uint32_t sender_ip_addr, uint32_t target_ip_addr, uint8_t target_hw_addr[], enum arp_opcode opcode);
@@ -596,6 +596,7 @@ void hexdump(void* data, uint32_t length, uint32_t bytes_per_line) {
 }
 
 int32_t nic_tx_daemon(void* arg) {
+	(void) arg;
 	for(;;) {
 		// check_waiting_transmissions();
 		recycle_command_blocks();
@@ -796,46 +797,6 @@ void intel_nic_init() {
 	// uint8_t ip[4] = {0xA9, 0xFE, 0xA9, 0xB9};
 	// set_ip(ip);
 	set_ip(0xA9FEA9B9);
-
-	// 
-	// 
-	// TODO:
-	// o issue ARP requests
-	// o handle ARP reply/request and add to cache on both
-	// o ICMP ping
-	// o ARP cache
-	// o add syscalls
-	// o write send_ipv4()
-	// o keep flag for rx_enable in _nic. with first call to receive, enable rx
-	// o mutex on doing anything with CB
-	// 
-	// TEST:
-	// 
-	// DONE:
-	// o add rx_daemon
-	// o receive ARP request, and reply to it
-	// o gratuitous ARP
-	// o finish send_arp(), and handle arp packets -- get IPs working so we can make some applications!
-	// o convert send_grat_arp() to send_arp(), so that it can handle sending arp requests/gratuitous/replies
-	// o merge into master
-	// o write hexdump(void* data, uint32_t length) using code from claim_rfd_data
-	// o handle receive interrupts in addition to CU interrupts
-	// o enable receiving data by putting first RFD ptr into gen_ptr (pg 99)
-	// o configure receive buffers
-	// o make sure CRC is being inserted (ask other networking guy)
-	// o Write send_packet function (check on ethernet header)
-	// o configure IA
-	// o change configure command to make sure NSAI (byte 10) is set correctly to insert source address
-	// o Write routine to output configure command blocks
-	// o figure out if interrupt handler needs to send EOI (caused bugs before)
-	// o ensure CBL ring and cleanup actually works
-	// o Finish writing ISR (cleanup CB)
-	// o Figure out what should stay static in intel.c and if some internal stuff should be removed from intel.h
-	// o Keep ring of available CB linked together, set EL flag on last one, but still have the links there
-	// o Merge memory stuff in from master, HINT MERGE NOT REBASE
-	// 
-	// 
-
 }
 
 void intel_nic_enable_rx() {
