@@ -5,6 +5,11 @@
 #include <baseline/common.h>
 
 /**
+ * Intel Network driver. Contains needed structures and methods to perform network functions. 
+ * @author Daniel Meiller
+ */
+
+/**
  * Intel Shared Memory Architecture
  * 
  * ---- Defintions ----
@@ -33,7 +38,7 @@
 #define NET_INTEL_INT_VECTOR 0x2B
 
 #define TOTAL_CB 0x80
-#define TOTAL_RFD 0x80
+#define TOTAL_RFD 1024
 #define ARP_CACHE_SIZE 256
 
 #define MAX_EEPROM_LENGTH 256
@@ -104,40 +109,44 @@ struct csr {
 	uint32_t rx_dma_byte_count;
 };
 
+typedef struct {
+	uint8_t version : 4;
+	uint8_t ihl : 4;
+	uint8_t dscp : 6;
+	uint8_t ecn : 2;
+	uint16_t total_len;
+	uint16_t id;
+	uint16_t flags : 3;
+	uint16_t frag_offset : 13;
+	uint8_t ttl;
+	uint8_t protocol;
+	uint16_t header_checksum;
+	uint8_t src_ip[4];
+	uint8_t dst_ip[4];
+	uint8_t ip_data[NET_INTEL_TCB_MAX_DATA_LEN - 5];
+} ipv4_t;
+
+typedef struct {
+	uint16_t hw_type;
+	uint16_t protocol_type;
+	uint8_t hw_addr_len;
+	uint8_t protocol_addr_len;
+	uint16_t opcode;
+	uint8_t sender_hw_addr[6];
+	// uint32_t sender_protocol_addr; // unaligned
+	uint8_t sender_protocol_addr[4]; // aligned
+	// uint16_t sender_protocol_addr_hi; // aligned
+	uint8_t target_hw_addr[6];
+	uint8_t target_protocol_addr[4];
+} arp_t;
+
 /**
  * Ethernet frame data payload
  */
 typedef union {
 	uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
-	struct {
-		uint8_t version : 4;
-		uint8_t ihl : 4;
-		uint8_t dscp : 6;
-		uint8_t ecn : 2;
-		uint16_t total_len;
-		uint16_t id;
-		uint16_t flags : 3;
-		uint16_t frag_offset : 13;
-		uint8_t ttl;
-		uint8_t protocol;
-		uint16_t header_checksum;
-		uint8_t src_ip[4];
-		uint8_t dst_ip[4];
-		uint8_t ip_data[NET_INTEL_TCB_MAX_DATA_LEN - 5];
-	} ipv4;
-	struct {
-		uint16_t hw_type;
-		uint16_t protocol_type;
-		uint8_t hw_addr_len;
-		uint8_t protocol_addr_len;
-		uint16_t opcode;
-		uint8_t sender_hw_addr[6];
-		// uint32_t sender_protocol_addr; // unaligned
-		uint8_t sender_protocol_addr[4]; // aligned
-		// uint16_t sender_protocol_addr_hi; // aligned
-		uint8_t target_hw_addr[6];
-		uint8_t target_protocol_addr[4];
-	} arp;
+	ipv4_t ipv4;
+	arp_t arp;
 } eth_payload_t;
 
 /**
@@ -181,13 +190,23 @@ struct cb {
 };
 
 /**
+ * ICMP packet structure
+ */
+typedef struct {
+	uint8_t type;
+	uint8_t code;
+	uint16_t chksm;
+	uint32_t rest_of_header;
+} icmp_t;
+
+/**
  * entry in the arp cache
  */
-struct arp_entry {
+typedef struct {
 	uint32_t ip_addr;
 	uint16_t filled;
 	uint8_t hw_addr[6];
-};
+} arp_entry_t;
 
 /**
  * Buffer to store data in once received
@@ -218,12 +237,12 @@ enum arp_opcode {
  * Ethertype field for ethernet frame. These are all in the correct network
  * byte order, and do not need to be changed before putting into a frame.
  */
-enum ethertype_t {
+typedef enum {
 	ethertype_ipv4 = 0x0008,
 	ethertype_arp = 0x0608,
 	ethertype_ipx = 0x3781,
 	ethertype_ipv6 = 0xdd86
-};
+} ethertype_t;
 
 /**
  * Constants to control EEPROM
@@ -333,7 +352,7 @@ enum cb_status {
  * @param length length of data to send
  * @return 0 on success, otherwise failure
  */
-int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length);
+int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length, ethertype_t ethertype);
 
 /**
  * Sets the IP address of the network card

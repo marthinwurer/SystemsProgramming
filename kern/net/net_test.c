@@ -36,17 +36,18 @@ int32_t net_test_main(void* args) {
 	for(i = 0; i < fast_packets; i++) { // test ring CBL
 		c_printf("Sending packet #%d\n", i);
 		my_data[0] = i;
-		send_packet(dst_mac, my_data, 0x80);
+		send_packet(dst_mac, my_data, 0x80, ethertype_ipv4);
 		sleep(fast_interval_ms);
 	}
 
 	for(i = 0; i < slow_packets; i++) { // test ring CBL
 		my_data[0] = i + fast_packets;
 		c_printf("Sending packet #%d\n", i + fast_packets);
-		send_packet(dst_mac, my_data, 0x80);
+		send_packet(dst_mac, my_data, 0x80, ethertype_ipv4);
 		sleep(slow_interval_ms);
 	}
 
+	exit(EXIT_SUCCESS);
 	return 0;
 }
 
