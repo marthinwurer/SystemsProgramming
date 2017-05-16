@@ -2,6 +2,27 @@
 
 #include <kern/video/fb/fb.h>
 
+// static VideoCol MASK_TABLE[] = {
+// 	/*  0: */          0,          0,          0,          0
+// 	/*  1: */          0,          0,          0, 0xFFFFFFFF,
+// 	/*  2: */          0,          0, 0xFFFFFFFF,          0,
+// 	/*  3: */          0,          0, 0xFFFFFFFF, 0xFFFFFFFF,
+// 	/*  4: */          0, 0xFFFFFFFF,          0,          0,
+// 	/*  5: */          0, 0xFFFFFFFF,          0, 0xFFFFFFFF,
+// 	/*  6: */          0, 0xFFFFFFFF, 0xFFFFFFFF,          0,
+// 	/*  7: */          0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+// 	/*  8: */ 0xFFFFFFFF,          0,          0,          0,
+// 	/*  9: */ 0xFFFFFFFF,          0,          0, 0xFFFFFFFF,
+// 	/* 10: */ 0xFFFFFFFF,          0, 0xFFFFFFFF,          0,
+// 	/* 11: */ 0xFFFFFFFF,          0, 0xFFFFFFFF, 0xFFFFFFFF,
+// 	/* 12: */ 0xFFFFFFFF, 0xFFFFFFFF,          0,          0,
+// 	/* 13: */ 0xFFFFFFFF, 0xFFFFFFFF,          0, 0xFFFFFFFF,
+// 	/* 14: */ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,          0,
+// 	/* 15: */ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+	
+
+// };
+
 
 int graphics_drawString(PaintContext *ctx, Point *p, const char *string) {
 

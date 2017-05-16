@@ -6,6 +6,10 @@
 # location of the build directory
 BUILD_DIR := build
 
+# makefile verbosity
+# 0: Only show command variable and output file
+# 1: Show entire command
+VERBOSE := 0
 
 # =============================================================================
 # COMMANDS
@@ -26,7 +30,7 @@ LD := ld
 # if set warnings will be treated as errors
 WERROR :=
 
-WARNFLAGS := -Wall -Wextra -pedantic
+WARNFLAGS := -Wall -Wextra
 
 CFLAGS = -std=c99 -fno-stack-protector -fno-builtin $(WARNFLAGS) $(WERROR)
 

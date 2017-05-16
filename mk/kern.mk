@@ -11,11 +11,15 @@ KERN_OBJ := early/_early.o \
             net/udp.o \
             early/memory_map_setup.o \
             early/video.o \
+            graphics/shapes/rect.o \
             graphics/text/text.o \
             memory/memory_map.o \
             util/marquee.o \
+            vconsole/buffer.o \
             vconsole/console.o \
             vconsole/control.o \
+            vconsole/render/draw.o \
+            vconsole/render/scroll.o \
             vesa/edid.o \
             vesa/vbe.o \
             video/color/color.o \
@@ -58,13 +62,13 @@ BASELINE_OBJ := $(addprefix $(BUILD_DIR)/baseline/,$(BASELINE_OBJ))
 PROG_OBJ := $(KERN_OBJ) $(BASELINE_OBJ)
 
 $(BUILD_DIR)/prog.out: $(PROG_OBJ)
-	$(LD) $(LDFLAGS) -o $@ $+
+	$(LD_V) $(LDFLAGS) -o $@ $+
 
 $(BUILD_DIR)/prog.o: $(PROG_OBJ) $(LIBK)
-	$(LD) $(LDFLAGS) -o $@ -e _early -Ttext 0x10000 $+
+	$(LD_V) $(LDFLAGS) -o $@ -e _early -Ttext 0x10000 $+
 
 $(BUILD_DIR)/prog.b: $(BUILD_DIR)/prog.o
-	$(LD) $(LDFLAGS) -o $@ -s -e _early --oformat binary -Ttext 0x10000 $<
+	$(LD_V) $(LDFLAGS) -o $@ -s -e _early --oformat binary -Ttext 0x10000 $<
 
 #$(BUILD_DIR)/earlyprog.o: $(EARLY_OBJ)
 #	$(LD) $(LDFLAGS) -o $@ -Ttext 0x3000 -e _early $+

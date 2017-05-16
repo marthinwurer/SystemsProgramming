@@ -162,26 +162,21 @@ void _init( void ) {
 	** Console I/O system.
 	*/
 
-	//c_io_init();
 	c_io_init_isr();
 
 	c_clearscreen();
+
+	c_setscroll( 0, 7, CIO_CONTROLLER.current->columns, CIO_CONTROLLER.current->rows );
+	
+	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
+		c_putchar_at(i, 6, '=');
+	}
 
 	// set up the memory
 	disp_memory_map();
 	setup_page_availibility_table();
 	setup_initial_page_table();
 
-
-
-	c_setscroll( 0, 7, 99, 99 );
-	c_puts_at( 0, 6, "================================================================================" );
-	c_io_init_isr();
-	c_setscroll( 0, 7, CIO_CONTROLLER.current->columns, CIO_CONTROLLER.current->rows );
-	
-	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
-		c_putchar_at(i, 6, '=');
-	}
 
 	video_dumpInfo(VIDEO_INFO);
 
@@ -303,4 +298,7 @@ void _init( void ) {
 
 	c_puts( "System initialization complete.\n" );
 	c_puts( "-------------------------------\n" );
+
+	// disable autoflush, the redrawProcess will handle flushing
+	CIO_AUTOFLUSH = 0;
 }

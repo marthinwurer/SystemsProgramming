@@ -1,6 +1,8 @@
 #ifndef _KERN_VIDEO_VIDEO_H
 #define _KERN_VIDEO_VIDEO_H
 
+#include <kern/graphics/text/PSFont.h>
+
 #include <kern/vesa/VBEInfo.h>
 #include <kern/vesa/VBEModeInfo.h>
 
@@ -9,6 +11,12 @@
 #include <kern/video/err.h>
 
 #include <kern/video/globals.h>
+
+#define VIDEO_FONTSET_GLYPHS 256
+#define VIDEO_FONTSET_BYTES_PER_GLYPH 16
+#define VIDEO_FONTSET_WIDTH 8
+#define VIDEO_FONTSET_HEIGHT 16
+
 
 /**
  * @brief Selects and changes to the best available video mode.
@@ -23,6 +31,13 @@ int video_convertVBEInfo(VBEInfo *vbe, VideoInfo *info);
 
 
 int video_convertVBEMode(VBEModeInfo *vbe, VideoMode *mode);
+
+
+/**
+ * @brief Initializes the given font variable with the default fontset
+ */
+int video_defaultFont(PSFont *font);
+
 
 //
 // Dumps all members in the given VideoInfo block to the

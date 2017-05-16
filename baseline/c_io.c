@@ -20,6 +20,8 @@
 #include <baseline/support.h>
 #include <x86arch.h>
 
+#include <kern/vconsole/buffer.h>
+
 /*
 ** Video parameters, and state variables
 */
@@ -30,17 +32,7 @@
 #define	SCREEN_MAX_X	( SCREEN_X_SIZE - 1 )
 #define	SCREEN_MAX_Y	( SCREEN_Y_SIZE - 1 )
 
-unsigned int	scroll_min_x, scroll_min_y;
-unsigned int	scroll_max_x, scroll_max_y;
-unsigned int	curr_x, curr_y;
-unsigned int	min_x, min_y;
-unsigned int	max_x, max_y;
 
-#ifdef	SA_DEBUG
-#include <stdio.h>
-#define	c_putchar	putchar
-#define	c_puts(x)	fputs( x, stdout )
-#endif
 
 #define	VIDEO_ADDR(x,y)	( unsigned short * ) \
 		( VIDEO_BASE_ADDR + 2 * ( (y) * SCREEN_X_SIZE + (x) ) )
@@ -48,46 +40,17 @@ unsigned int	max_x, max_y;
 #include <kern/vconsole/console.h>
 #include <kern/vconsole/control.h>
 
-static VConChar *TEMP_CONSOLE_BUF = (VConChar*)0x4C00;
+static VConLine *TEMP_CONSOLE_LINETAB = (VConLine*)0x4C00;
+
+static VConChar *TEMP_CONSOLE_CHARTAB = (VConChar*)0x4D40;
 
 static VCon CON;
+
+int CIO_AUTOFLUSH;
 
 
 VConCtrl CIO_CONTROLLER = { .mode = VCON_MODE_VGATEXT };
 
-/*
-** Support routines.
-**
-** bound: confine an argument within given bounds
-** __c_putchar_at: physical output to the video memory
-** __c_setcursor: set the cursor location (screen coordinates)
-** __c_strlen: compute the length of a string
-*/
-static unsigned int bound( unsigned int min, unsigned int value, unsigned int max ){
-	if( value < min ){
-		value = min;
-	}
-	if( value > max ){
-		value = max;
-	}
-	return value;
-}
-
-static void __c_setcursor( void ){
-	unsigned addr;
-	unsigned int	y = curr_y;
-
-	if( y > scroll_max_y ){
-		y = scroll_max_y;
-	}
-
-	addr = (unsigned)( y * SCREEN_X_SIZE + curr_x );
-
-	__outb( 0x3d4, 0xe );
-	__outb( 0x3d5, ( addr >> 8 ) & 0xff );
-	__outb( 0x3d4, 0xf );
-	__outb( 0x3d5, addr & 0xff );
-}
 
 static unsigned int __c_strlen( char const *str ){
 	unsigned int	len = 0;
@@ -98,45 +61,20 @@ static unsigned int __c_strlen( char const *str ){
 	return len;
 }
 
-static void __c_putchar_at( unsigned int x, unsigned int y, unsigned int c ){
-	/*
-	** If x or y is too big or small, don't do any output.
-	*/
-	if( x <= max_x && y <= max_y ){
-		unsigned short *addr = VIDEO_ADDR( x, y );
-
-		if( c > 0xff ) {
-			/*
-			** Use the given attributes
-			*/
-			*addr = (unsigned short)c;
-		} else {
-			/*
-			** Use attributes 0000 0111 (white on black)
-			*/
-			*addr = (unsigned short)c | 0x0700;
-		}
-	}
+void c_flush(void) {
+	vcon_redraw(&CIO_CONTROLLER);
 }
 
+
 void c_setscroll( unsigned int s_min_x, unsigned int s_min_y, unsigned int s_max_x, unsigned int s_max_y ){
-	// scroll_min_x = bound( min_x, s_min_x, max_x );
-	// scroll_min_y = bound( min_y, s_min_y, max_y );
-	// scroll_max_x = bound( scroll_min_x, s_max_x, max_x );
-	// scroll_max_y = bound( scroll_min_y, s_max_y, max_y );
-	// curr_x = scroll_min_x;
-	// curr_y = scroll_min_y;
-	// __c_setcursor();
-	vcon_setScroll(&CON, s_min_x, s_min_y, s_max_x, s_max_y);
+	(void)s_min_x; (void)s_max_x;
+	vcon_setScroll(&CON, s_min_y, s_max_y);
 }
 
 /*
 ** Cursor movement in the scroll region
 */
 void c_moveto( unsigned int x, unsigned int y ){
-	// curr_x = bound( scroll_min_x, x + scroll_min_x, scroll_max_x );
-	// curr_y = bound( scroll_min_y, y + scroll_min_y, scroll_max_y );
-	// __c_setcursor();
 	vcon_setCursor(&CON, x, y);
 }
 
@@ -144,73 +82,16 @@ void c_moveto( unsigned int x, unsigned int y ){
 ** The putchar family
 */
 void c_putchar_at( unsigned int x, unsigned int y, unsigned int c ){
-	// if( ( c & 0x7f ) == '\n' ){
-	// 	unsigned int	limit;
-
-	// 	/*
-	// 	** If we're in the scroll region, don't let this loop
-	// 	** leave it.  If we're not in the scroll region, don't
-	// 	** let this loop enter it.
-	// 	*/
-	// 	if( x > scroll_max_x ){
-	// 		limit = max_x;
-	// 	}
-	// 	else if( x >= scroll_min_x ){
-	// 		limit = scroll_max_x;
-	// 	}
-	// 	else {
-	// 		limit = scroll_min_x - 1;
-	// 	}
-	// 	while( x <= limit ){
-	// 		__c_putchar_at( x, y, ' ' );
-	// 		x += 1;
-	// 	}
-	// }
-	// else {
-	// 	__c_putchar_at( x, y, c );
-	// }
 	vcon_putcharAt(&CON, c, x, y);
+	if (CIO_AUTOFLUSH)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 #ifndef SA_DEBUG
 void c_putchar( unsigned int c ){
-	// /*
-	// ** If we're off the bottom of the screen, scroll the window.
-	// */
-	// if( curr_y > scroll_max_y ){
-	// 	c_scroll( curr_y - scroll_max_y );
-	// 	curr_y = scroll_max_y;
-	// }
-
-	// switch( c & 0xff ){
-	// case '\n':
-	// 	/*
-	// 	** Erase to the end of the line, then move to new line
-	// 	** (actual scroll is delayed until next output appears).
-	// 	*/
-	// 	while( curr_x <= scroll_max_x ){
-	// 		__c_putchar_at( curr_x, curr_y, ' ' );
-	// 		curr_x += 1;
-	// 	}
-	// 	curr_x = scroll_min_x;
-	// 	curr_y += 1;
-	// 	break;
-
-	// case '\r':
-	// 	curr_x = scroll_min_x;
-	// 	break;
-
-	// default:
-	// 	__c_putchar_at( curr_x, curr_y, c );
-	// 	curr_x += 1;
-	// 	if( curr_x > scroll_max_x ){
-	// 		curr_x = scroll_min_x;
-	// 		curr_y += 1;
-	// 	}
-	// 	break;
-	// }
-	// __c_setcursor();
 	vcon_putchar(&CON, c);
+	if (CIO_AUTOFLUSH)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 #endif
 
@@ -218,89 +99,36 @@ void c_putchar( unsigned int c ){
 ** The puts family
 */
 void c_puts_at( unsigned int x, unsigned int y, char *str ){
-	// unsigned int	ch;
-
-	// while( (ch = *str++) != '\0' && x <= max_x ){
-	// 	c_putchar_at( x, y, ch );
-	// 	x += 1;
-	// }
 	vcon_putsAt(&CON, str, x, y);
+	if (CIO_AUTOFLUSH)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 #ifndef SA_DEBUG
 void c_puts( char *str ){
-	// unsigned int	ch;
-
-	// while( (ch = *str++) != '\0' ){
-	// 	c_putchar( ch );
-	// }
 	vcon_puts(&CON, str);
+	if (CIO_AUTOFLUSH)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 #endif
 
 void c_clearscroll( void ){
-	// unsigned int	nchars = scroll_max_x - scroll_min_x + 1;
-	// unsigned int	l;
-	// unsigned int	c;
-
-	// for( l = scroll_min_y; l <= scroll_max_y; l += 1 ){
-	// 	unsigned short *to = VIDEO_ADDR( scroll_min_x, l );
-
-	// 	for( c = 0; c < nchars; c += 1 ){
-	// 		*to++ = ' ' | 0x0700;
-	// 	}
-	// }
 	vcon_clearScroll(&CON);
+	if (CIO_AUTOFLUSH)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 void c_clearscreen( void ){
-	// unsigned short *to = VIDEO_ADDR( min_x, min_y );
-	// unsigned int	nchars = ( max_y - min_y + 1 ) * ( max_x - min_x + 1 );
-
-	// while( nchars > 0 ){
-	// 	*to++ = ' ' | 0x0700;
-	// 	nchars -= 1;
-	// }
 	vcon_clear(&CON);
+	if (CIO_AUTOFLUSH)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 
 void c_scroll( unsigned int lines ){
-	// unsigned short *from;
-	// unsigned short *to;
-	// int	nchars = scroll_max_x - scroll_min_x + 1;
-	// unsigned int line;
-	// int c;
-
-	// /*
-	// ** If # of lines is the whole scrolling region or more, just clear.
-	// */
-	// if( lines > scroll_max_y - scroll_min_y ){
-	// 	c_clearscroll();
-	// 	curr_x = scroll_min_x;
-	// 	curr_y = scroll_min_y;
-	// 	__c_setcursor();
-	// 	return;
-	// }
-
-	// /*
-	// ** Must copy it line by line.
-	// */
-	// for( line = scroll_min_y; line <= scroll_max_y - lines; line += 1 ){
-	// 	from = VIDEO_ADDR( scroll_min_x, line + lines );
-	// 	to = VIDEO_ADDR( scroll_min_x, line );
-	// 	for( c = 0; c < nchars; c += 1 ){
-	// 		*to++ = *from++;
-	// 	}
-	// }
-
-	// for( ; line <= scroll_max_y; line += 1 ){
-	// 	to = VIDEO_ADDR( scroll_min_x, line );
-	// 	for( c = 0; c < nchars; c += 1 ){
-	// 		*to++ = ' ' | 0x0700;
-	// 	}
-	// }
 	vcon_scroll(&CON, lines);
+	if (CIO_AUTOFLUSH)
+		vcon_redraw(&CIO_CONTROLLER);
 }
 
 char * cvtdec0( char *buf, int value ){
@@ -427,6 +255,12 @@ static void __c_do_printf( int x, int y, char **f ){
 	int	len;
 	int	padchar;
 
+	int enableAutoFlush = 0;
+	if (CIO_AUTOFLUSH) {
+		CIO_AUTOFLUSH = 0;
+		enableAutoFlush = 1;
+	}
+
 	/*
 	** Get characters from the format string and process them
 	*/
@@ -506,7 +340,7 @@ static void __c_do_printf( int x, int y, char **f ){
 					/* FALL THRU */
 
 				case '\r':
-					x = CON.scrollMinX;
+					x = 0;
 					break;
 
 				default:
@@ -517,6 +351,11 @@ static void __c_do_printf( int x, int y, char **f ){
 				c_putchar( ch );
 			}
 		}
+	}
+
+	if (enableAutoFlush) {
+		CIO_AUTOFLUSH = 1;
+		c_flush();
 	}
 }
 
@@ -704,34 +543,19 @@ int c_input_queue( void ){
 ** Initialization routines
 */
 void c_io_init( void ){
-	// /*
-	// ** Screen dimensions
-	// */
-	// min_x  = SCREEN_MIN_X;	
-	// min_y  = SCREEN_MIN_Y;
-	// max_x  = SCREEN_MAX_X;
-	// max_y  = SCREEN_MAX_Y;
-
-	// /*
-	// ** Scrolling region
-	// */
-	// scroll_min_x = SCREEN_MIN_X;
-	// scroll_min_y = SCREEN_MIN_Y;
-	// scroll_max_x = SCREEN_MAX_X;
-	// scroll_max_y = SCREEN_MAX_Y;
-
-	// /*
-	// ** Initial cursor location
-	// */
-	// curr_y = min_y;
-	// curr_x = min_x;
-	// __c_setcursor();
+	
 	CIO_CONTROLLER.current = &CON;
 
-	vcon_init(&CON, TEMP_CONSOLE_BUF, SCREEN_Y_SIZE, SCREEN_X_SIZE);
+	vcon_init(&CON, SCREEN_Y_SIZE, SCREEN_X_SIZE);
+	CON.buf.lineTable = TEMP_CONSOLE_LINETAB;
+	CON.buf.charTable = TEMP_CONSOLE_CHARTAB;
+	vcon_buf_initLineTable(&CON);
+
 	CON.controller = &CIO_CONTROLLER;
 	vcon_clear(&CON);
 	vcon_redraw(&CIO_CONTROLLER);
+
+	CIO_AUTOFLUSH = 1;
 
 }
 
@@ -742,32 +566,3 @@ void c_io_init_isr(void) {
 	__install_isr( INT_VEC_KEYBOARD, __c_keyboard_isr );
 }
 
-#ifdef SA_DEBUG
-int main(){
-	c_printf( "%d\n", 123 );
-	c_printf( "%d\n", -123 );
-	c_printf( "%d\n", 0x7fffffff );
-	c_printf( "%d\n", 0x80000001 );
-	c_printf( "%d\n", 0x80000000 );
-	c_printf( "x%14dy\n", 0x80000000 );
-	c_printf( "x%-14dy\n", 0x80000000 );
-	c_printf( "x%014dy\n", 0x80000000 );
-	c_printf( "x%-014dy\n", 0x80000000 );
-	c_printf( "%s\n", "xyz" );
-	c_printf( "|%10s|\n", "xyz" );
-	c_printf( "|%-10s|\n", "xyz" );
-	c_printf( "%c\n", 'x' );
-	c_printf( "|%4c|\n", 'y' );
-	c_printf( "|%-4c|\n", 'y' );
-	c_printf( "|%04c|\n", 'y' );
-	c_printf( "|%-04c|\n", 'y' );
-	c_printf( "|%3d|\n", 5 );
-	c_printf( "|%3d|\n", 54321 );
-	c_printf( "%x\n", 0x123abc );
-	c_printf( "|%04x|\n", 20 );
-	c_printf( "|%012x|\n", 0xfedcba98 );
-	c_printf( "|%-012x|\n", 0x76543210 );
-}
-
-int curr_x, curr_y, max_x, max_y;
-#endif

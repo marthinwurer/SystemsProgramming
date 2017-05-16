@@ -9,7 +9,12 @@
  */
 int vcon_switch(VConCtrl *ctrl, VCon *console);
 
-int vcon_drawCursor(VConCtrl *ctrl);
+/**
+ * @brief Toggles visibility and updates position of the software cursor.
+ *
+ * If a hardware cursor is available, this function does nothing. 
+ */
+int vcon_blink(VConCtrl *ctrl);
 
 
 /**
