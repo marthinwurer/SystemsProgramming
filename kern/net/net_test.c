@@ -11,7 +11,16 @@
 int32_t net_test_main(void* args) {
 	(void) args; // suppress warnings
 
-	intel_nic_enable_rx();
+	c_printf("%d:%d\n", 15, __builtin_bswap32(15));
+	c_printf("%d:%d\n", 15, __builtin_bswap16(15));
+
+	for(int i = 0; i < 100; i++) {
+		send_ipv4(0xA9FEA9B8, "hello, how are you doing today", 31, ip_udp);
+		sleep(1000);
+	}
+	exit(EXIT_SUCCESS);
+
+	// intel_nic_enable_rx();
 	// send_grat_arp(0xA9FEA9B9);
 	// send_grat_arp(0xC0A88001);
 
@@ -36,17 +45,18 @@ int32_t net_test_main(void* args) {
 	for(i = 0; i < fast_packets; i++) { // test ring CBL
 		c_printf("Sending packet #%d\n", i);
 		my_data[0] = i;
-		send_packet(dst_mac, my_data, 0x80);
+		send_packet(dst_mac, my_data, 0x80, ethertype_ipv4);
 		sleep(fast_interval_ms);
 	}
 
 	for(i = 0; i < slow_packets; i++) { // test ring CBL
 		my_data[0] = i + fast_packets;
 		c_printf("Sending packet #%d\n", i + fast_packets);
-		send_packet(dst_mac, my_data, 0x80);
+		send_packet(dst_mac, my_data, 0x80, ethertype_ipv4);
 		sleep(slow_interval_ms);
 	}
 
+	exit(EXIT_SUCCESS);
 	return 0;
 }
 
