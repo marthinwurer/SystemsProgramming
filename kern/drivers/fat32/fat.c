@@ -160,7 +160,7 @@ FAT_DENTRY parse_dirtable_entry(PFAT_CONTEXT ctx, int32_t start, int32_t* end, i
 status_t free_cluster_chain(PFAT_CONTEXT ctx, int32_t cluster_start) {
     //find first cluster
     int32_t byte_offset;
-    byte_offset_for_fat(ctx, 0, &byte_offset); //gets to the fat
+    byte_offset_fat(ctx, 0, &byte_offset); //gets to the fat
     byte_offset += cluster_start * 4; //4 bytes per cluster
     
     //read in data
@@ -180,7 +180,7 @@ status_t free_cluster_chain(PFAT_CONTEXT ctx, int32_t cluster_start) {
         //extract cluster number
         int32_t cluster_num = (next >> 4) & 0xFFFFFFF;
         //then look up offset in table for cluster
-        byte_offset_for_fat(ctx, 0, &byte_offset);
+        byte_offset_fat(ctx, 0, &byte_offset);
         byte_offset += 4 * cluster_num;
     }
     return E_SUCCESS;
@@ -317,4 +317,20 @@ status_t find_file(PFAT_CONTEXT ctx, char* path, FAT_DENTRY* out) {
 
 status_t read_next_dentry(PFAT_CONTEXT ctx, FAT_DENTRY* parent, int32_t offset, FAT_DENTRY* dentry) {
     return E_NOT_IMPLEMENTED;
+}
+
+status_t grab_next_free_clusters(PFAT_CONTEXT ctx, int32_t filesize, int32_t* start) {
+    //TODO - update to support multi-cluster initial allocations
+    //get fat offset
+    int32_t starting_offset;
+    int32_t size = 4;
+    byte_offset_fat(ctx, 0, &starting_offset);
+    starting_offset += 2*4; //skip first two entries due to special clusters
+    char buffer[4];
+    while (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0) {
+        ((PIO_DEVICE)ctx->driver)->read(starting_offset, &size, &buffer);
+        starting_offset += 4;
+    }
+    int32_t reserve = 0xFFFFFFFF;
+    ((PIO_DEVICE)ctx->driver)->write(starting_offset-size, &size, &reserve);
 }
