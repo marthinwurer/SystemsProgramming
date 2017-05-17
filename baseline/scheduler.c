@@ -125,7 +125,7 @@ void _dispatch( void ) {
 //	c_printf("dispatch: PID: %d, PDE: %x\n", _current->pid, _current->memory);
 	set_return_pde(_current->memory);
 
-	c_printf("last: %x\n\n", get_return_pde());
-	c_printf("Current: %x\n\n", get_current_pde());
+//	c_printf("last: %x\n\n", get_return_pde());
+//	c_printf("Current: %x\n\n", get_current_pde());
 
 }	

@@ -39,7 +39,7 @@ static void __page_fault_isr( int vector, int code ){
 
 	c_printf("Code: %x\n", code);
 	c_printf("address: %x\n", address);
-	__panic("Page Fault received!");
+//	__panic("Page Fault received!");
 //	_sys_kill(_current);
 
 	c_printf("\nSEGFAULT - Core dumped\n");
@@ -292,8 +292,8 @@ address_space_t set_page_directory(address_space_t directory){
 	c_printf("paging done\n");
 //	__panic("done with paging setup");
 
-	c_printf("last: %x\n\n", get_return_pde());
-	c_printf("Current: %x\n\n", get_current_pde());
+//	c_printf("last: %x\n\n", get_return_pde());
+//	c_printf("Current: %x\n\n", get_current_pde());
 
 
 	return old;
