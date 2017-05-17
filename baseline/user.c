@@ -962,6 +962,8 @@ int32_t test_u_mmap(void *arg) {
 	uint32_t * seg_target = 0x12345678;
 	seg_target[0] = 3;
 
+	cwrites("\nHahahaha, I survived!\n");
+
 	return 0;
 }
 
