@@ -127,7 +127,6 @@ typedef struct _ft_de_inmem {
     int32_t updated;
     int32_t filesize;
     int32_t cluster_start;
-    int32_t byte_offset_start;
     int32_t cluster_parent_de;
     int32_t child_count;
     FAT_DE_ATTRIBUTE attr;

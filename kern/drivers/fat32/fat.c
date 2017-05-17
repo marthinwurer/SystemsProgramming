@@ -122,7 +122,6 @@ FAT_DENTRY parse_dirtable_entry(PFAT_CONTEXT ctx, int32_t start, int32_t* end, i
                         .filesize = filesize,
                         .cluster_start = cluster,
                         .child_count = -1,
-                        .byte_offset_start = -1,
                         .cluster_parent_de = dir_cluster,
                         .attr = t
                 };
