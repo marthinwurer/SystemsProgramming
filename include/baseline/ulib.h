@@ -21,6 +21,8 @@
 
 #ifndef __SP_ASM__
 
+#include <stddef.h>
+
 /*
 ** Start of C-only definitions
 */
@@ -308,6 +310,13 @@ time_t gettime( void );
 **      the state of the process, or an error code
 */
 state_t getstatus( pid_t pid );
+
+
+
+state_t mmap(void * vmem_start,
+		void * pmem_start,
+		size_t length,
+		int * status);
 
 /*
 ** bogus - a bogus system call, for testing our syscall ISR

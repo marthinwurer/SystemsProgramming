@@ -17,6 +17,7 @@
 #include <kern/net/net_test.h>
 #include <kern/net/intel.h>
 #include <baseline/c_io.h>
+#include <kern/memory/memory_constants.h>
 #include <kern/ioapi/file.h>
 #include <kern/vconsole/control.h>
 
@@ -935,6 +936,80 @@ int32_t redrawProcess(void *arg) {
 
 	return 0;
 }
+
+
+
+
+
+int32_t test_u_mmap(void *arg) {
+
+	uint32_t * map_location = SECOND_PDE;
+	int status = 0;
+
+	c_printf("last: %x\n\n", get_return_pde());
+	c_printf("Current: %x\n\n", get_current_pde());
+	char buf[12];
+	int i = cvt_hex( buf, 0 );
+
+
+
+	mmap(map_location, NULL, PAGE_SIZE, &status);
+
+	cwrites("\nstatus:");
+	cwrite( buf, i );
+	cwritech('\n');
+
+	map_location[0] = 0xDEADBEEF;
+	cwrites("\nread:");
+	i = cvt_hex( buf, map_location[0] );
+	cwrite( buf, i );
+
+
+	uint32_t * seg_target = 0x12345678;
+	seg_target[0] = 3;
+
+	cwrites("\nHahahaha, I survived!\n");
+
+	return 0;
+}
+
+int32_t mem_demo(void *arg) {
+//	sleep(5000);
+	cwrites("\nWelcome to the Memory Demo!\n");
+	int index = 0;
+	for(;;){
+		char buff[256];
+		char in = 0;
+		
+		cwrites(" > ");
+		do{
+
+			// get a character and add it to the buffer
+			in = creadch();
+			buff[index] = in;
+
+			cwritech(in);
+
+
+			
+			index++;
+
+
+
+		} while( index < 20 && in != '\n');
+
+	}
+
+
+	
+
+	return 0;
+}
+
+
+
+
+
 /*
 ** Initial process; it starts the other top-level user processes.
 **
@@ -988,6 +1063,9 @@ int32_t init( void *arg ) {
 		cwrites( "init, spawn() fsdemo failed\n" );
 	}
 	swritech( '+' );
+
+	spawn(test_u_mmap, NULL, P_LOW);
+//	spawn(mem_demo, NULL, P_LOW);
 
 #ifdef SPAWN_A
 	pid = spawn( user_a, 0, P_HIGH );

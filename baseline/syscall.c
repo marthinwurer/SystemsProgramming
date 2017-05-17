@@ -584,12 +584,36 @@ static void _sys_exec( pcb_t *pcb ) {
 	}
 	c_printf("exec: PID: %d, PDE: %x\n", pcb->pid, pcb->memory);
 
-	set_page_directory(pcb->memory);
+//	set_page_directory(pcb->memory);
+
+	// return back to its new memory space
+	set_return_pde(pcb->memory);
 
 	// question:  should we schedule and dispatch here?
 	// we choose not to, so the "new" program will
 	// begin executing immediately, with whatever's left
 	// of the "old" quantum for the process.
+}
+
+/*
+ * _sys_mmap - map the given memory to the current memory space
+ *
+ * implements:
+ */
+static void _sys_mmap( pcb_t *pcb ) {
+	address_space_t current = pcb->memory;
+	void * arg1 = (void *) ARG(pcb,1);
+	void * arg2 = (void *) ARG(pcb,2);
+	size_t arg3 = (size_t) ARG(pcb,3);
+
+	int status = 0;
+
+
+	c_printf("_sys_mmap %x, %x, %x, %x\n", current, arg1, arg2, arg3);
+
+	_k_mmap(current, arg1, arg2, arg3, &status);
+
+	RET(pcb) = status;
 }
 
 /*
@@ -626,6 +650,7 @@ void _sys_init( void ) {
 	_syscalls[ SYS_getppid ]	= _sys_getppid;
 	_syscalls[ SYS_gettime ]	= _sys_gettime;
 	_syscalls[ SYS_getstatus ]	= _sys_getstatus;
+	_syscalls[ SYS_mmap ]	= _sys_mmap;
 
 	// initialize the zombie and waiting queues
 	_q_reset( &_zombie, NULL );
