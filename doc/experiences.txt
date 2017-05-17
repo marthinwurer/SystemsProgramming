@@ -8,7 +8,21 @@ Nathan Castle
 
 Daniel Meiller
 --------------------------------------------------------------------------------
+Over the course of this project, I had lots of problems arising from the
+compiler. I had weird problems where including a function in a compilation would
+cause either bootlooping or weird things to execute and display on the screen.
+Even putting a panic or x86 hlt early wouldn't stop it from bootlooping. This
+was very hard to debug, and I spent lots of time trying to figure these issues,
+when I would've liked to work on the actually networking/programming aspect of
+the project. I attempted to use the Windows Subsystem for Linux and gcc-6.2 as
+well as an Ubuntu 17.04 vm, with both gcc-6.3 and gcc-5.4. If I had to do this
+again I would install an LTS ubuntu version native onto my computer, as it would
+make everything more simple. 
 
+Because nobody in our group worked on a shell, we had to rely on recompiling
+the OS and using different flags when we wanted to test the different modules.
+This worked fine, but meant that our ability to demo things was relatively
+limited.
 
 Benjamin Maitland
 --------------------------------------------------------------------------------
