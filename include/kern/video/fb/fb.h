@@ -36,6 +36,9 @@ int fb_init(VideoFb *fb);
 int fb_clear(VideoFb *fb, VideoCol color);
 
 
+int fb_clearcolsf(VideoFb *fb, uint32_t offset, uint16_t cols, VideoCol color);
+
+
 /**
  * @brief Calculates a pixel offset in a framebuffer at x and y.
  *

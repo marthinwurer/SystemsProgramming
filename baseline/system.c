@@ -26,6 +26,7 @@
 
 // memory map stuff
 #include <kern/memory/memory_map.h>
+extern address_space_t page_directory;
 
 // network stuff
 #include <kern/net/intel.h>
@@ -166,23 +167,22 @@ void _init( void ) {
 	** Console I/O system.
 	*/
 
-	//c_io_init();
 	c_io_init_isr();
 
 	c_clearscreen();
 
-	c_io_init_isr();
 	c_setscroll( 0, 7, CIO_CONTROLLER.current->columns, CIO_CONTROLLER.current->rows );
 	
 	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
 		c_putchar_at(i, 6, '=');
 	}
-	//c_puts_at( 0, 6, "================================================================================" );
-	setup_page_availibility_table();
 
-//
-//	__panic("lololol");
-//		c_getchar();
+	// set up the memory
+	disp_memory_map();
+	setup_page_availibility_table();
+	setup_initial_page_table();
+
+
 	video_dumpInfo(VIDEO_INFO);
 
 	void * address = get_next_page();
@@ -268,6 +268,9 @@ void _init( void ) {
 		_kpanic( "_init", "init() stack setup failed" );
 	}
 
+	// give the initial process the identity pde
+	pcb->memory = page_directory;
+
 	// set up various PCB fields
 	pcb->pid = pcb->ppid = PID_INIT;
 	pcb->prio = P_SYSTEM;
@@ -297,6 +300,7 @@ void _init( void ) {
 
 	// dispatch the first user process
 
+	c_puts("dispatching first\n");
 	_dispatch();
 
 	/*
@@ -307,4 +311,7 @@ void _init( void ) {
 
 	c_puts( "System initialization complete.\n" );
 	c_puts( "-------------------------------\n" );
+
+	// disable autoflush, the redrawProcess will handle flushing
+	CIO_AUTOFLUSH = 0;
 }

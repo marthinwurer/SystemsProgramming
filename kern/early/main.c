@@ -36,28 +36,6 @@
 //
 int main(void) {
 
-	// VCon console;
-
-    
-	// VConCtrl ctrl = (VConCtrl){
-	// 	.current = &console,
-	// 	.mode = VCON_MODE_VGATEXT
-	// };
-
-	// vcon_init(&console, (VConChar*)0x4C00, 25, 80);
-	// vcon_clear(&console);
-
-	// vcon_puts(&console, "Assfaggot bitch\n");
-	// vcon_puts(&console, "WHORE");
-
-	// vcon_putcharAt(&console, '9', 79, 24);
-	// vcon_scroll(&console, 1);
-	
-
-	// vcon_redraw(&ctrl);
-
-	// __asm("hlt");
-
     get_memory_map();
     
     // Initialize the video module
@@ -85,14 +63,6 @@ int main(void) {
 	c_printf(" * Height: %d\n", mode.fb.height);
 	c_printf(" * Scanline: %d\n", mode.fb.pitch);
 	c_printf(" * BPP: %d\n", mode.fb.bpp);
-	c_printf(" * RGB: %d (%d) | %d (%d) | %d (%d)\n", mode.fb.colorspace[0].position,
-	                                                  mode.fb.colorspace[0].mask,
-													  mode.fb.colorspace[1].position,
-	                                                  mode.fb.colorspace[1].mask,
-													  mode.fb.colorspace[2].position,
-	                                                  mode.fb.colorspace[2].mask);
-
-	// __asm("hlt");
 
 	// Set the mode
 
@@ -102,24 +72,17 @@ int main(void) {
 		return EXIT_VIDEO_ERROR;
 	}
 
+	fb_clear(&mode.fb, color_getColor(mode.fb.colorspace, 0xF1, 0x31, 0x27));
+
 	CIO_CONTROLLER.mode = VCON_MODE_GRAPHICS;
 	PaintContext *ctx = &CIO_CONTROLLER.ctx;
 	ctx->drawCol = color_getColor(mode.fb.colorspace, 255, 255, 255);
 	ctx->fillCol = color_getColor(mode.fb.colorspace, 0, 0, 0);
-	ctx->font.glyphs = 256;
-	ctx->font.bytesPerGlyph = 16;
-	ctx->font.height = 16;
-	ctx->font.width = 8;
-	ctx->font.glyphMap = VIDEO_FONTSET;
+	video_defaultFont(&ctx->font);
 	ctx->fb = &VIDEO_MODE->fb;
 
-	CIO_CONTROLLER.current->columns = mode.fb.width / ctx->font.width;
-	CIO_CONTROLLER.current->rows = mode.fb.height / ctx->font.height;
-
-	disp_memory_map();
-
-	vcon_redraw(&CIO_CONTROLLER);
-
+	vcon_resize(CIO_CONTROLLER.current, mode.fb.height / ctx->font.height,
+	                                    mode.fb.width / ctx->font.width);
 
 	return EXIT_SUCCESS;
 

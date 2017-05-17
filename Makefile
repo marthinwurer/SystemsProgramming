@@ -1,6 +1,8 @@
 
 include mk/marker.mk
 
+include mk/verbose.mk
+
 include mk/constants.mk
 
 include includes.default.mk
@@ -33,25 +35,25 @@ BUILDINFO_DEFINES := $(shell $(GENBUILDINFO))
 
 # Compile the c source to assembly
 $(BUILD_DIR)/%.s: %.c $(MARKER)
-	$(CC) $(CFLAGS) -o $@ -S $<
+	$(CC_V) $(CFLAGS) -o $@ -S $<
 
 # Preprocess the assembly source
 $(BUILD_DIR)/%.s: %.S $(MARKER)
-	$(CPP) $(CPPFLAGS) $(USER_OPTIONS) $(BUILDINFO_DEFINES) -o $@ $<
+	$(CPP_V) $(CPPFLAGS) $(USER_OPTIONS) $(BUILDINFO_DEFINES) -o $@ $<
 
 # Compile assembly source to object code
 $(BUILD_DIR)/%.o: %.S $(MARKER)
-	$(CPP) -MD $(CPPFLAGS) $(USER_OPTIONS) $(BUILDINFO_DEFINES) -o $(BUILD_DIR)/$*.s $<
-	$(AS) $(ASFLAGS) -o $@ $(BUILD_DIR)/$*.s -a=$(BUILD_DIR)/$*.lst
-	$(RM) -f $*.s
+	@$(CPP) -MD $(CPPFLAGS) $(USER_OPTIONS) $(BUILDINFO_DEFINES) -o $(BUILD_DIR)/$*.s $<
+	$(AS_V) $(ASFLAGS) -o $@ $(BUILD_DIR)/$*.s -a=$(BUILD_DIR)/$*.lst
+	@$(RM) -f $*.s
 
-$(BUILD_DIR)/%.b: %.s $(MARKER)
-	$(AS) $(ASFLAGS) -o $(BUILD_DIR)/$*.o $< -a=$(BUILD_DIR)/$*.lst
-	$(LD) $(LDFLAGS) -Ttext 0x0 -s --oformat binary -e begtext -o $@ $(BUILD_DIR)/$*.o
+$(BUILD_DIR)/%.b: $(BUILD_DIR)/%.s $(MARKER)
+	$(AS_V) $(ASFLAGS) -o $(BUILD_DIR)/$*.o $< -a=$(BUILD_DIR)/$*.lst
+	$(LD_V) $(LDFLAGS) -Ttext 0x0 -s --oformat binary -e begtext -o $@ $(BUILD_DIR)/$*.o
 
 # Compile C source to object code
 $(BUILD_DIR)/%.o: %.c $(MARKER)
-	$(CC) -MD $(CPPFLAGS) $(USER_OPTIONS) -m32 $(CFLAGS) -o $@ -c $<
+	$(CC_V) -MD $(CPPFLAGS) $(USER_OPTIONS) -m32 $(CFLAGS) -o $@ -c $<
 
 #$(BUILD_DIR)/%.16.o: %.16.c $(MARKER)
 #	$(CC) -MD $(CPPFLAGS) $(USER_OPTIONS) -m16 -s $(CFLAGS) -o $@ -c $<
@@ -70,10 +72,10 @@ IMAGE_SETUP := $(BUILD_DIR)/realprog/prog.b 0x3000 \
                $(BUILD_DIR)/prog.b 0x10000
 
 $(BUILD_DIR)/usb.image: $(IMAGE_BOOTSTRAP) $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
-	$(BUILDIMAGE) -d usb -o $@ -b $(IMAGE_BOOTSTRAP) $(IMAGE_SETUP)
+	$(BUILDIMAGE_V) -d usb -o $@ -b $(IMAGE_BOOTSTRAP) $(IMAGE_SETUP)
 
 $(BUILD_DIR)/floppy.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
-	$(BUILDIMAGE) -d floppy -o $@ -b $(IMAGE_FILES) 0x10000
+	$(BUILDIMAGE_V) -d floppy -o $@ -b $(IMAGE_FILES) 0x10000
 
 
 

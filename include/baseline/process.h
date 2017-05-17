@@ -14,6 +14,7 @@
 #define _PROCESS_H_
 
 #include "common.h"
+#include <kern/memory/memory_map.h>
 
 /*
 ** General (C and/or assembly) definitions
@@ -27,7 +28,7 @@
 ** Start of C-only definitions
 */
 
-#ifdef __SP_KERNEL__
+//#ifdef __SP_KERNEL__
 
 /*
 ** OS-only declarations
@@ -108,6 +109,7 @@ typedef struct pcb {
 	stack_t		*stack;		// per-process runtime stack
 	time_t		wakeup;		// for sleeping processes
 	int32_t		exitstatus;	// holds state of zombie
+	address_space_t	memory; // the virtual memory context for this process
 
 	// 16-bit fields
 	pid_t		pid;		// our pid
@@ -201,7 +203,7 @@ void _pcb_dump( const char *which, pcb_t *pcb );
 */
 void _context_dump( const char *which, context_t *context );
 
-#endif
+//#endif
 
 #endif
 

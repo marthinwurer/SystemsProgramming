@@ -9,6 +9,7 @@
 ** module. 
 **
 */
+#include <baseline/c_io.h>
 
 #include <kern/video/video.h>
 #include <kern/video/globals.h>

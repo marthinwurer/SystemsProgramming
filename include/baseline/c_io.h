@@ -60,6 +60,8 @@
 
 extern VConCtrl CIO_CONTROLLER;
 
+extern int CIO_AUTOFLUSH;
+
 
 /*
 ** Name:	c_io_init
@@ -70,6 +72,12 @@ extern VConCtrl CIO_CONTROLLER;
 void c_io_init( void );
 
 void c_io_init_isr(void);
+
+
+/**
+ * @brief Flush the CIO VCon to the screen
+ */
+void c_flush(void);
 
 /*****************************************************************************
 **

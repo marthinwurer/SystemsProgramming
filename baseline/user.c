@@ -15,8 +15,11 @@
 #include <baseline/user.h>
 
 #include <kern/net/net_test.h>
+#include <kern/net/intel.h>
 #include <baseline/c_io.h>
 #include <kern/ioapi/file.h>
+#include <kern/vconsole/control.h>
+
 /*
 ** Support functions
 */
@@ -916,14 +919,17 @@ int32_t idle( void *arg ) {
 }
 
 int32_t redrawProcess(void *arg) {
-
-	
+	(void)arg;
+	// disable autoredraw, we will do the redrawing here
+	//c_set_auto_redraw(0);
+	//CIO_AUTOFLUSH = 0;
 
 	for (;;) {
-		if (CIO_CONTROLLER.dirty) {
-			vcon_redraw(&CIO_CONTROLLER);
-			CIO_CONTROLLER.dirty = 0;
-		}
+		c_flush();
+		//if (CIO_CONTROLLER.dirty) {
+			//vcon_redraw(&CIO_CONTROLLER);
+		//	CIO_CONTROLLER.dirty = 0;
+		//}
 		sleep(10);
 	}
 
@@ -967,11 +973,13 @@ int32_t init( void *arg ) {
 	}
 	swritech( '+' );
 
+	// startup network daemons as system
+	spawn(nic_rx_daemon, 0, P_SYSTEM);
+	spawn(nic_tx_daemon, 0, P_SYSTEM);
+
 	// Launch test program for networking
-	//pid = spawn(net_test_main, 0, P_HIGH);
-	//if(pid < 0) {
-	//	cwrites("init, spawn() net_test_main failed\n");
-	//}
+	spawn(net_test_main, 0, P_SYSTEM);
+
 	//swritech('{');
 	spawn(redrawProcess, 0, P_SYSTEM);
     
