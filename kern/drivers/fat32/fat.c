@@ -334,3 +334,28 @@ status_t grab_next_free_clusters(PFAT_CONTEXT ctx, int32_t filesize, int32_t* st
     int32_t reserve = 0xFFFFFFFF;
     ((PIO_DEVICE)ctx->driver)->write(starting_offset-size, &size, &reserve);
 }
+
+status_t expand_cluster_in_fat(PFAT_CONTEXT ctx, int32_t start_cluster, int32_t newsize) {
+    //first traverse through to end of cluster chain
+    int32_t starting_offset;
+    int32_t size = 4;
+    byte_offset_fat(ctx, 0, &starting_offset);
+    starting_offset += start_cluster*4;
+    int32_t active_offset = starting_offset;
+    char buffer[4];
+    int32_t tail_cluster = 0;
+    ((PIO_DEVICE)ctx->driver)->read(active_offset, &size, &buffer);
+    while(((buffer[2] << 8 ) | buffer[3]) < 0xF8) {
+        tail_cluster = active_offset;
+        int32_t cluster = (buffer[20] << 24) | (buffer[21] << 16) | (buffer[26] << 8) | buffer[27];
+        active_offset = starting_offset + 4 * cluster;
+        ((PIO_DEVICE)ctx->driver)->read(active_offset, &size, &buffer);
+    }
+    //use grab_next_free_cluster to get one or more clusters
+    int32_t newtail = 0;
+    grab_next_free_clusters(ctx, newsize, &newtail);
+    //replace end_chain entry with newly returned entry
+    newtail = newtail << 1; //TODO - re-examine this math
+    ((PIO_DEVICE)ctx->driver)->write(tail_cluster, &size, &newtail);
+    return E_SUCCESS;
+}
