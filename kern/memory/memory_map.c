@@ -221,7 +221,7 @@ void setup_initial_page_table(void){
 			cur_pt[jj] = (ii << 22) | ( jj << 12 ) | PAGE_FLAGS;
 
 		}
-		c_printf("pte:%x\n", cur_pt[0]);
+		// c_printf("pte:%x\n", cur_pt[0]);
 	}
 
 	// store the identity mapped first entry
@@ -260,9 +260,9 @@ address_space_t set_page_directory(address_space_t directory){
 				: //clobber list    /* optional */
 	);
 
-	c_printf("old pd: %x\n",old);
+	// c_printf("old pd: %x\n",old);
 //	__panic("done setting pd");
-	c_printf("enabling paging\n");
+	// c_printf("enabling paging\n");
 
 	// enable paging
 	__asm__
