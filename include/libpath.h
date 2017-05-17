@@ -34,6 +34,21 @@ void io_path_keep_n_nodes(char* path, unsigned int n, char* out);
 void io_path_disc_n_nodes(char* path, unsigned int n, char* out);
 
 /**
+ * \brief returns path with first component removed
+ * \param path [in]
+ * \returns new path with first component removed.
+ *          e.g. \mount\nathan\c -> nathan\c
+ */
+char* io_path_tail(char* path);
+
+/**
+ * \brief returns the first part of a path
+ * \param path
+ * \returns path component. e.g. \mount\nathan\c -> mount
+ */
+char* io_path_head(char* path);
+
+/**
  * \brief compares two paths, returns 0 if they're the same.
  *          canonicalized in this case means the paths will
  *          be converted to a standard format before comparison.

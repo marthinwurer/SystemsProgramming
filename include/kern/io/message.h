@@ -5,6 +5,7 @@ typedef struct _io_message {
     char*           path; ///< Path for the message
     void*           filesystem; ///< Reference to associated filesystem; PIO_FILESYSTEM
     void*           device; ///< Reference to associated device; PIO_DEVICE
+    void*           mount; ///< Regerence to associated mount point; PIO_MOUNT
     char*           buffer; ///< Data buffer for storing input/output data
     BSIZE           length; ///< Length of buffer
     status_t        status; ///< Current status of message; intended to support cancelation by middleware, etc.

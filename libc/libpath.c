@@ -48,6 +48,14 @@ void io_path_keep_n_nodes(char* path, unsigned int n, char* out) {
     }
 }
 
+char* io_path_tail(char* path) {
+    return NULL; //TODO implement
+}
+
+char* io_path_head(char* path) {
+    return NULL; //TODO implement
+}
+
 void io_path_disc_n_nodes(char* path, unsigned int n, char* out) {
     int remaining = io_path_count_nodes(path) - n;
     io_path_keep_n_nodes(path, remaining, out);

@@ -60,6 +60,7 @@ typedef enum _file_prop {
     IOPROP_SYSTEM, //FAT32
     IOPROP_ARCHIVE, //FAT32
     IOPROP_LOCKED, //FAT32
+    IOPROP_FS_GRAB, 
     IOPROP_PROP
 } IOPROP, *PIOPROP;
 

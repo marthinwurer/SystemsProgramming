@@ -4,6 +4,7 @@ typedef struct _io_mount {
     IOHANDLE        handle; ///< Handle associated with the mount point
     char*           name; ///< Name associated with the mount point
     char*           path; ///< Path of the mount point
+    void*           fs_grab_bag; ///< generic storage for use by filesystem
     IOHANDLE        filesystem; ///< Handle referring to a filesystem
     IOHANDLE        device; ///< Handle referring to a device
 } IO_MOUNT, *PIO_MOUNT;

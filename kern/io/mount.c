@@ -45,6 +45,9 @@ status_t _io_mp_setprop(PIO_MOUNT mp, IOPROP prop, void* value, int32_t length){
             PIOHANDLE pvd = value;
             mp->device = *pvd;
             break;
+        case IOPROP_FS_GRAB: ;
+            mp->fs_grab_bag = value;
+            break;
         default:
             return E_BAD_ARG;
     }
@@ -56,6 +59,7 @@ IO_MOUNT _io_mp_init_null(){
         .handle = IOHANDLE_NULL,
         .name = (char*)NULL,
         .path = (char*)NULL,
+        .fs_grab_bag = (void*)NULL,
         .filesystem = IOHANDLE_NULL,
         .device = IOHANDLE_NULL
     };
@@ -66,6 +70,7 @@ IO_MOUNT _io_mp_init_handle(IOHANDLE handle){
         .handle = handle,
         .name = (char*)NULL,
         .path = (char*)NULL,
+        .fs_grab_bag = (void*)NULL,
         .filesystem = IOHANDLE_NULL,
         .device = IOHANDLE_NULL
     };
@@ -105,6 +110,7 @@ status_t _io_mp_iterate(PIOHANDLE out, int index) {
     *out = _IO_MP_TABLE[index].handle;
     return E_SUCCESS;
 }
+
 status_t _io_mp_getprop(PIO_MOUNT mp, IOPROP prop, void* value, PBSIZE plength){
     //verify length
     if (*plength < 0){

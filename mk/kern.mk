@@ -7,7 +7,7 @@
 # U_S_OBJ := realmode.o
 # U_S_OBJ := $(addprefix $(BUILD_DIR)/kern/,$(U_S_OBJ))
 
-KERN_DRV_OBJ := ramdisk/ramdisk.o rawfs/raw.o
+KERN_DRV_OBJ := ramdisk/ramdisk.o rawfs/raw.o fat32/fat.o fat32/pubfat.o fat32/time.o
 KERN_DRV_OBJ := $(addprefix $(BUILD_DIR)/kern/drivers/, $(KERN_DRV_OBJ))
 KERN_API_OBJ := simple_mount.o file.o
 KERN_API_OBJ := $(addprefix $(BUILD_DIR)/kern/ioapi/, $(KERN_API_OBJ))

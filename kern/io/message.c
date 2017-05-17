@@ -59,6 +59,7 @@ IO_MESSAGE _io_msg_init_null(){
         .device = (void*)NULL,
         .buffer = (void*)NULL,
         .length = (int32_t)NULL,
+        .mount = (void*)NULL,
         .status = E_NO_DATA
     };
 }
@@ -71,6 +72,7 @@ IO_MESSAGE _io_msg_init_handle(IOHANDLE handle){
         .device = (void*)NULL,
         .buffer = (void*)NULL,
         .length = (int32_t)NULL,
+        .mount = (void*)NULL,
         .status = E_NO_DATA
     };
 }

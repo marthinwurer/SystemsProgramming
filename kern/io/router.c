@@ -102,6 +102,7 @@ status_t match_path(IOHANDLE handle, PIOHANDLE filesystem, PIOHANDLE device){
             if (mismatch == 0){
                 *filesystem = ((PIO_MOUNT)HANDLE_TABLE[mount_handle].object)->filesystem;
                 *device = ((PIO_MOUNT)HANDLE_TABLE[mount_handle].object)->device;
+                msgpath->mount = HANDLE_TABLE[mount_handle].object;
                 return E_SUCCESS;
             }
         }
@@ -301,7 +302,7 @@ status_t IO_EXECUTE(IOHANDLE handle){
     //associate file system & device
     PIOHANDLE fs = NULL;
     PIOHANDLE dev = NULL;
-    status_t stat = match_path(handle, fs, dev);
+    status_t stat = match_path(handle, fs, dev); //also updates mount link
     if (stat != E_SUCCESS){
         return stat;
     }
