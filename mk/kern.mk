@@ -8,7 +8,6 @@ KERN_OBJ := early/_early.o \
             pci/pci.o \
             net/intel.o \
             net/net_test.o \
-            net/udp.o \
             early/memory_map_setup.o \
             early/video.o \
             graphics/shapes/rect.o \

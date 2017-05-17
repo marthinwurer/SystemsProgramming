@@ -961,15 +961,13 @@ int32_t init( void *arg ) {
 	}
 	swritech( '+' );
 
-	// startup network daemons
+	// startup network daemons as system
 	spawn(nic_rx_daemon, 0, P_SYSTEM);
 	spawn(nic_tx_daemon, 0, P_SYSTEM);
 
 	// Launch test program for networking
-	pid = spawn(net_test_main, 0, P_SYSTEM);
-	if(pid < 0) {
-		cwrites("init, spawn() net_test_main failed\n");
-	}
+	spawn(net_test_main, 0, P_SYSTEM);
+
 	//swritech('{');
 	spawn(redrawProcess, 0, P_SYSTEM);
 

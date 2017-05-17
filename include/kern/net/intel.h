@@ -1,8 +1,8 @@
 #ifndef _KERN_NET_INTEL_H
 #define _KERN_NET_INTEL_H
 
-#include <kern/memory/memory_map.h> //PAGE_SIZE
 #include <baseline/common.h>
+#include <baseline/ulib.h>
 
 /**
  * Intel Network driver. Contains needed structures and methods to perform network functions. 
@@ -209,15 +209,8 @@ typedef struct {
 } arp_entry_t;
 
 /**
- * Buffer to store data in once received
+ * IP protocols that can be used in send_ipv4()
  */
-// struct rx_buf {
-// 	struct rx_buf* next;
-// 	uint32_t length;
-// 	uint32_t curr_ptr;
-// 	void* data[NET_INTEL_RX_BUF_MAX_LEN];
-// };
-
 typedef enum {
 	ip_icmp = 0x01,
 	ip_igmp = 0x02,
