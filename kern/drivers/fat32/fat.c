@@ -157,6 +157,35 @@ FAT_DENTRY parse_dirtable_entry(PFAT_CONTEXT ctx, int32_t start, int32_t* end, i
     return (FAT_DENTRY){};
 }
 
+status_t free_cluster_chain(PFAT_CONTEXT ctx, int32_t cluster_start) {
+    //find first cluster
+    int32_t byte_offset;
+    byte_offset_for_fat(ctx, 0, &byte_offset); //gets to the fat
+    byte_offset += cluster_start * 4; //4 bytes per cluster
+    
+    //read in data
+    char buffer[4];
+    int32_t size = 4;
+    int32_t next = 0;
+    FAT_ENTRY entry = FAT_CLUST_POINTER;
+    while (entry != FAT_CLUST_BAD && entry != FAT_CLUST_FREE && entry != FAT_CLUST_RESERVED) {
+        int32_t value = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+        ((PIO_DEVICE)ctx->driver)->read(byte_offset, &size, buffer);
+        entry = classify_fat_entry(ctx, value, &next);
+        buffer[0] = 0x0; buffer[1] = 0x0; buffer[2] = 0x0; buffer[3] = 0x0;
+        ((PIO_DEVICE)ctx->driver)->write(byte_offset, &size, buffer);
+        if (entry == FAT_CLUST_LAST) {
+            return E_SUCCESS;
+        }
+        //extract cluster number
+        int32_t cluster_num = (next >> 4) & 0xFFFFFFF;
+        //then look up offset in table for cluster
+        byte_offset_for_fat(ctx, 0, &byte_offset);
+        byte_offset += 4 * cluster_num;
+    }
+    return E_SUCCESS;
+}
+
 //TODO - handle case where file doesn't already exist
 status_t update_dentry(PFAT_CONTEXT ctx, int32_t parent_dir_cluster, FAT_DENTRY updated) {
     //read in existing d-entry
@@ -208,7 +237,7 @@ int32_t cluster_num_for_byte_offset(PFAT_CONTEXT ctx, int32_t offset) {
     return newoffset /= ctx->cluster_size;
 }
 
-FAT_ENTRY classify_clust(PFAT_CONTEXT ctx, int32_t cluster, int32_t* next) {
+FAT_ENTRY classify_fat_entry(PFAT_CONTEXT ctx, int32_t cluster, int32_t* next) {
     int32_t offset_fat = 0; byte_offset_fat(ctx, 0, &offset_fat);
     int32_t size_entry = 4; 
     char* buffer = malloc(size_entry);
@@ -263,7 +292,7 @@ status_t traverse_and_find_file_rec_r(PFAT_CONTEXT ctx, int32_t* start, char* pa
             current_clust = cluster_num_for_byte_offset(ctx, newstart);
             //look up entry in fat
             int32_t next_clust = 0;
-            FAT_ENTRY type = classify_clust(ctx, current_clust, &next_clust);
+            FAT_ENTRY type = classify_fat_entry(ctx, current_clust, &next_clust);
             //if entry is end of block, return file not found
             //if entry is pointer, newstart = byteoffset for newblock
             if (type == FAT_CLUST_POINTER) {
