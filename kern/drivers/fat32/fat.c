@@ -359,3 +359,18 @@ status_t expand_cluster_in_fat(PFAT_CONTEXT ctx, int32_t start_cluster, int32_t 
     ((PIO_DEVICE)ctx->driver)->write(tail_cluster, &size, &newtail);
     return E_SUCCESS;
 }
+
+status_t write_into_cluster_chain(PFAT_CONTEXT ctx, int32_t cluster_start, int32_t write_size, int32_t offset, char* buffer) {
+    //TODO - implement full chaining support
+   int32_t byte_offset;
+   byte_offset_for_cluster(ctx, cluster_start, &byte_offset);
+
+   if (write_size < 32 * 1024) {
+       return ((PIO_DEVICE)ctx->driver)->write(byte_offset + offset, write_size, buffer);
+   } //else we need to do chaining
+   return E_NOT_IMPLEMENTED;
+}
+
+status_t wipe_dentry(PFAT_CONTEXT ctx, int32_t parent_dir_cluster, char* name) {
+    return E_NOT_IMPLEMENTED;
+}
