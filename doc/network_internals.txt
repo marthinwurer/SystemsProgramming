@@ -1,0 +1,87 @@
+Module: Networking
+Contributors: Daniel Meiller
+--------------------------------------------------------------------------------
+I wrote a driver for the Intel i82557 network interface card. I also implemented
+a minimalistic network stack. 
+--------------------------------------------------------------------------------
+Overall Design
+
+I made the decision to focus on making this driver work for a single process at
+a time, not dealing with multiple processes trying to utilize the NIC. Dealing
+with synchronization would’ve taken away a lot of time from the actual
+networking aspect of the project, and that is what I wanted to focus the
+majority of my time on. Because nobody on our team implemented a shell, or
+utilizes the network capabilities, this works out. I can run one test program
+that uses the network, and know I’m guaranteed to have exclusive access to it.
+
+Another decision I made was to use the simplified mode (SF) for the command
+receive units. This basically means any data that I transmit or receive must be
+contiguous after the command/receive headers. While this is simple, it is also
+restrictive. For example, when creating a packet, I have a function that will
+take data and make/send an ethernet frame with the data. I have other functions
+that create, for example, an IP header with data, or an ARP header. When these
+functions call the main ethernet send function, it has to memcpy() into the
+contiguous memory space following the ethernet header. This causes a lot of
+memory copies that could be avoided by using the flexible mode. For the scope of
+this project, I think trading performance for simplicity is well worth it, as
+I would rather focus on getting more functionality working than extensively
+optimizing the execution.
+--------------------------------------------------------------------------------
+Commands
+
+I took a simple approach to sending commands to the NIC. I have a circularly
+linked list of Command Blocks (CB). When I send single commands, I turn on the
+end of list bit (EL) so the command unit (CU) will stop after executing the next
+command. I can send multiple commands in a row by only setting the EL bit on the
+last one. I do this for issuing the configure and set individual address
+commands during initialization. After this, the only commands I issue are
+transmit commands, which all get their EL bit set. In order to reclaim the space
+used by the finalized CBs, I occasionally (through the use of a daemon or when
+requested by the get_next_cb routine) go through the list of CBs starting at the
+last “cleaned” CB. I stop once I reach a CB that hasn’t been finalized. This
+frees up CBs for other uses. 
+--------------------------------------------------------------------------------
+Receive
+
+The receive frame area (RFA) consists of a linked list of receive frame
+descriptors (RFD). This allows the NIC to receive a burst of packets and then be
+processed later. In user.c I start an rx daemon process. This monitors the RFA,
+and will process new data as it comes in. As is processes one, it adds an
+additional buffer to the end of the RFD list and frees the one it just worked
+on. This allows for a kind of sliding frame for receiving packets. 
+--------------------------------------------------------------------------------
+Ethernet
+
+I utilize the configure command and the set individual address commands to setup
+the NIC to automatically insert the source hardware address and CRC calculation
+into my transmitted ethernet frames. I have a function that will send an
+ethernet frame (send_packet), and this gets utilized by the other upper layers
+that will pass their own headers and data to this function. 
+--------------------------------------------------------------------------------
+ARP
+
+There are 3 parts to ARP in my driver, ARP requests, ARP replies, and the ARP
+table. When I receive a packet, I check if it is an ARP packet. If it is, I
+record the sender IP and sender ethernet address into the ARP table, and in the
+case of an ARP request, I send back a reply. I also have the ability to send arp
+requests, which I use if I can’t find the destination IP address in the ARP
+table. 
+
+The ARP table is a fixed size hash table with open addressing and linear
+probing. The hash function is pretty bad, so collisions will be common. I don’t
+see this as an issue, and the performance for collisions is relatively quick,
+and for the case of hooking up directly to the operating system with one other
+system, the ARP table will most likely have at most one entry. The ARP table
+will either add (if the IP is new) or update (if the IP has been recorded in the
+table before whenever an ARP packet is received. 
+--------------------------------------------------------------------------------
+IP
+
+IP packets are sent using send_ipv4. There is not currently a way for user
+processes to receive data, it is handled in the daemon. The daemon will respond
+to arp requests, although it does it synchronously. For certain packet types 
+(TCP, UDP, ICMP, IGMP) there is a short print statement when something is
+received. There is also a compiler flag option (NETWORK_DUMP) that will print
+out all received frames in a hexdump format. The hexdump function is
+configurable to different bytes per line, but is set at 16 for now to match the
+output of Wireshark.
