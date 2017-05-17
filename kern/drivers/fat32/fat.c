@@ -6,6 +6,10 @@
 #include <kern/drivers/fat32/fat.h>
 #include <kern/io/device.h>
 #include <libpath.h>
+#include <kern/drivers/fat32/time.h>
+
+status_t traverse_and_find_file_rec_r(PFAT_CONTEXT ctx, int32_t* start, char* path, FAT_DENTRY* out);
+
 /**
  * Calculation: 
  *      first sector: BIOS boot entry: 512 bytes
@@ -59,6 +63,27 @@ FAT_DATE_PACKED date_from_bytes(char b1, char b2) {
     };
 }
 
+//hour: 5bits, minute: 6bits, seconds: 5bits
+void write_fat32_time(PFAT_CONTEXT ctx, FAT32TIME time, int32_t starting_offset) {
+    char bytes[2];
+    bytes[0] = time.hour << 3;
+    bytes[0] = bytes[0] | ((time.minute >> 3)  & 0x7);
+    bytes[1] = time.minute << 5;
+    bytes[1] = bytes[1] | (time.seconds & 0x1F);
+    int32_t size = 2;
+    ((PIO_DEVICE)ctx->driver)->write(starting_offset, &size, &bytes);
+}
+//year: 7 bits. Month: 4 bits. Day: 5 bits
+void write_fat32_date(PFAT_CONTEXT ctx, FAT32TIME date, int32_t starting_offset) {
+    char bytes[2];
+    bytes[0] = date.year << 1;
+    bytes[0] = bytes[0] | ((date.month >> 3) & 0x1);
+    bytes[1] = date.month << 4;
+    bytes[1] = bytes[1] | (date.day & 0x1F);
+    int32_t size = 2;
+    ((PIO_DEVICE)ctx->driver)->write(starting_offset, &size, &bytes);
+}
+
 //starts at a position on disk (ideally the start of a directory entry)
 //and reads it, building up a FAT_DENTRY and ultimately returning byte offset 
 //of the next block entry in the table.
@@ -71,7 +96,7 @@ FAT_DENTRY parse_dirtable_entry(PFAT_CONTEXT ctx, int32_t start, int32_t* end, i
     while (start - start_start < ctx->cluster_size) { //sanity check... don't read past cluster
         int32_t delength = 32;
         char* debuffer = malloc(32);
-        status_t stat = ((PIO_DEVICE)(ctx->driver))->read(start, &delength, &debuffer);
+        ((PIO_DEVICE)(ctx->driver))->read(start, &delength, &debuffer);
         if (delength != 32) { return (FAT_DENTRY){}; }
         //is this a name entry or a file/dir entry?
         if (debuffer[11] == 0x0f) {
@@ -94,7 +119,7 @@ FAT_DENTRY parse_dirtable_entry(PFAT_CONTEXT ctx, int32_t start, int32_t* end, i
                 *end = start + 32;
                 return (FAT_DENTRY){};
                 //end of table reached, return error
-            } else if (debuffer[0] == 0xe5) {
+            } else if (debuffer[0] == 0xe && debuffer[1] == 0x5) {
                 //unused entry, return error
                 *end = start + 32;
                 return (FAT_DENTRY){};
@@ -104,7 +129,7 @@ FAT_DENTRY parse_dirtable_entry(PFAT_CONTEXT ctx, int32_t start, int32_t* end, i
                 //get attributes
                 FAT_DE_ATTRIBUTE t =(FAT_DE_ATTRIBUTE)debuffer[1];
                 //get times
-                int32_t creation_secs = debuffer[13];
+                //int32_t creation_secs = debuffer[13]; ignoring for now
                 FAT_TIME_PACKED created_time = time_from_bytes(debuffer[14], debuffer[15]);
                 FAT_DATE_PACKED created_date = date_from_bytes(debuffer[16], debuffer[17]);
                 FAT_DATE_PACKED read_date = date_from_bytes(debuffer[18], debuffer[19]);
@@ -122,7 +147,6 @@ FAT_DENTRY parse_dirtable_entry(PFAT_CONTEXT ctx, int32_t start, int32_t* end, i
                         .filesize = filesize,
                         .cluster_start = cluster,
                         .child_count = -1,
-                        .byte_offset_start = -1,
                         .cluster_parent_de = dir_cluster,
                         .attr = t
                 };
@@ -130,6 +154,78 @@ FAT_DENTRY parse_dirtable_entry(PFAT_CONTEXT ctx, int32_t start, int32_t* end, i
         }
         start += delength;
     }
+    return (FAT_DENTRY){};
+}
+
+status_t free_cluster_chain(PFAT_CONTEXT ctx, int32_t cluster_start) {
+    //find first cluster
+    int32_t byte_offset;
+    byte_offset_fat(ctx, 0, &byte_offset); //gets to the fat
+    byte_offset += cluster_start * 4; //4 bytes per cluster
+    
+    //read in data
+    char buffer[4];
+    int32_t size = 4;
+    int32_t next = 0;
+    FAT_ENTRY entry = FAT_CLUST_POINTER;
+    while (entry != FAT_CLUST_BAD && entry != FAT_CLUST_FREE && entry != FAT_CLUST_RESERVED) {
+        int32_t value = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+        ((PIO_DEVICE)ctx->driver)->read(byte_offset, &size, buffer);
+        entry = classify_fat_entry(ctx, value, &next);
+        buffer[0] = 0x0; buffer[1] = 0x0; buffer[2] = 0x0; buffer[3] = 0x0;
+        ((PIO_DEVICE)ctx->driver)->write(byte_offset, &size, buffer);
+        if (entry == FAT_CLUST_LAST) {
+            return E_SUCCESS;
+        }
+        //extract cluster number
+        int32_t cluster_num = (next >> 4) & 0xFFFFFFF;
+        //then look up offset in table for cluster
+        byte_offset_fat(ctx, 0, &byte_offset);
+        byte_offset += 4 * cluster_num;
+    }
+    return E_SUCCESS;
+}
+
+//TODO - handle case where file doesn't already exist
+status_t update_dentry(PFAT_CONTEXT ctx, int32_t parent_dir_cluster, FAT_DENTRY updated) {
+    //read in existing d-entry
+    int32_t byte_offset; //get to parent directory
+    status_t stat_h = byte_offset_for_cluster(ctx, parent_dir_cluster, &byte_offset);
+    //call parse_dir until we get the matching d-entry
+    FAT_DENTRY old;
+    HANDLED(traverse_and_find_file_rec_r(ctx, &byte_offset, updated.name, &old));
+    FAT32TIME newtime;
+    //go through and compare changes
+    if (old.created != updated.created) {
+        //generate FAT-style time
+        newtime = unix_to_fattime(updated.created);
+        write_fat32_time(ctx, newtime, byte_offset + 14);
+        write_fat32_date(ctx, newtime, byte_offset + 16);
+        //write changes as appropriate
+    }
+    if (old.read != updated.read){
+        //generate FAT-style time
+        newtime = unix_to_fattime(updated.read);
+        write_fat32_date(ctx, newtime, byte_offset + 18);
+        //write changes
+    }
+    if (old.updated != updated.updated) {
+        //generate FAT-style time
+        newtime = unix_to_fattime(updated.updated);
+        write_fat32_time(ctx, newtime, byte_offset + 22);
+        write_fat32_date(ctx, newtime, byte_offset + 24);
+        //write changes
+    }
+    if (old.filesize != updated.filesize) {
+        int32_t size = 4;
+        HANDLED(((PIO_DEVICE)ctx->driver)->write(byte_offset + 28, &size, &updated.filesize)); 
+    }
+    if (old.attr != updated.attr) {
+        char flags = (char) updated.attr;
+        int32_t size = 1;
+        HANDLED(((PIO_DEVICE)ctx->driver)->write(byte_offset + 1, &size, &flags));
+    }
+    return E_SUCCESS;
 }
 
 int32_t cluster_num_for_byte_offset(PFAT_CONTEXT ctx, int32_t offset) {
@@ -141,7 +237,7 @@ int32_t cluster_num_for_byte_offset(PFAT_CONTEXT ctx, int32_t offset) {
     return newoffset /= ctx->cluster_size;
 }
 
-FAT_ENTRY classify_clust(PFAT_CONTEXT ctx, int32_t cluster, int32_t* next) {
+FAT_ENTRY classify_fat_entry(PFAT_CONTEXT ctx, int32_t cluster, int32_t* next) {
     int32_t offset_fat = 0; byte_offset_fat(ctx, 0, &offset_fat);
     int32_t size_entry = 4; 
     char* buffer = malloc(size_entry);
@@ -151,49 +247,56 @@ FAT_ENTRY classify_clust(PFAT_CONTEXT ctx, int32_t cluster, int32_t* next) {
         return FAT_CLUST_FREE;
     } else if (buffer[0] == 0 && buffer[1] == 0 && buffer[2] == 0 && buffer[3] == 1) {
         return FAT_CLUST_RESERVED;
-    } else if (buffer[3] & 2 == 2) {
+    } else if ((buffer[3] & 2) == 2) {
         *next = 99; //TODO - actually do this
         return FAT_CLUST_POINTER;
-    } else if (buffer[3] >= 0xF8 && buffer[3] <= 0xFF) {
+    } else if (buffer[3] == 0xF) {
         return FAT_CLUST_LAST;
     } else {
         return FAT_CLUST_BAD;
     }
 }
 
+//in case I don't care about new start byte
+status_t traverse_and_find_file_rec(PFAT_CONTEXT ctx, int32_t start, char* path, FAT_DENTRY* out) {
+    int32_t junk = start;
+    return traverse_and_find_file_rec_r(ctx, &junk, path, out);
+}
+
 /** 
  * pre-condition: start is pointing at the head of a directory table
+ * TODO - verify that start is updated to be the first byte of the file dentry (not name dentry)
  */
-status_t traverse_and_find_file_rec(PFAT_CONTEXT ctx, int32_t start, char* path, FAT_DENTRY* out) {
+status_t traverse_and_find_file_rec_r(PFAT_CONTEXT ctx, int32_t* start, char* path, FAT_DENTRY* outv) {
     //base case: empty path (shouldn't happen, return err)
     //pull out first part of path
     char* pathhead = io_path_head(path); //note: need to free
     char* pathtail = io_path_head(path);
     //scan through directory, examining pathnames
-    int32_t newstart = start;
+    int32_t newstart = *start;
     int32_t current_clust = cluster_num_for_byte_offset(ctx, newstart);
     FAT_DENTRY file = parse_dirtable_entry(ctx, newstart, &newstart, current_clust);
     while (file.attr != NULL) {
         if (io_path_canonicalized_compare(pathhead, file.name) == 0) {
-            if (file.attr & 0x10 == FAT_DE_DIRECTORY && pathtail != NULL){ 
-                return traverse_and_find_file_rec(ctx, newstart, pathtail, out);
-            } else if (file.attr & 0x10 != FAT_DE_DIRECTORY && pathtail == NULL) {
-                *out = file;
+            if ((file.attr & 0x10) == FAT_DE_DIRECTORY && pathtail != NULL){ 
+                return traverse_and_find_file_rec_r(ctx, &newstart, pathtail, outv);
+            } else if ((file.attr & 0x10) != FAT_DE_DIRECTORY && pathtail == NULL) {
+                *outv = file;
                 return E_SUCCESS;
             }
             return E_NO_MATCH;
         }
         //correct byte offset for next iter if necessary:
-        if (newstart - start > ctx->cluster_size) {
+        if (newstart - *start > ctx->cluster_size) {
             //find current cluster
             current_clust = cluster_num_for_byte_offset(ctx, newstart);
             //look up entry in fat
             int32_t next_clust = 0;
-            FAT_ENTRY type = classify_clust(ctx, current_clust, &next_clust);
+            FAT_ENTRY type = classify_fat_entry(ctx, current_clust, &next_clust);
             //if entry is end of block, return file not found
             //if entry is pointer, newstart = byteoffset for newblock
             if (type == FAT_CLUST_POINTER) {
-                start = next_clust;
+                *start = next_clust;
                 newstart = next_clust;
             } else {
                 return E_NO_MATCH;
@@ -213,5 +316,61 @@ status_t find_file(PFAT_CONTEXT ctx, char* path, FAT_DENTRY* out) {
 }
 
 status_t read_next_dentry(PFAT_CONTEXT ctx, FAT_DENTRY* parent, int32_t offset, FAT_DENTRY* dentry) {
+    return E_NOT_IMPLEMENTED;
+}
+
+status_t grab_next_free_clusters(PFAT_CONTEXT ctx, int32_t filesize, int32_t* start) {
+    //TODO - update to support multi-cluster initial allocations
+    //get fat offset
+    int32_t starting_offset;
+    int32_t size = 4;
+    byte_offset_fat(ctx, 0, &starting_offset);
+    starting_offset += 2*4; //skip first two entries due to special clusters
+    char buffer[4];
+    while (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0) {
+        ((PIO_DEVICE)ctx->driver)->read(starting_offset, &size, &buffer);
+        starting_offset += 4;
+    }
+    int32_t reserve = 0xFFFFFFFF;
+    ((PIO_DEVICE)ctx->driver)->write(starting_offset-size, &size, &reserve);
+}
+
+status_t expand_cluster_in_fat(PFAT_CONTEXT ctx, int32_t start_cluster, int32_t newsize) {
+    //first traverse through to end of cluster chain
+    int32_t starting_offset;
+    int32_t size = 4;
+    byte_offset_fat(ctx, 0, &starting_offset);
+    starting_offset += start_cluster*4;
+    int32_t active_offset = starting_offset;
+    char buffer[4];
+    int32_t tail_cluster = 0;
+    ((PIO_DEVICE)ctx->driver)->read(active_offset, &size, &buffer);
+    while(((buffer[2] << 8 ) | buffer[3]) < 0xF8) {
+        tail_cluster = active_offset;
+        int32_t cluster = (buffer[20] << 24) | (buffer[21] << 16) | (buffer[26] << 8) | buffer[27];
+        active_offset = starting_offset + 4 * cluster;
+        ((PIO_DEVICE)ctx->driver)->read(active_offset, &size, &buffer);
+    }
+    //use grab_next_free_cluster to get one or more clusters
+    int32_t newtail = 0;
+    grab_next_free_clusters(ctx, newsize, &newtail);
+    //replace end_chain entry with newly returned entry
+    newtail = newtail << 1; //TODO - re-examine this math
+    ((PIO_DEVICE)ctx->driver)->write(tail_cluster, &size, &newtail);
+    return E_SUCCESS;
+}
+
+status_t write_into_cluster_chain(PFAT_CONTEXT ctx, int32_t cluster_start, int32_t write_size, int32_t offset, char* buffer) {
+    //TODO - implement full chaining support
+   int32_t byte_offset;
+   byte_offset_for_cluster(ctx, cluster_start, &byte_offset);
+
+   if (write_size < 32 * 1024) {
+       return ((PIO_DEVICE)ctx->driver)->write(byte_offset + offset, write_size, buffer);
+   } //else we need to do chaining
+   return E_NOT_IMPLEMENTED;
+}
+
+status_t wipe_dentry(PFAT_CONTEXT ctx, int32_t parent_dir_cluster, char* name) {
     return E_NOT_IMPLEMENTED;
 }

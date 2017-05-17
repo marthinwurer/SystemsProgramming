@@ -15,9 +15,6 @@ typedef enum _fat_clust_stat {
     FAT_CLUST_LAST
 } FAT_ENTRY;
 
-//takes a cluster entry and determines its type
-FAT_ENTRY classify_fat_entry(int32_t fat_entry_value); 
-
 typedef struct _ft_fsinfo {
     char compatguard[4]; //default 0x52 0x52 0x61 0x41
     char reserved[480]; //default: 0
@@ -127,7 +124,6 @@ typedef struct _ft_de_inmem {
     int32_t updated;
     int32_t filesize;
     int32_t cluster_start;
-    int32_t byte_offset_start;
     int32_t cluster_parent_de;
     int32_t child_count;
     FAT_DE_ATTRIBUTE attr;
@@ -144,3 +140,8 @@ typedef struct _ft_ctxt_block {
     int32_t     cluster_size;
     int32_t     clusters_per_fat;
 } FAT_CONTEXT, *PFAT_CONTEXT;
+
+//takes a cluster entry and determines its type
+FAT_ENTRY classify_fat_entry(PFAT_CONTEXT ctx, int32_t fat_entry_value, int32_t* next_fat_entry); 
+
+
