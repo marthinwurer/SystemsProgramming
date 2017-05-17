@@ -1,8 +1,13 @@
 #ifndef _KERN_NET_INTEL_H
 #define _KERN_NET_INTEL_H
 
-#include <kern/memory/memory_map.h> //PAGE_SIZE
 #include <baseline/common.h>
+#include <baseline/ulib.h>
+
+/**
+ * Intel Network driver. Contains needed structures and methods to perform network functions. 
+ * @author Daniel Meiller
+ */
 
 /**
  * Intel Shared Memory Architecture
@@ -33,7 +38,8 @@
 #define NET_INTEL_INT_VECTOR 0x2B
 
 #define TOTAL_CB 0x80
-#define TOTAL_RFD 0x80
+#define TOTAL_RFD 1024
+#define ARP_CACHE_SIZE 256
 
 #define MAX_EEPROM_LENGTH 256
 #define MAC_LENGTH_BYTES 6
@@ -44,8 +50,23 @@
 #define NET_INTEL_MAX_ETH_LENGTH 1500
 #define NET_INTEL_ETH_HEAD_LEN 14
 #define NET_INTEL_ARP_HEAD_LEN 28
+#define IPV4_HEAD_LEN 20
 #define NET_INTEL_RFD_SIZE 3096
 #define NET_INTEL_RX_BUF_MAX_LEN 3096
+
+/**
+ * Receive Frame Descriptor is given to receive unit to store incoming
+ * transmissions. 
+ */
+typedef struct {
+	uint16_t status;
+	uint16_t command;
+	uint32_t link;
+	uint32_t __pad1;
+	uint16_t count;
+	uint16_t size;
+	uint8_t data[NET_INTEL_RFD_SIZE];
+} rfd_t;
 
 /**
  * Stores info about network interface
@@ -58,10 +79,13 @@ struct nic_info {
 	uint32_t avail_cb;
 	struct cb* next_cb;
 	struct cb* cb_to_check;
-	struct rfd* next_rfd;
-	uint32_t rx_buf_count;
-	struct rx_buf* rx_buf_head;
-	struct rx_buf* next_rx_buf;
+	struct {
+		rfd_t* tail;
+		rfd_t* head;
+		rfd_t* next;
+	} rfa;
+	// uint8_t my_ip[4];
+	uint32_t my_ip;
 };
 
 /**
@@ -83,6 +107,68 @@ struct csr {
 	uint32_t rx_dma_byte_count;
 };
 
+typedef struct {
+	uint8_t ihl : 4;
+	uint8_t version : 4;
+	uint8_t dscp : 6;
+	uint8_t ecn : 2;
+	uint16_t total_len;
+	uint16_t id;
+	uint16_t flags : 3;
+	uint16_t frag_offset : 13;
+	uint8_t ttl;
+	uint8_t protocol;
+	uint16_t header_checksum;
+	uint32_t src_ip;
+	uint32_t dst_ip;
+	// uint8_t src_ip[4];
+	// uint8_t dst_ip[4];
+	uint8_t ip_data[NET_INTEL_TCB_MAX_DATA_LEN - 5];
+} ipv4_t;
+
+typedef struct {
+	uint16_t hw_type;
+	uint16_t protocol_type;
+	uint8_t hw_addr_len;
+	uint8_t protocol_addr_len;
+	uint16_t opcode;
+	uint8_t sender_hw_addr[6];
+	uint32_t sender_protocol_addr; // unaligned
+	// uint8_t sender_protocol_addr[4]; // aligned
+	uint8_t target_hw_addr[6];
+	// uint8_t target_protocol_addr[4];
+	uint32_t target_protocol_addr;
+} __attribute__((packed)) arp_t;
+
+/**
+ * Ethernet frame data payload
+ */
+typedef union {
+	uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
+	ipv4_t ipv4;
+	arp_t arp;
+} eth_payload_t;
+
+/**
+ * Ethernet TX packet structure
+ */
+typedef struct {
+	uint8_t dst_mac[MAC_LENGTH_BYTES];
+	// uint8_t src_mac[MAC_LENGTH_BYTES]; // auto inserted
+	uint16_t ethertype; // under 1500 is payload length, above is type of payload header
+	eth_payload_t payload;
+} eth_packet_t;
+
+/**
+ * Ethernet RX packet structure
+ */
+typedef struct {
+	uint8_t dst_mac[MAC_LENGTH_BYTES];
+	uint8_t src_mac[MAC_LENGTH_BYTES];
+	uint16_t ethertype; // under 1500 is payload length, above is type of payload header
+	eth_payload_t payload;
+} __attribute__((packed)) eth_packet_rx_t;
+
 /**
  * Command Block
  */
@@ -98,70 +184,39 @@ struct cb {
 			uint16_t tcb_byte_count;
 			uint8_t threshold;
 			uint8_t tbd_count;
-			struct eth_packet_t {
-				uint8_t dst_mac[MAC_LENGTH_BYTES];
-				// uint8_t src_mac[MAC_LENGTH_BYTES];
-				uint16_t ethertype; // under 1500 is payload length, above is type of payload header
-				union {
-					uint8_t data[NET_INTEL_TCB_MAX_DATA_LEN]; 
-					struct {
-						uint8_t version : 4;
-						uint8_t ihl : 4;
-						uint8_t dscp : 6;
-						uint8_t ecn : 2;
-						uint16_t total_len;
-						uint16_t id;
-						uint16_t flags : 3;
-						uint16_t frag_offset : 13;
-						uint8_t ttl;
-						uint8_t protocol;
-						uint16_t header_checksum;
-						uint8_t src_ip[4];
-						uint8_t dst_ip[4];
-						uint8_t ip_data[NET_INTEL_TCB_MAX_DATA_LEN - 5];
-					} ipv4;
-					struct {
-						uint16_t hw_type;
-						uint16_t protocol_type;
-						uint8_t hw_addr_len;
-						uint8_t protocol_addr_len;
-						uint16_t opcode;
-						uint8_t sender_hw_addr[6];
-						// uint32_t sender_protocol_addr; // unaligned
-						uint8_t sender_protocol_addr[4]; // aligned
-						// uint16_t sender_protocol_addr_hi; // aligned
-						uint8_t target_hw_addr[6];
-						uint8_t target_protocol_addr[4];
-					} arp;
-				} payload;
-			} eth_packet;
+			eth_packet_t eth_packet;
 		} tcb;
 	} u;
 };
 
 /**
- * Receive Frame Descriptor is given to receive unit to store incoming
- * transmissions. 
+ * ICMP packet structure
  */
-struct rfd {
-	uint16_t status;
-	uint16_t command;
-	uint32_t link;
-	uint32_t __pad1;
-	uint16_t count;
-	uint16_t size;
-	uint8_t data[NET_INTEL_RFD_SIZE];
-};
+typedef struct {
+	uint8_t type;
+	uint8_t code;
+	uint16_t chksm;
+	uint32_t rest_of_header;
+} icmp_t;
 
 /**
- * Buffer to store data in once received
+ * entry in the arp cache
  */
-struct rx_buf {
-	struct rx_buf* next;
-	uint32_t length;
-	uint32_t curr_ptr;
-	void* data[NET_INTEL_RX_BUF_MAX_LEN];
-};
+typedef struct {
+	uint32_t ip_addr;
+	uint16_t filled;
+	uint8_t hw_addr[6];
+} arp_entry_t;
+
+/**
+ * IP protocols that can be used in send_ipv4()
+ */
+typedef enum {
+	ip_icmp = 0x01,
+	ip_igmp = 0x02,
+	ip_tcp = 0x06,
+	ip_udp = 0x11
+} ip_protocol_t;
 
 /**
  * ARP opcodes
@@ -175,12 +230,12 @@ enum arp_opcode {
  * Ethertype field for ethernet frame. These are all in the correct network
  * byte order, and do not need to be changed before putting into a frame.
  */
-enum ethertype_t {
+typedef enum {
 	ethertype_ipv4 = 0x0008,
 	ethertype_arp = 0x0608,
 	ethertype_ipx = 0x3781,
 	ethertype_ipv6 = 0xdd86
-};
+} ethertype_t;
 
 /**
  * Constants to control EEPROM
@@ -282,34 +337,31 @@ enum cb_status {
 };
 
 /**
- * Sends a gratuitous ARP packet with a given IP
- *
- * @param sender_ip_addr sender's IP address
- * @return 0 on success, otherwise failure
- */
-int32_t send_grat_arp(uint32_t sender_ip_addr);
-
-/**
- * Sends an ARP packet
- *
- * @param sender_ip_addr sender's IP address
- * @param target_ip_addr target's IP address
- * @param target_hw_addr target's HW address
- * @param opcode type of arp (request/reply)
- * @return 0 on success, otherwise failure
- */
-int32_t send_arp(uint32_t sender_ip_addr, uint32_t target_ip_addr, uint8_t target_hw_addr[], enum arp_opcode opcode);
-
-/**
- * Sends an ethernet packet (without an internal protocol). This should mainly
- * be used for testing purposes
- *
+ * Sends an ethernet frame.
+ * 
  * @param dst_hw_addr destination hardware address
  * @param data data to send
  * @param length length of data to send
  * @return 0 on success, otherwise failure
  */
-int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length);
+int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length, ethertype_t ethertype);
+
+/**
+ * Sends an ipv4 packet
+ *
+ * @param dst_ip destination IP address
+ * @param data data to send
+ * @param length length of data to send
+ * @return 0 on success, otherwise failure
+ */
+int32_t send_ipv4(uint32_t dst_ip, void* data, uint32_t length, ip_protocol_t protocol);
+
+/**
+ * Sets the IP address of the network card
+ *
+ * @param ip new ip address
+ */
+void set_ip(uint32_t ip);
 
 /**
  * Starts the receive unit
@@ -323,7 +375,23 @@ void intel_nic_enable_rx();
  * @param data pointer to data to print
  * @param length number of bytes to read from data pointer
  */
-void hexdump(void* data, uint32_t length);
+void hexdump(void* data, uint32_t length, uint32_t bytes_per_line);
+
+/**
+ * transmit daemon for network, does cleanup
+ *
+ * @param arg unused
+ * @return unused
+ */
+int32_t nic_tx_daemon(void* arg);
+
+/**
+ * receive daemon processes incoming data
+ *
+ * @param arg unused
+ * @return unused
+ */
+int32_t nic_rx_daemon(void* arg);
 
 /**
  * Initializes the network card on startup

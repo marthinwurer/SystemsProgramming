@@ -20,7 +20,7 @@ void* memset(void *mem, int val, size_t n);
 
 size_t strlen(const char *str);
 
-
+int strpos(char *str1, const char c, int offset);
 // non-standard functions
 
 // converts all chars [A-Za-z] to uppercase
@@ -28,6 +28,7 @@ char* strupper(char *str);
 
 char* strlower(char *str);
 
+int atoi(const char *str, int *value);
 
 #ifdef __cplusplus
 }

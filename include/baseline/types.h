@@ -55,7 +55,20 @@ typedef enum e_stat {
 	E_NO_CHAR = -6, E_NO_CHILD = -5, E_BAD_CHAN = -4,
 	E_NO_PROCESS = -3, E_NO_PERM = -2, E_FAILURE = -1,
 	E_SUCCESS = 0,
-
+    
+    E_NOT_IMPLEMENTED = -50,
+    E_BAD_TYPE = -51,
+    E_NO_MORE_HANDLES = -52,
+    E_BAD_HANDLE = -53,
+    E_NO_DATA = -54,
+    E_OUT_OF_BOUNDS = -55, //Provided index out of range
+    E_BAD_ARG = -56, //Bad argument provided to IO function
+    E_NO_MATCH = -57, //No Match for Path in IO operation
+    E_CANCELED = -58, //IO Operation In Progress Canceled by Middleware
+    E_LOCKED = -59,
+    E_BAD_PTR = -60,
+    E_OUT_OF_OBJECTS = -61, //no more objects available for allocation
+    E_MORE_DATA = -62,
 	// used only within the OS
 	E_NO_QNODES, E_EMPTY_QUEUE
 

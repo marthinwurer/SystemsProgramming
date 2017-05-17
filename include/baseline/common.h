@@ -18,9 +18,9 @@
 */
 
 // correct (?) way to define NULL
-
+#ifndef NULL
 #define NULL		((void *) 0)
-
+#endif
 // maximum number of processes the system will support
 
 #define	N_PROCS		25

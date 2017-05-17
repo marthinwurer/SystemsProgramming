@@ -39,6 +39,11 @@ extern address_space_t page_directory;
 
 #include <kern/video/video.h>
 
+#include <kern/io/router.h>
+#include <kern/ioapi/file.h>
+#include <kern/ioapi/simple_mount.h>
+#include <kern/drivers/ramdisk/ramdisk.h>
+#include <kern/drivers/rawfs/raw.h>
 /*
 ** PRIVATE DEFINITIONS
 */
@@ -162,26 +167,21 @@ void _init( void ) {
 	** Console I/O system.
 	*/
 
-	//c_io_init();
 	c_io_init_isr();
 
 	c_clearscreen();
+
+	c_setscroll( 0, 7, CIO_CONTROLLER.current->columns, CIO_CONTROLLER.current->rows );
+	
+	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
+		c_putchar_at(i, 6, '=');
+	}
 
 	// set up the memory
 	disp_memory_map();
 	setup_page_availibility_table();
 	setup_initial_page_table();
 
-
-
-	c_setscroll( 0, 7, 99, 99 );
-	c_puts_at( 0, 6, "================================================================================" );
-	c_io_init_isr();
-	c_setscroll( 0, 7, CIO_CONTROLLER.current->columns, CIO_CONTROLLER.current->rows );
-	
-	for (unsigned i = 0, c = CIO_CONTROLLER.current->columns; i != c; ++i) {
-		c_putchar_at(i, 6, '=');
-	}
 
 	video_dumpInfo(VIDEO_INFO);
 
@@ -218,9 +218,17 @@ void _init( void ) {
 #ifdef NETWORK_ENABLED
 	intel_nic_init();	// network
 #endif
+    IO_INIT(); //io & filesystemsu
+    ramdisk_install();
+    raw_install();
 
+    IOHANDLE dev = IOHANDLE_NULL;
+    IOHANDLE fs  = IOHANDLE_NULL;
 
+    IO_ENUMERATE(IO_OBJ_DEVICE, 0, &dev);
+    IO_ENUMERATE(IO_OBJ_FILESYSTEM, 0, &fs);
 
+    install_mount("RAW", "\\raw\\", dev, fs);
 	c_puts( "\nModule initialization complete\n" );
 	c_puts( "------------------------------\n" );
 
@@ -303,4 +311,7 @@ void _init( void ) {
 
 	c_puts( "System initialization complete.\n" );
 	c_puts( "-------------------------------\n" );
+
+	// disable autoflush, the redrawProcess will handle flushing
+	CIO_AUTOFLUSH = 0;
 }

@@ -15,8 +15,11 @@
 #include <baseline/user.h>
 
 #include <kern/net/net_test.h>
+#include <kern/net/intel.h>
 #include <baseline/c_io.h>
 #include <kern/memory/memory_constants.h>
+#include <kern/ioapi/file.h>
+#include <kern/vconsole/control.h>
 
 /*
 ** Support functions
@@ -917,14 +920,17 @@ int32_t idle( void *arg ) {
 }
 
 int32_t redrawProcess(void *arg) {
-
-	
+	(void)arg;
+	// disable autoredraw, we will do the redrawing here
+	//c_set_auto_redraw(0);
+	//CIO_AUTOFLUSH = 0;
 
 	for (;;) {
-		if (CIO_CONTROLLER.dirty) {
-			vcon_redraw(&CIO_CONTROLLER);
-			CIO_CONTROLLER.dirty = 0;
-		}
+		c_flush();
+		//if (CIO_CONTROLLER.dirty) {
+			//vcon_redraw(&CIO_CONTROLLER);
+		//	CIO_CONTROLLER.dirty = 0;
+		//}
 		sleep(10);
 	}
 
@@ -1014,6 +1020,18 @@ int32_t mem_demo(void *arg) {
 ** with that child's exit status.
 */
 
+int32_t fs_demo (void *arg) {
+    FILEHANDLE file = -1;
+    IoFileOpen("\\raw\\0", IO_CP_FAIL, &file);
+    char* buffer = (char*)malloc(4096);
+    cwrites("continuing user stuff\n");
+    IoFileRead(file, 0, 4096, buffer);
+    buffer[0] = 0xAA;
+    IoFileWrite(file, 0, 2, buffer);
+    IoFileRead(file,0, 4096, buffer);
+    IoFileClose(file);
+    return 0;
+}
 int32_t init( void *arg ) {
 	// cast away warnings
 	(void) arg;
@@ -1030,13 +1048,21 @@ int32_t init( void *arg ) {
 	}
 	swritech( '+' );
 
+	// startup network daemons as system
+	spawn(nic_rx_daemon, 0, P_SYSTEM);
+	spawn(nic_tx_daemon, 0, P_SYSTEM);
+
 	// Launch test program for networking
-	//pid = spawn(net_test_main, 0, P_HIGH);
-	//if(pid < 0) {
-	//	cwrites("init, spawn() net_test_main failed\n");
-	//}
+	spawn(net_test_main, 0, P_SYSTEM);
+
 	//swritech('{');
 	spawn(redrawProcess, 0, P_SYSTEM);
+    
+    pid = spawn( fs_demo, 0, P_HIGH);
+    if( pid < 0 ) {
+		cwrites( "init, spawn() fsdemo failed\n" );
+	}
+	swritech( '+' );
 
 	spawn(test_u_mmap, NULL, P_LOW);
 //	spawn(mem_demo, NULL, P_LOW);

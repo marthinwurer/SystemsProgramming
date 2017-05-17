@@ -49,6 +49,17 @@ int fb_clear(VideoFb *fb, VideoCol color) {
 	return E_VIDEO_SUCCESS;
 }
 
+int fb_clearcolsf(VideoFb *fb, uint32_t offset, uint16_t cols, VideoCol col) {
+
+	unsigned dcol = fb->bpp / 8;
+	for (unsigned c = 0; c != cols; ++c) {
+		fb_putpixelf(fb, offset, col);
+		offset += dcol;
+	}
+
+	return E_VIDEO_SUCCESS;
+}
+
 int fb_offset(VideoFb *fb, uint32_t *offset, uint16_t x, uint16_t y) {
 	if (fb == NULL || offset == NULL) {
 		return E_VIDEO_ARGNULL;

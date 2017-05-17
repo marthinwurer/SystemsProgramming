@@ -6,6 +6,10 @@
 # location of the build directory
 BUILD_DIR := build
 
+# makefile verbosity
+# 0: Only show command variable and output file
+# 1: Show entire command
+VERBOSE := 0
 
 # =============================================================================
 # COMMANDS
@@ -26,7 +30,7 @@ LD := ld
 # if set warnings will be treated as errors
 WERROR :=
 
-WARNFLAGS := -Wall -Wextra -pedantic
+WARNFLAGS := -Wall -Wextra
 
 CFLAGS = -std=c99 -fno-stack-protector -fno-builtin $(WARNFLAGS) $(WERROR)
 
@@ -45,4 +49,4 @@ LDFLAGS = -melf_i386
 #	REPORT_MYSTERY_INTS	print a message on interrupt 0x27
 #
 # USER_OPTIONS = -DCLEAR_BSS_SEGMENT -DISR_DEBUGGING_CODE -DSP_OS_CONFIG -DDUMP_QUEUES
-USER_OPTIONS = -DCLEAR_BSS_SEGMENT -DISR_DEBUGGING_CODE -DSP_OS_CONFIG -DNETWORK_ENABLED
+USER_OPTIONS = -DCLEAR_BSS_SEGMENT -DISR_DEBUGGING_CODE -DSP_OS_CONFIG -DNETWORK_ENABLED -DNETWORK_DUMP

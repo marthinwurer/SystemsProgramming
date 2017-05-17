@@ -10,7 +10,10 @@ LIBC_OBJS = string/memcmp.o \
             string/memmove.o \
             string/memset.o \
             string/strlen.o \
-            string/strcpy.o 
+            string/strcpy.o \
+			string/strpos.o \
+			string/atoi.o \
+			libpath.o
 
 LIBC_OBJS := $(addprefix $(BUILD_DIR)/libc/,$(LIBC_OBJS))
 LIBK_OBJS := $(LIBC_OBJS:.o=.libk.o)
@@ -18,13 +21,13 @@ LIBK_OBJS := $(LIBC_OBJS:.o=.libk.o)
 LIBK = $(BUILD_DIR)/libk.a
 
 $(LIBK): $(LIBK_OBJS) $(MARKER)
-	$(AR) rcs $@ $(LIBK_OBJS)
+	$(AR_V) rcs $@ $(LIBK_OBJS)
 
 
 $(BUILD_DIR)/libc/%.o: libc/%.c $(MARKER)
-	$(CC) -MD $(LIBC_CPPFLAGS) -m32 $(LIBC_CFLAGS) -o $@ -c $<
+	$(CC_V) -MD $(LIBC_CPPFLAGS) -m32 $(LIBC_CFLAGS) -o $@ -c $<
 
 $(BUILD_DIR)/libc/%.libk.o: libc/%.c $(MARKER)
-	$(CC) -MD $(LIBK_CPPFLAGS) -m32 $(LIBK_CFLAGS) -o $@ -c $<
+	$(CC_V) -MD $(LIBK_CPPFLAGS) -m32 $(LIBK_CFLAGS) -o $@ -c $<
 
 -include $(LIBC_OBJS:.o=.d)
