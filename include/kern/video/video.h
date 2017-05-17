@@ -1,3 +1,14 @@
+/*
+** File: include/kern/video/video.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Functions for the video module
+*/
+
+
 #ifndef _KERN_VIDEO_VIDEO_H
 #define _KERN_VIDEO_VIDEO_H
 

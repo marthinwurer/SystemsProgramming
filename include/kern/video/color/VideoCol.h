@@ -1,3 +1,13 @@
+/*
+** File: include/kern/video/color/VideoCol.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VideoCol type
+*/
+
 #ifndef _KERN_VIDEO_VIDEOCOL_H
 #define _KERN_VIDEO_VIDEOCOL_H
 

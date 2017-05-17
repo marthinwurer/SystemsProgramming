@@ -1,3 +1,14 @@
+/*
+** File: include/kern/vga13/vga13.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** DEPRECATED
+** Function prototypes for the VGA Mode 0x13 driver
+*/
+
 #ifndef _KERN_VGA13_VGA13_H
 #define _KERN_VGA13_VGA13_H
 

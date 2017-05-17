@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vconsole/VConBuf.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VConBuf struct
+*/
+
 #ifndef _KERN_VCONSOLE_VCONBUF_H
 #define _KERN_VCONSOLE_VCONBUF_H
 

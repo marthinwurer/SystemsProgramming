@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vconsole/VConChar.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VConChar struct
+*/
+
 #ifndef _KERN_VCONSOLE_VCONCHAR_H
 #define _KERN_VCONSOLE_VCONCHAR_H
 

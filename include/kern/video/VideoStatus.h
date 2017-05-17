@@ -1,3 +1,13 @@
+/*
+** File: include/kern/video/VideoStatus.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VideoStatus enum
+*/
+
 #ifndef _KERN_VIDEO_VIDEOSTATUS_H
 #define _KERN_VIDEO_VIDEOSTATUS_H
 

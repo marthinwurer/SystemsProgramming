@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vconsole/VConLine.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VConLine struct, or Line Information Table entry
+*/
+
 #ifndef _KERN_VCONSOLE_VCONLINE_H
 #define _KERN_VCONSOLE_VCONLINE_H
 

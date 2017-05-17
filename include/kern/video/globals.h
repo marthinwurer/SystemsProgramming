@@ -3,6 +3,8 @@
 **
 ** Author: Brennan Ringey (bjr1251)
 **
+** Contributors: 
+**
 ** Contains global variable definitions for the video module.
 */
 

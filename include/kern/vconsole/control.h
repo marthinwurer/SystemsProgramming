@@ -1,3 +1,12 @@
+/*
+** File: include/kern/vconsole/control.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Function prototypes for VConCtrl instances
+*/
 #ifndef _KERN_VCONSOLE_CONTROL_H
 #define _KERN_VCONSOLE_CONTROL_H
 

@@ -1,3 +1,14 @@
+/*
+** File: include/kern/video/err.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Macro definitions for the video module
+*/
+
+
 #ifndef _KERN_VIDEO_ERR_H
 #define _KERN_VIDEO_ERR_H
 

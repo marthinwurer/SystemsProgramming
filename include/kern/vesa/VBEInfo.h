@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vesa/VBEInfo.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VBEInfo struct
+*/
+
 #ifndef _KERN_VESA_VBEINFO_H
 #define _KERN_VESA_VBEINFO_H
 

@@ -1,3 +1,13 @@
+/*
+** File: include/kern/graphics/Rect.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the Rect primitive
+*/
+
 #ifndef _KERN_GRAPHICS_RECT_H
 #define _KERN_GRAPHICS_RECT_H
 

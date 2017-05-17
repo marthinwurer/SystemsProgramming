@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vesa/EDIDRecord.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the EDIDRecord struct
+*/
+
 #ifndef _KERN_VESA_EDIDRECORD_H
 #define _KERN_VESA_EDIDRECORD_H
 

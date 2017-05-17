@@ -1,3 +1,13 @@
+/*
+** File: include/kern/video/VideoTiming.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VideoTiming struct
+*/
+
 #ifndef _KERN_VIDEO_VIDEOTIMING_H
 #define _KERN_VIDEO_VIDEOTIMING_H
 

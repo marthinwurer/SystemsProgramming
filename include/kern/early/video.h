@@ -1,3 +1,13 @@
+/*
+** File: include/kern/early/video.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Contains early initialization functions for the video module.
+*/
+
 #ifndef _KERN_EARLY_VIDEO_H
 #define _KERN_EARLY_VIDEO_H
 

@@ -1,3 +1,13 @@
+/*
+** File: include/kern/gdt/GDTEntry.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Contains the GDTEntry typedef
+*/
+
 #ifndef _KERN_GDT_GDTENTRY_H
 #define _KERN_GDT_GDTENTRY_H
 

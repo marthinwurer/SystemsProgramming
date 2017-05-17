@@ -1,3 +1,13 @@
+/*
+** File: include/kern/graphics/text/PSFont.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the PC Screen Font format
+*/
+
 #ifndef _KERN_GRAPHICS_TEXT_PSFONT_H
 #define _KERN_GRAPHICS_TEXT_PSFONT_H
 

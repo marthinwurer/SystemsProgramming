@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vesa/VBE2ModeInfo.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for VBE2ModeInfo struct (VBE version 2.0 Mode Info block)
+*/
+
 #ifndef _KERN_VESA_VBE2MODEINFO_H
 #define _KERN_VESA_VBE2MODEINFO_H
 

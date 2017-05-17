@@ -1,3 +1,13 @@
+/*
+** File: include/kern/video/color/VideoColorSpace.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VideoColorSpace type
+*/
+
 #ifndef _KERN_VIDEO_FB_VIDEOCOLORSPACE_H
 #define _KERN_VIDEO_FB_VIDEOCOLORSPACE_H
 

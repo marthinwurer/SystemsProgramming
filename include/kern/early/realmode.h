@@ -1,3 +1,12 @@
+/*
+** File: include/early/realmode.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contains the function prototype for real mode utility, int32
+** Allows for calling BIOS functions from protected mode
+*/
+
 #ifndef _KERN_EARLY_REALMODE_H
 #define _KERN_EARLY_REALMODE_H
 

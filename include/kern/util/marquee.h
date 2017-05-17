@@ -1,3 +1,13 @@
+/*
+** File: include/kern/util/marquee.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Function prototypes for the marquee (horizontal scrolling text)
+*/
+
 #ifndef _KERN_DEBUG_MARQUEE_H
 #define _KERN_DEBUG_MARQUEE_H
 

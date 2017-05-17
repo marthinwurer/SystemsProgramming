@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vesa/err.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Macro definitions for errorcodes in the vesa module
+*/
+
 #ifndef _KERN_VESA_ERR_H
 #define _KERN_VESA_ERR_H
 

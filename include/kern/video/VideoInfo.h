@@ -1,3 +1,14 @@
+/*
+** File: include/kern/video/VideoInfo.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VideoInfo struct. Similar to VBEInfo
+*/
+
+
 #ifndef _KERN_VIDEO_VIDEOINFO_H
 #define _KERN_VIDEO_VIDEOINFO_H
 

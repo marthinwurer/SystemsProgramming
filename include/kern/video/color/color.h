@@ -1,3 +1,13 @@
+/*
+** File: include/kern/video/color/color.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Functions for calculating color values in the framebuffer
+*/
+
 #ifndef _KERN_VIDEO_COLOR_COLOR_H
 #define _KERN_VIDEO_COLOR_COLOR_H
 

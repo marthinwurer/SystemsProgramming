@@ -1,3 +1,14 @@
+/*
+** File: include/kern/graphics/text/text.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Function prototypes for drawing characters and strings
+*/
+
+
 #ifndef _KERN_GRAPHICS_TEXT_TEXT_H
 #define _KERN_GRAPHICS_TEXT_TEXT_H
 

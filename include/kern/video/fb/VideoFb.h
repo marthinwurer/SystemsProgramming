@@ -1,3 +1,14 @@
+/*
+** File: include/kern/video/fb/VideoFb.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VideoFb struct
+*/
+
+
 #ifndef _KERN_VIDEO_FB_VIDEOFB_H
 #define _KERN_VIDEO_FB_VIDEOFB_H
 

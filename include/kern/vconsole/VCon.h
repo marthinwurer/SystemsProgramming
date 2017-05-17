@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vconsole/VCon.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VCon struct
+*/
+
 #ifndef _KERN_VCONSOLE_VCONSOLE_H
 #define _KERN_VCONSOLE_VCONSOLE_H
 

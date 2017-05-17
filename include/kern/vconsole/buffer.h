@@ -1,3 +1,12 @@
+/*
+** File: include/kern/vconsole/buffer.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Function prototypes for modifying a VConBuf
+*/
 #ifndef _KERN_VCONSOLE_BUFFER_H
 #define _KERN_VCONSOLE_BUFFER_H
 

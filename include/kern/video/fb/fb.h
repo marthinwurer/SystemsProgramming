@@ -1,3 +1,13 @@
+/*
+** File: include/kern/video/fb/fb.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Contains functions for writing to the linear framebuffer
+*/
+
 #ifndef _KERN_VIDEO_FB_FB_H
 #define _KERN_VIDEO_FB_FB_H
 

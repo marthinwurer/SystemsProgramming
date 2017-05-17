@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vesa/vbe.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Function prototypes for performing VBE functions
+*/
+
 #ifndef _KERN_VESA_VBE_H
 #define _KERN_VESA_VBE_H
 

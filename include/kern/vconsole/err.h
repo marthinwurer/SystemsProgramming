@@ -1,3 +1,13 @@
+/*
+** File: include/kern/vconsole/err.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Macro definitions for error codes in the vconsole module
+*/
+
 #ifndef _KERN_VCONSOLE_ERR_H
 #define _KERN_VCONSOLE_ERR_H
 

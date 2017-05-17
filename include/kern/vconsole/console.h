@@ -1,3 +1,12 @@
+/*
+** File: include/kern/vconsole/console.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Functions for modifying a VCon instance
+*/
 #ifndef _KERN_VCONSOLE_CONSOLE_H
 #define _KERN_VCONSOLE_CONSOLE_H
 

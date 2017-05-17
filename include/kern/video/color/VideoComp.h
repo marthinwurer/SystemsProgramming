@@ -1,3 +1,13 @@
+/*
+** File: include/kern/video/color/VideoComp.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Enum definition for the supported color components
+*/
+
 #ifndef _KERN_VIDEO_FB_VIDEOCOMP_H
 #define _KERN_VIDEO_FB_VIDEOCOMP_H
 

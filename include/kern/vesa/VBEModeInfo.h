@@ -1,3 +1,14 @@
+/*
+** File: include/kern/vesa/VBEModeInfo.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Typedef for the VBEModeInfo union. This type is a union of
+** VBE2ModeInfo and VBE3ModeInfo structs
+*/
+
 #ifndef _KERN_VESA_VBEMODEINFO_H
 #define _KERN_VESA_VBEMODEINFO_H
 

@@ -1,3 +1,14 @@
+/*
+** File: include/kern/vesa/edid.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors: 
+**
+** Function prototypes for getting the EDID record, as well as parsing
+** an EDIDRecord struct.
+*/
+
 #ifndef _KERN_VESA_EDID_H
 #define _KERN_VESA_EDID_H
 
