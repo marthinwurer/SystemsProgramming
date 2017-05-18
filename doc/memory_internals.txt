@@ -59,8 +59,35 @@ PDE must be loaded into the control register %cr3. Then, the paging and
 protection bits of the %cr0 register must be set. Once these are set, you are 
 now runing on virtual memory. 
 
+Memory Spaces and Context Switching
+------------------------------------------------------------------------------
+Processes now have memory spaces associated with them. Processes running at 
+the system priority are given the identity mapped memory space. All user 
+processes are given new memory spaces with the lower PTE identity mapped for 
+compatibility with interrupt code. 
 
+Context switching is done in multiple stages. Whenever an interrupt triggers, 
+the current memory space is saved and the identity mapped space is loaded. 
+Once the interrupt has been serviced, the old memory space is loaded. When 
+a new process is started, it immediately switches to its new memory space and
+changes the return memory space to its space. This avoids switching to a
+new memory space, and then switching back to the stored memory space.
 
+Memory Mapping
+------------------------------------------------------------------------------
+New memory spaces are intially unmapped besides the initial identity mapped 
+region. Mapping new memory to a memory space is accomplished using the mmap 
+syscall and the _k_mmap() function. The _k_mmap() function takes an address 
+space, a virtual memory pointer, a physical memory pointer, a length, and a 
+pointer to a status variable. It returns a pointer to the start of the area
+mapped. The mmap syscall is a wrapper of the _k_mmap function; it gives the 
+current process's memory space as the first argument and passes the rest from 
+the syscall parameters. It does not return anything.
 
-
+There are two modes that the mmap syscall can act in: plain mapping and 
+mapping the next page. In plain mapping, the physical address passed as a 
+parameter to the function is not null. In this case, the virtual page is 
+mapped to the physical page, and the physical page is not marked as being 
+used. When maping the next page, the physical address given is null. The 
+next availible page is then mapped to the given virtual address. 
 
