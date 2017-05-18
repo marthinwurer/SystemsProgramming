@@ -1,0 +1,13 @@
+NAME
+        set_ip
+
+SYNOPSIS
+        void set_ip(uint32_t ip)
+
+DESCRIPTION
+        This is a simple command to set the personal IP address for the Intel
+        network card. 
+
+OPTIONS
+        uint32_t ip
+            IP to set for sending packets (in little endian)

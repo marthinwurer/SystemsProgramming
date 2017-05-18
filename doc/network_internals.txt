@@ -3,9 +3,9 @@ Contributors: Daniel Meiller
 --------------------------------------------------------------------------------
 I wrote a driver for the Intel i82557 network interface card. I also implemented
 a minimalistic network stack. 
---------------------------------------------------------------------------------
-Overall Design
 
+Overall Design
+--------------------------------------------------------------------------------
 I made the decision to focus on making this driver work for a single process at
 a time, not dealing with multiple processes trying to utilize the NIC. Dealing
 with synchronization would’ve taken away a lot of time from the actual
@@ -26,9 +26,23 @@ memory copies that could be avoided by using the flexible mode. For the scope of
 this project, I think trading performance for simplicity is well worth it, as
 I would rather focus on getting more functionality working than extensively
 optimizing the execution.
---------------------------------------------------------------------------------
-Commands
 
+PCI
+--------------------------------------------------------------------------------
+I had to access the PCI configuration space when initializing the card. This
+allows me to get the MMIO address, which I use to interface with the card.
+
+EEPROM
+--------------------------------------------------------------------------------
+I use the serial EEPROM to get the hardware address from the network card. This
+is a bit by bit process, and utilized a delay function I wrote, as the clock in
+the EEPROM has a limit to how fast it can operate. I began using the kernal
+delay function from the baseline operating system, but found it delayed way
+longer than I needed it to, prolonging the initialization process, so I wrote my
+own.
+
+Commands
+--------------------------------------------------------------------------------
 I took a simple approach to sending commands to the NIC. I have a circularly
 linked list of Command Blocks (CB). When I send single commands, I turn on the
 end of list bit (EL) so the command unit (CU) will stop after executing the next
@@ -40,26 +54,26 @@ used by the finalized CBs, I occasionally (through the use of a daemon or when
 requested by the get_next_cb routine) go through the list of CBs starting at the
 last “cleaned” CB. I stop once I reach a CB that hasn’t been finalized. This
 frees up CBs for other uses. 
---------------------------------------------------------------------------------
-Receive
 
+Receive
+--------------------------------------------------------------------------------
 The receive frame area (RFA) consists of a linked list of receive frame
 descriptors (RFD). This allows the NIC to receive a burst of packets and then be
 processed later. In user.c I start an rx daemon process. This monitors the RFA,
 and will process new data as it comes in. As is processes one, it adds an
 additional buffer to the end of the RFD list and frees the one it just worked
 on. This allows for a kind of sliding frame for receiving packets. 
---------------------------------------------------------------------------------
-Ethernet
 
+Ethernet
+--------------------------------------------------------------------------------
 I utilize the configure command and the set individual address commands to setup
 the NIC to automatically insert the source hardware address and CRC calculation
 into my transmitted ethernet frames. I have a function that will send an
 ethernet frame (send_packet), and this gets utilized by the other upper layers
 that will pass their own headers and data to this function. 
---------------------------------------------------------------------------------
-ARP
 
+ARP
+--------------------------------------------------------------------------------
 There are 3 parts to ARP in my driver, ARP requests, ARP replies, and the ARP
 table. When I receive a packet, I check if it is an ARP packet. If it is, I
 record the sender IP and sender ethernet address into the ARP table, and in the
@@ -74,9 +88,9 @@ and for the case of hooking up directly to the operating system with one other
 system, the ARP table will most likely have at most one entry. The ARP table
 will either add (if the IP is new) or update (if the IP has been recorded in the
 table before whenever an ARP packet is received. 
---------------------------------------------------------------------------------
-IP
 
+IP
+--------------------------------------------------------------------------------
 IP packets are sent using send_ipv4. There is not currently a way for user
 processes to receive data, it is handled in the daemon. The daemon will respond
 to arp requests, although it does it synchronously. For certain packet types 

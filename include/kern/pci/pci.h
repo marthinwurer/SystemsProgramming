@@ -1,3 +1,11 @@
+/**
+ * File: include/kern/pci/pci.h
+ * @author Daniel Meiller
+ * Contributors:
+ * 
+ * Utilities to access the PCI configuration space
+ */
+
 #ifndef _KERN_PCI_PCI_H
 #define _KERN_PCI_PCI_H
 

@@ -24,6 +24,28 @@ the OS and using different flags when we wanted to test the different modules.
 This worked fine, but meant that our ability to demo things was relatively
 limited.
 
+For the networking portion I worked on, the biggest things that bit me we
+network byte order, and struct alignment. I initially started using uint8_t[]
+for most of the multi-byte data I needed to send and receive through the
+network. I switched to using native little endian in my code, and just
+converting to network byte order when interfacing on the network. I discovered a
+built in gcc function called __builtin_bswap32(), as well as the 16-bit varient.
+This were really useful, as I didn't have to write and test my own function 
+(however simple it may have been). 
+
+I had issues with synchronization, which led me away from some of the things I
+would've liked to get working. An example is ICMP echo replies. This in theory
+would be easy to implement, but I had the issue of possibly needing to make an
+ARP request while trying to respond to the echo. Since my receive daemon would
+be handling the ICMP echo at that time, it wouldn't be able to process received
+data and get the ARP entry that was needed. This could be fixed by adding
+another layer, where the daemon spawns other processes to deal with accepting
+ARP packets, or responding to pings, or putting data into queues for users to
+receive. This would lead to synchronization issues, and fixing these were beyond
+the scope of what I was trying to do. Because of these issues, I also avoided
+using system calls, as I needed to be able to utilize interrupts within these
+functions.
+
 Benjamin Maitland
 --------------------------------------------------------------------------------
 My role in the project was team leader. There wasn't too much to do as team 
@@ -51,7 +73,27 @@ our code on laptop hardware.
 
 Brennan Ringey
 --------------------------------------------------------------------------------
+The int32 support function was almost scrapped since I had to rewrite it 3 times
+as it was always breaking. I spent at least 3 days trying to fix it before I got
+the idea for the early init routine. The int32 works, but it's not the best
+solution for calling BIOS functions from protected mode.
 
+We had quite a few problems with memory. We used a wiki page on github that
+contains a memory map of lower memory (0x0-0xFFFFF). This way we can keep track
+of who's using what. This helped somewhat, except for when a macro did not
+match up with the table and then the Ben's memory map got overwritten by my
+VIDEO_INFO block and things just broke. I also had an issue with my
+edid_getRecord function. There is not much documentation on the supplemental
+DDC VBE function other than it exists. I copied an example from osdev, that did
+not set the si:edi register pair. This register pair is a segment:offset pointer
+for where to store the EDID block. Since this was not set, it was junk, which
+strangely worked for me just fine but for others not so much. This combined
+with the incorrect macro became an annoying bug for everyone else.
+
+Drawing fonts in software without hardware acceleration is very slow as opposed
+to just writing a character in memory. The virtual console redraw implementation
+had to be rewritten since the first implementation was too slow. Output became
+garbled as each process spent most of its time drawing text.
 
 Nathan Castle
 --------------------------------------------------------------------------------

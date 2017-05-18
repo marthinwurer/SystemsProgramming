@@ -1,13 +1,17 @@
+/**
+ * File: include/kern/net/intel.h
+ * @author Daniel Meiller
+ * Contributors:
+ * 
+ * Intel Network driver. Contains structures and public methods to perform
+ * network functions. 
+ */
+
 #ifndef _KERN_NET_INTEL_H
 #define _KERN_NET_INTEL_H
 
 #include <baseline/common.h>
 #include <baseline/ulib.h>
-
-/**
- * Intel Network driver. Contains needed structures and methods to perform network functions. 
- * @author Daniel Meiller
- */
 
 /**
  * Intel Shared Memory Architecture

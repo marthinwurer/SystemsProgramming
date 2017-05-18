@@ -1,3 +1,11 @@
+/**
+ * File: kern/net/net_test.c
+ * @author Daniel Meiller
+ * Contributors:
+ * 
+ * Test program for networking functionality
+ */
+
 #include <kern/net/net_test.h>
 #include <kern/net/intel.h>
 #include <kern/pci/pci.h>

@@ -1,0 +1,21 @@
+NAME
+        hexdump
+
+SYNOPSIS
+        void hexdump(void* data, uint32_t length, uint32_t bytes_per_line)
+
+DESCRIPTION
+        Hexdump is a utility to print out data in a human readable format. It 
+        prints the address offset into the data pointer, the hex representation
+        of the data, as well as the ASCII conversion, converting unprintable 
+        characters to period ('.') character.
+
+OPTIONS
+        void* data
+            Pointer to data to be output
+        uint32_t length
+            Length in bytes of data
+        uint32_t bytes_per_line
+            Number of bytes to print per line. Multiples of 8 will look best, 
+            with 16 being recommended (as it will match hd on linux and 
+            wireshark's default)

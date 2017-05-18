@@ -1,0 +1,23 @@
+NAME
+        send_packet
+
+SYNOPSIS
+        int32_t send_packet(uint8_t dst_hw_addr[], void* data, uint16_t length, 
+                ethertype_t ethertype)
+
+DESCRIPTION
+        Sends an ethernet frame without any inner headers. Can be layered to use
+        with different Internet layer protocols. 
+
+OPTIONS
+        uint8_t dst_hw_addr[]
+            Destination mac address 
+        void* data
+            Data to send
+        uint16_t length
+            Length of the data to send
+        ethertype_t ethertype
+            Ethertype to use with the frame (defined in kern/net/intel.h). This
+            indicates what the inner packet protocol is (IP, ARP, etc), or the
+            length of the ethernet frame if the value is under 1500. If using a
+            length value, it must be in network byte order (big endian).
