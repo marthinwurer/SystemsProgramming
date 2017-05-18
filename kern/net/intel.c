@@ -1,3 +1,11 @@
+/**
+ * File: kern/net/intel.c
+ * @author Daniel Meiller
+ * Contributors:
+ * 
+ * Network driver for the Intel i82557. 
+ */
+
 #include <kern/net/intel.h>
 #include <kern/pci/pci.h>
 #include <kern/memory/memory_map.h> //get_next_page, free_page
@@ -7,13 +15,6 @@
 #include <x86arch.h> //PIC_EOI, PIC_SLAVE_CMD_PORT
 #include <baseline/support.h> //__install_isr
 #include <baseline/startup.h> //__outb
-
-/**
- * Network driver for the Intel i82557. 
- *
- * 
- * @author Daniel Meiller
- */
 
 //
 // Static method declarations

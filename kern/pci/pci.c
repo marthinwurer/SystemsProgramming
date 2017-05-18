@@ -1,3 +1,11 @@
+/**
+ * File: kern/pci/pci.c
+ * @author Daniel Meiller
+ * Contributors:
+ * 
+ * PCI configuration utilities
+ */
+
 #include <kern/pci/pci.h>
 #include <baseline/c_io.h>
 #include <baseline/startup.h>
