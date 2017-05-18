@@ -1,0 +1,107 @@
+Module: Filesystem
+Contributors: Nathan Castle
+============================================================
+
+Overview
+=========
+
+The file & I/O architecture is designed for modularity & flexibility. The design is architected in terms of layers. The roles of each component are as follows:
+
+* API- exposes the I/O system via user-friendly APIs. A paradigm is used to expose the File & Directory concepts; Alternative paradigms could present different types of objects
+* Router - Tracks each installed component and manages the flow of I/O operations, receiving messages from installed paradigms and delivering them to middleware components, the appropriate filesystem and the appropriate device driver.
+* Middleware - software components that can read and alter incoming I/O messages. A middleware layer might, for example, be used to implement logging, quota management, permissions enforcement, wildcard/variable interpretation, etc.
+* Filesystem - imposes meaningful structure on top of raw bytes; Used to implement abstractions on raw data
+* Device driver - used by the filesystem to read and write data, working in terms of bytes and absolute offsets
+
+
+Public User I/O API
+===================
+
+This is an implementation of a user-mode file API. It is modeled after the Windows API as an example of how an object-oriented API can be built on top of the I/O framework. A Unix-like API is planned.
+
+* `status_t IoOpenFile(CHAR* path, PIOHANDLE h);` File metadata loaded and cursor set to position 0 in file
+* `status_t IoReadFile(IOHANDLE h, int offset, void* buffer, int* length);` reads file contents into buffer of specified length. Written length returned through `length`.
+* `status_t IoWriteFile(IOHANDLE h, void* buffer, int length, int offset);` writes contents to buffer at the specified offset; offset is relative to current cursor position
+* `status_t IoAdvanceFile(IOHANDLE handle, int offset);` adjusts cursor position
+* `status_t IoQueryFile(IOHANDLE h, IOPROP prop, void* buffer, int* length);` reads the specified metadata property of a file into the specified buffer
+* `status_t IoSetFile(IOHANDLE h,  IOPROP prop, void* buffer, int* length);` sets the specified metadata property
+* `status_t IoDeleteFile(IOHANDLE h);` deletes the specified file
+* `status_t IoEnumerateChild(IOHANDLE parent, int offset, char* name, int* length);` gets the name of a child in a parent directory. offset specifies index. May need to call multiple times if length is insufficient for file name (E_MORE_DATA returned).
+
+Note: a file opens two IO Messages, one for read and one for write.
+
+Private IO Manager API
+======================
+
+* Prototype(obj_type, phandle) -> status; Used to initialize structures used by the I/O Manager, including messages, drivers, filesystems, mount points, and middleware.
+* Update (phandle, property,value, length) -> status; Used to change the value of a property on an object by its handle. By enforcing that only the I/O Manager can manipulate these objects, we prevent client software from making unacceptable changes
+* Delete (phandle) -> status; Deletes an object or cancels a message. *Does Not* delete a file. 
+* Execute(phandle) -> status (for use only with io_message); Causes the I/O manager to execute the message pipeline, first passing the message to filters, then to the associated filesystem
+* Enumerate(obj_type, index, phandle) -> status (iterates through handles of a specific type); Used for enumerating the objects that I/O manager is tracking. This is *not* used for listing the files in a directory.
+* Lock(handle) -> status; Locks an object from further editing.
+
+Object types
+=============
+
+* Filesystem {lockable}
+* Device {lockable}
+* Filter {lockable}
+* File 
+* Middleware {lockable}
+* Message 
+* Mount point
+
+IO Properties
+=============
+
+* Read_func
+* Write_func
+* Query_func
+* Set_func
+* Delete_func
+* enum_func
+* Is_dir
+* Count_children
+* Path
+* Last_read
+* Last_modified
+* Created {file, dir, filesystem, device, message}
+* Length_content {file, dir}
+* Cursor position
+
+Filesystem Interface
+====================
+
+* Execute -> processes the request
+* Init -> prepares the filesystem for first use
+* Finalize -> destructs any filesystem data structures and frees resources
+
+> Note: in version two, a mount call is planned so that filesystems can receive notifications that theyve been mounted and should prepare their data structures.
+
+IO Device Driver Interface
+==========================
+
+* Initialize()
+* Read(offset, run, buffer)
+* Called directly by filesystems as needed
+* Write(offset, run, buffer)
+* Called directly by filesystems as needed
+* Finalize()
+
+The IO Flow:
+=============
+
+* User API requests kernel-space IOMESSAGE object (prototype):
+* Caller receives pointer to IOMESSAGE
+* Caller populates IOMESSAGE with pointer to buffer, length of buffer, path/name, IOCTL 
+* User API makes execute call when operation is ready
+* Execute handler:
+    * Reads messages path
+    * Uses path to assign a filesystem
+    * Uses path to assign a device driver
+    * Calls first filter 
+* When all filters return, IO Manager invokes assigned filesystem
+    * Reads path to look up information about the request
+    * The filesystem interprets the IO Message and takes action. 
+    * The Filesystem calls the associated driver methods included in the I/O message for all reads and writes
+

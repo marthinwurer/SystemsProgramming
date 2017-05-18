@@ -98,3 +98,50 @@ garbled as each process spent most of its time drawing text.
 Nathan Castle
 --------------------------------------------------------------------------------
 
+Filesystems was an interesting topic because I've wanted to learn more about 
+them - I've tended to gloss over them every time they've come up so far. For 
+better or worse, the exercise ultimately turned into an exercise in API design -
+another topic I'm interested in. 
+
+The challenge with an API design project is that there isn't anything 
+interesting until there is something for the API to manipulate. I got a basic 
+in-memory backing store working and a basic raw filesystem working, but these
+are uninteresting because they implement comparatively few operations. 
+
+To make things interesting, I decided to implement FAT32. I reviewed the 
+documentation, built an implementation plan, and figured out how it would
+work with my I/O framework. While this task seemed reasonable ahead of the 
+presentation on Thursday, in the context of having to finish a comparch project,
+I ran into a hard limit on my ability to be productive. 
+
+Lesson learned: don't take comparch, c++, sysprog, and data mining concurrently. 
+
+I did get most of the coding done for the FAT32 filesystem, test and verification
+remains to be done. FAT32 is interesting because it is really straightforward 
+except for a relatively extreme amount of bit manipulation. For example, dates
+are split over two bytes, with hour taking 5 bits, minute taking 5 bits, and second
+taking 6 bits. I would not bet that I got the bit manipulation correct for things
+like that. 
+
+FAT32 has a lot of recursive/iterative patterns. For example, filenames are split
+across one or more directory entries and may or may not be in order. Clusters
+in the FAT table may refer to other clusters. Directory entries are in clusters
+and themselves may span clusters. A document detailing my implementation of FAT32 
+is included somewhere. 
+
+Back on the API design side, 
+I had trouble deciding where the architectural boundary between kernel and user
+should be. As things are now, user-land filesystem APIs interact directly 
+with the IO Manager over what would ultimately be syscalls. I'm thinking it would
+make more sense to have a parallel IO Message (IO Request Packet) sub-structure 
+that is manipulated directly by the user-mode APIs and sent to the IO Manager. 
+Then the manager could still marshal that object and enforce policy, but the 
+filesystem API wouldn't be forced to do a syscall for every updated property. 
+
+I would have liked to explore asynchronous I/O with the I/O framework I built. 
+The design would have made it convenient to register callbacks, listeners, 
+etc. that could be notified on IO request completion. Additionally, the I/O 
+manager had mechanisms for handling incoming I/O request packets; I would have
+liked to explore the message_from_void -> IO manager -> clients flow to handle
+'unexpected' I/O. The IoCompletionPort mechanism in Windows NT and epoll in Linux
+could be modeled this way and would be interesting. 
