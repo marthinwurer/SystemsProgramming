@@ -58,3 +58,28 @@ The following table contains all default variables:
 | ASFLAGS      | ...           | Flags used wtih AS                                      |
 | LDFLAGS      | ...           | Flags used with LD                                      |
 | USER_OPTIONS | ...           | Compilation options                                     |
+
+## User Options
+
+The following user options exist and can be set for the USER_OPTIONS variable:
+ * ISR_DEBUGGING_CODE  - includes context restore debugging code
+ * CLEAR_BSS_SEGMENT   - include code to clear all BSS space in early init
+ * SP_OS_CONFIG        - required, enables OS-specific startup variations
+ * REPORT_MYSTERY_INTS - print a message on interrupt 0x27
+ * DUMP_QUEUES         - dump information about scheduler queues periodically
+ * NETWORK_ENABLED     - Enable the intel NIC driver
+ * NETWORK_DUMP        - hexdump all received packets
+
+## Project setup
+
+| Directory | Description                           |
+|-----------|---------------------------------------|
+| baseline  | Baseline OS C and Assembly source     |
+| doc       | Documentation                         |
+| include   | Global header files                   |
+| kern      | OS kernel C and Assembly source       |
+| libc      | C Standard Library source             |
+| man       | Man pages                             |
+| mk        | Makefiles included from root Makefile |
+| realprog  | realprog project source               |
+| tools     | Utility applications used in building |
