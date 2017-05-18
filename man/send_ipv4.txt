@@ -1,0 +1,21 @@
+NAME
+        send_ipv4
+
+SYNOPSIS
+        int32_t send_ipv4(uint32_t dst_ip, void* data, uint32_t length, 
+                ip_protocol_t protocol)
+
+DESCRIPTION
+        This sends an IPv4 packet along the network. It can be used with another
+        encapsulated protocal, specified as an argument, as well as by itself
+        for testing a network.
+
+OPTIONS
+        uint32_t dst_ip
+            Destination IP address in Little Endian
+        void* data
+            Data to send to send as with the IP packet
+        uint32_t length
+            Length of data to send
+        ip_protocol_t protocol
+            Which protocol to use (defined in kern/net/intel.h)

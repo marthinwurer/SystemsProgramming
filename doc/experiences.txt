@@ -24,6 +24,28 @@ the OS and using different flags when we wanted to test the different modules.
 This worked fine, but meant that our ability to demo things was relatively
 limited.
 
+For the networking portion I worked on, the biggest things that bit me we
+network byte order, and struct alignment. I initially started using uint8_t[]
+for most of the multi-byte data I needed to send and receive through the
+network. I switched to using native little endian in my code, and just
+converting to network byte order when interfacing on the network. I discovered a
+built in gcc function called __builtin_bswap32(), as well as the 16-bit varient.
+This were really useful, as I didn't have to write and test my own function 
+(however simple it may have been). 
+
+I had issues with synchronization, which led me away from some of the things I
+would've liked to get working. An example is ICMP echo replies. This in theory
+would be easy to implement, but I had the issue of possibly needing to make an
+ARP request while trying to respond to the echo. Since my receive daemon would
+be handling the ICMP echo at that time, it wouldn't be able to process received
+data and get the ARP entry that was needed. This could be fixed by adding
+another layer, where the daemon spawns other processes to deal with accepting
+ARP packets, or responding to pings, or putting data into queues for users to
+receive. This would lead to synchronization issues, and fixing these were beyond
+the scope of what I was trying to do. Because of these issues, I also avoided
+using system calls, as I needed to be able to utilize interrupts within these
+functions.
+
 Benjamin Maitland
 --------------------------------------------------------------------------------
 
