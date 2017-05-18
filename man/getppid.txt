@@ -1,0 +1,13 @@
+NAME
+        getppid
+
+SYNOPSIS
+        pid_t getppid( void )
+
+DESCRIPTION
+        The getppid system call retrieves the parent PID of the process who
+        performed this system call. A process that was spawned by the init
+        process will have its parent PID set to 1.
+
+OPTIONS
+        void

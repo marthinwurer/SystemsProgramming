@@ -1,0 +1,22 @@
+NAME
+        wait
+
+SYNOPSIS
+        status_t wait(
+                pid_t *pid,
+                int32_t *status
+        )
+
+DESCRIPTION
+        The wait system call blocks the current process until a specified
+        child process terminates. If the current process has no children then
+        an error code is returned. If the current process has at least one
+        child that has not been cleaned up yet, that child will be cleaned
+        and its status will be returned. Otherwise the process will block until
+        a child terminates.
+
+OPTIONS
+        pid
+            If successful, will be set to the PID of the child
+        status
+            If successful, will be set to the exit code of the child

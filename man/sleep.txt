@@ -1,0 +1,17 @@
+NAME
+        sleep
+
+SYNOPSIS
+        void sleep( uint32_t msec )
+
+DESCRIPTION
+        The sleep system call puts the current process to sleep for
+        the given amount of milleseconds. The process will be blocked for
+        at least msec milleseconds, the actual amount of time spent sleeping
+        depends on the scheduler. If msec is 0, then the process will give up
+        its time slice and the scheduler will dispatch the next process.
+
+OPTIONS
+        msec
+            The amount of time, in milleseconds, for the current process to
+            sleep for.

@@ -1,0 +1,12 @@
+NAME
+        getpid
+
+SYNOPSIS
+        pid_t getpid( void )
+
+DESCRIPTION
+        The getpid system call retrieves the PID of the process who called
+        this system call.
+
+OPTIONS
+        void

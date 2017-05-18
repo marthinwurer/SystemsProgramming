@@ -1,0 +1,11 @@
+NAME
+        gettime
+
+SYNOPSIS
+        time_t gettime( void )
+
+DESCRIPTION
+        The gettime system call retrieves the current system time
+
+OPTIONS
+        void

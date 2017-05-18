@@ -1,0 +1,14 @@
+NAME
+        getstatus
+
+SYNOPSIS
+        state_t getstatus( pid_t pid )
+
+DESCRIPTION
+        The getstatus syscall is used to retrieve the state of a process from
+        its pid. If the process has already exited, the status code is
+        returned, otherwise the state is returned.
+
+OPTIONS
+        pid_t pid
+            The pid of the process to retrieve the state/errorcode from
