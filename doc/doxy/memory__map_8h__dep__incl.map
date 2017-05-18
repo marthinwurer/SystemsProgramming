@@ -1,0 +1,45 @@
+<map id="include/kern/memory/memory_map.h" name="include/kern/memory/memory_map.h">
+<area shape="rect" id="node2" href="$system_8c.html" title="baseline/system.c" alt="" coords="1177,534,1315,561"/>
+<area shape="rect" id="node3" href="$ramdisk_8c.html" title="kern/drivers/ramdisk\l/ramdisk.c" alt="" coords="2317,437,2469,479"/>
+<area shape="rect" id="node4" href="$memory__map__setup_8c.html" title="kern/early/memory_map\l_setup.c" alt="" coords="801,95,979,136"/>
+<area shape="rect" id="node5" href="$main_8c.html" title="kern/main.c" alt="" coords="1004,102,1101,129"/>
+<area shape="rect" id="node6" href="$memory__map_8c.html" title="kern/memory/memory\l_map.c" alt="" coords="5,527,172,568"/>
+<area shape="rect" id="node7" href="$intel_8c.html" title="kern/net/intel.c" alt="" coords="1177,102,1294,129"/>
+<area shape="rect" id="node8" href="$net__test_8c.html" title="kern/net/net_test.c" alt="" coords="1317,102,1460,129"/>
+<area shape="rect" id="node9" href="$process_8h.html" title="include/baseline/process.h" alt="" coords="492,355,683,382"/>
+<area shape="rect" id="node18" href="$memshim_8h.html" title="include/kern/io/memshim.h" alt="" coords="1942,102,2137,129"/>
+<area shape="rect" id="node10" href="$clock_8c.html" title="baseline/clock.c" alt="" coords="378,534,501,561"/>
+<area shape="rect" id="node11" href="$process_8c.html" title="baseline/process.c" alt="" coords="705,445,845,471"/>
+<area shape="rect" id="node12" href="$scheduler_8c.html" title="baseline/scheduler.c" alt="" coords="548,534,699,561"/>
+<area shape="rect" id="node13" href="$sio_8c.html" title="baseline/sio.c" alt="" coords="829,534,937,561"/>
+<area shape="rect" id="node14" href="$syscall_8c.html" title="baseline/syscall.c" alt="" coords="199,534,331,561"/>
+<area shape="rect" id="node15" href="$stack_8h.html" title="include/baseline/stack.h" alt="" coords="177,445,352,471"/>
+<area shape="rect" id="node16" href="$scheduler_8h.html" title="include/baseline/scheduler.h" alt="" coords="428,445,629,471"/>
+<area shape="rect" id="node17" href="$system_8h.html" title="include/baseline/system.h" alt="" coords="921,445,1107,471"/>
+<area shape="rect" id="node19" href="$memshim_8c.html" title="kern/io/memshim.c" alt="" coords="2128,191,2273,218"/>
+<area shape="rect" id="node20" href="$io__types_8h.html" title="include/kern/io/io\l_types.h" alt="" coords="1975,184,2104,225"/>
+<area shape="rect" id="node21" href="$pubfat_8h.html" title="include/kern/drivers\l/fat32/pubfat.h" alt="" coords="2811,348,2958,389"/>
+<area shape="rect" id="node23" href="$ramdisk_8h.html" title="include/kern/drivers\l/ramdisk/ramdisk.h" alt="" coords="2021,348,2167,389"/>
+<area shape="rect" id="node25" href="$raw_8h.html" title="include/kern/drivers\l/rawfs/raw.h" alt="" coords="2086,437,2233,479"/>
+<area shape="rect" id="node27" href="$device_8h.html" title="include/kern/io/device.h" alt="" coords="2243,273,2414,300"/>
+<area shape="rect" id="node30" href="$router_8h.html" title="include/kern/io/router.h" alt="" coords="1829,355,1997,382"/>
+<area shape="rect" id="node35" href="$filesystem_8h.html" title="include/kern/io/filesystem.h" alt="" coords="1383,273,1578,300"/>
+<area shape="rect" id="node37" href="$message_8h.html" title="include/kern/io/message.h" alt="" coords="2649,273,2838,300"/>
+<area shape="rect" id="node39" href="$middleware_8h.html" title="include/kern/io/middleware.h" alt="" coords="1602,273,1805,300"/>
+<area shape="rect" id="node41" href="$mount_8h.html" title="include/kern/io/mount.h" alt="" coords="1829,273,2001,300"/>
+<area shape="rect" id="node43" href="$file_8h.html" title="Definition of the File&#45;Oriented I/O API. This is intended for consumption by user&#45;mode apps..." alt="" coords="1177,348,1310,389"/>
+<area shape="rect" id="node22" href="$pubfat_8c.html" title="public interface to FAT32 filesystem " alt="" coords="2552,437,2687,479"/>
+<area shape="rect" id="node24" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="1959,534,2091,561"/>
+<area shape="rect" id="node26" href="$raw_8c.html" title="kern/drivers/rawfs\l/raw.c" alt="" coords="2115,527,2249,568"/>
+<area shape="rect" id="node28" href="$fat_8c.html" title="implements several support functions for the FAT32 File System " alt="" coords="2337,348,2472,389"/>
+<area shape="rect" id="node29" href="$device_8c.html" title="kern/io/device.c" alt="" coords="2192,355,2313,382"/>
+<area shape="rect" id="node31" href="$router_8c.html" title="kern/io/router.c" alt="" coords="1633,445,1752,471"/>
+<area shape="rect" id="node32" href="$file_8c.html" title="Implements the File&#45;Oriented I/O API. This is intended for consumption by user&#45;mode apps..." alt="" coords="1434,445,1551,471"/>
+<area shape="rect" id="node33" href="$simple__mount_8h.html" title="include/kern/ioapi\l/simple_mount.h" alt="" coords="1827,437,1961,479"/>
+<area shape="rect" id="node34" href="$simple__mount_8c.html" title="kern/ioapi/simple_mount.c" alt="" coords="1744,534,1935,561"/>
+<area shape="rect" id="node36" href="$filesystem_8c.html" title="kern/io/filesystem.c" alt="" coords="1335,355,1480,382"/>
+<area shape="rect" id="node38" href="$message_8c.html" title="kern/io/message.c" alt="" coords="2649,355,2787,382"/>
+<area shape="rect" id="node40" href="$middleware_8c.html" title="kern/io/middleware.c" alt="" coords="1504,355,1657,382"/>
+<area shape="rect" id="node42" href="$mount_8c.html" title="kern/io/mount.c" alt="" coords="1682,355,1805,382"/>
+<area shape="rect" id="node44" href="$user_8c.html" title="baseline/user.c" alt="" coords="1283,445,1401,471"/>
+</map>

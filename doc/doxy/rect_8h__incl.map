@@ -1,0 +1,12 @@
+<map id="include/kern/graphics/shapes/rect.h" name="include/kern/graphics/shapes/rect.h">
+<area shape="rect" id="node2" href="$PaintContext_8h.html" title="kern/graphics/PaintContext.h" alt="" coords="217,95,422,121"/>
+<area shape="rect" id="node9" href="$Rect_8h.html" title="kern/graphics/Rect.h" alt="" coords="505,95,656,121"/>
+<area shape="rect" id="node3" href="$VideoCol_8h.html" title="kern/video/color/VideoCol.h" alt="" coords="167,251,362,278"/>
+<area shape="rect" id="node5" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="310,169,481,196"/>
+<area shape="rect" id="node8" href="$PSFont_8h.html" title="kern/graphics/text\l/PSFont.h" alt="" coords="5,244,143,285"/>
+<area shape="rect" id="node4" href="$stdint_8h.html" title="stdint.h" alt="" coords="281,333,352,360"/>
+<area shape="rect" id="node6" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="437,244,633,285"/>
+<area shape="rect" id="node7" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="429,333,642,360"/>
+<area shape="rect" id="node10" href="$Point_8h.html" title="kern/graphics/Point.h" alt="" coords="680,169,836,196"/>
+<area shape="rect" id="node11" href="$Size_8h.html" title="kern/graphics/Size.h" alt="" coords="505,169,656,196"/>
+</map>

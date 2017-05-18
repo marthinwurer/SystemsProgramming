@@ -1,0 +1,7 @@
+<map id="include/kern/early/realmode.h" name="include/kern/early/realmode.h">
+<area shape="rect" id="node2" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="5,102,137,129"/>
+<area shape="rect" id="node3" href="$memory__map__setup_8c.html" title="kern/early/memory_map\l_setup.c" alt="" coords="162,95,341,136"/>
+<area shape="rect" id="node4" href="$early_2video_8c.html" title="kern/early/video.c" alt="" coords="365,102,500,129"/>
+<area shape="rect" id="node5" href="$edid_8c.html" title="kern/vesa/edid.c" alt="" coords="524,102,651,129"/>
+<area shape="rect" id="node6" href="$vbe_8c.html" title="kern/vesa/vbe.c" alt="" coords="675,102,798,129"/>
+</map>

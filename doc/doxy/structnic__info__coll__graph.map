@@ -1,0 +1,8 @@
+<map id="nic_info" name="nic_info">
+<area shape="rect" id="node2" href="$structcsr.html" title="csr" alt="" coords="5,273,47,300"/>
+<area shape="rect" id="node3" href="$structrfd__t.html" title="rfd_t" alt="" coords="71,273,122,300"/>
+<area shape="rect" id="node4" href="$structcb.html" title="cb" alt="" coords="147,273,185,300"/>
+<area shape="rect" id="node5" href="$structeth__packet__t.html" title="eth_packet_t" alt="" coords="113,184,219,211"/>
+<area shape="rect" id="node6" href="$unioneth__payload__t.html" title="eth_payload_t" alt="" coords="110,95,222,121"/>
+<area shape="rect" id="node7" href="$structipv4__t.html" title="ipv4_t" alt="" coords="136,5,196,32"/>
+</map>

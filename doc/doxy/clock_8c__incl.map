@@ -1,0 +1,36 @@
+<map id="baseline/clock.c" name="baseline/clock.c">
+<area shape="rect" id="node2" href="$x86arch_8h.html" title="x86arch.h" alt="" coords="5,326,91,353"/>
+<area shape="rect" id="node3" href="$startup_8h.html" title="baseline/startup.h" alt="" coords="1409,80,1546,107"/>
+<area shape="rect" id="node4" href="$common_8h.html" title="baseline/common.h" alt="" coords="1121,408,1269,435"/>
+<area shape="rect" id="node9" href="$clock_8h.html" title="baseline/clock.h" alt="" coords="1384,155,1507,181"/>
+<area shape="rect" id="node10" href="$process_8h.html" title="baseline/process.h" alt="" coords="1011,155,1152,181"/>
+<area shape="rect" id="node30" href="$queue_8h.html" title="queue.h" alt="" coords="601,237,676,263"/>
+<area shape="rect" id="node31" href="$scheduler_8h.html" title="baseline/scheduler.h" alt="" coords="924,80,1076,107"/>
+<area shape="rect" id="node32" href="$sio_8h.html" title="baseline/sio.h" alt="" coords="653,155,763,181"/>
+<area shape="rect" id="node33" href="$syscall_8h.html" title="baseline/syscall.h" alt="" coords="1176,155,1309,181"/>
+<area shape="rect" id="node34" href="$marquee_8h.html" title="kern/util/marquee.h" alt="" coords="1571,80,1717,107"/>
+<area shape="rect" id="node35" href="$buildinfo_8h.html" title="kern/buildinfo.h" alt="" coords="1742,80,1861,107"/>
+<area shape="rect" id="node5" href="$types_8h.html" title="types.h" alt="" coords="1160,483,1229,509"/>
+<area shape="rect" id="node7" href="$ulib_8h.html" title="ulib.h" alt="" coords="1080,483,1136,509"/>
+<area shape="rect" id="node6" href="$stdint_8h.html" title="stdint.h" alt="" coords="702,736,773,763"/>
+<area shape="rect" id="node8" href="$stddef_8h.html" title="stddef.h" alt="" coords="1049,565,1122,591"/>
+<area shape="rect" id="node11" href="$memory__map_8h.html" title="kern/memory/memory\l_map.h" alt="" coords="699,229,866,271"/>
+<area shape="rect" id="node29" href="$stack_8h.html" title="stack.h" alt="" coords="1047,237,1115,263"/>
+<area shape="rect" id="node12" href="$c__io_8h.html" title="baseline/c_io.h" alt="" coords="398,326,514,353"/>
+<area shape="rect" id="node25" href="$klib_8h.html" title="baseline/klib.h" alt="" coords="995,326,1107,353"/>
+<area shape="rect" id="node26" href="$support_8h.html" title="baseline/support.h" alt="" coords="641,326,781,353"/>
+<area shape="rect" id="node27" href="$string_8h.html" title="string.h" alt="" coords="657,408,727,435"/>
+<area shape="rect" id="node28" href="$memory__constants_8h.html" title="kern/memory/memory\l_constants.h" alt="" coords="805,319,971,360"/>
+<area shape="rect" id="node13" href="$VConCtrl_8h.html" title="kern/vconsole/VConCtrl.h" alt="" coords="355,408,538,435"/>
+<area shape="rect" id="node14" href="$VCon_8h.html" title="kern/vconsole/VCon.h" alt="" coords="165,483,325,509"/>
+<area shape="rect" id="node18" href="$VConMode_8h.html" title="kern/vconsole/VConMode.h" alt="" coords="349,483,544,509"/>
+<area shape="rect" id="node19" href="$PaintContext_8h.html" title="kern/graphics/PaintContext.h" alt="" coords="568,483,773,509"/>
+<area shape="rect" id="node15" href="$VConBuf_8h.html" title="kern/vconsole/VConBuf.h" alt="" coords="283,565,463,591"/>
+<area shape="rect" id="node16" href="$VConChar_8h.html" title="kern/vconsole/VConChar.h" alt="" coords="216,654,405,681"/>
+<area shape="rect" id="node17" href="$VConLine_8h.html" title="kern/vconsole/VConLine.h" alt="" coords="429,654,616,681"/>
+<area shape="rect" id="node20" href="$VideoCol_8h.html" title="kern/video/color/VideoCol.h" alt="" coords="640,654,835,681"/>
+<area shape="rect" id="node21" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="853,565,1024,591"/>
+<area shape="rect" id="node24" href="$PSFont_8h.html" title="kern/graphics/text\l/PSFont.h" alt="" coords="691,557,829,599"/>
+<area shape="rect" id="node22" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="961,647,1157,688"/>
+<area shape="rect" id="node23" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="952,736,1165,763"/>
+</map>

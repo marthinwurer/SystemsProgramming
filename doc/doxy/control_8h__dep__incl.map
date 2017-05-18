@@ -1,0 +1,8 @@
+<map id="include/kern/vconsole/control.h" name="include/kern/vconsole/control.h">
+<area shape="rect" id="node2" href="$c__io_8c.html" title="baseline/c_io.c" alt="" coords="5,95,120,121"/>
+<area shape="rect" id="node3" href="$support_8c.html" title="baseline/support.c" alt="" coords="144,95,283,121"/>
+<area shape="rect" id="node4" href="$user_8c.html" title="baseline/user.c" alt="" coords="307,95,424,121"/>
+<area shape="rect" id="node5" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="449,95,581,121"/>
+<area shape="rect" id="node6" href="$console_8c.html" title="kern/vconsole/console.c" alt="" coords="605,95,779,121"/>
+<area shape="rect" id="node7" href="$control_8c.html" title="kern/vconsole/control.c" alt="" coords="803,95,973,121"/>
+</map>

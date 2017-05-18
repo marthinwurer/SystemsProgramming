@@ -1,0 +1,8 @@
+<map id="include/kern/graphics/PaintContext.h" name="include/kern/graphics/PaintContext.h">
+<area shape="rect" id="node2" href="$VideoCol_8h.html" title="kern/video/color/VideoCol.h" alt="" coords="5,191,200,218"/>
+<area shape="rect" id="node4" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="323,102,493,129"/>
+<area shape="rect" id="node7" href="$PSFont_8h.html" title="kern/graphics/text\l/PSFont.h" alt="" coords="161,95,298,136"/>
+<area shape="rect" id="node3" href="$stdint_8h.html" title="stdint.h" alt="" coords="211,273,282,300"/>
+<area shape="rect" id="node5" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="326,184,522,225"/>
+<area shape="rect" id="node6" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="317,273,531,300"/>
+</map>

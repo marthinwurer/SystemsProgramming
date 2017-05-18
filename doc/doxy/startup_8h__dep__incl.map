@@ -1,0 +1,10 @@
+<map id="include/baseline/startup.h" name="include/baseline/startup.h">
+<area shape="rect" id="node2" href="$c__io_8c.html" title="baseline/c_io.c" alt="" coords="5,80,120,107"/>
+<area shape="rect" id="node3" href="$clock_8c.html" title="baseline/clock.c" alt="" coords="144,80,267,107"/>
+<area shape="rect" id="node4" href="$sio_8c.html" title="baseline/sio.c" alt="" coords="291,80,399,107"/>
+<area shape="rect" id="node5" href="$support_8c.html" title="baseline/support.c" alt="" coords="424,80,563,107"/>
+<area shape="rect" id="node6" href="$syscall_8c.html" title="baseline/syscall.c" alt="" coords="587,80,719,107"/>
+<area shape="rect" id="node7" href="$intel_8c.html" title="kern/net/intel.c" alt="" coords="744,80,861,107"/>
+<area shape="rect" id="node8" href="$pci_8c.html" title="kern/pci/pci.c" alt="" coords="885,80,990,107"/>
+<area shape="rect" id="node9" href="$control_8c.html" title="kern/vconsole/control.c" alt="" coords="1014,80,1183,107"/>
+</map>

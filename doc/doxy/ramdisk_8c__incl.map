@@ -1,0 +1,36 @@
+<map id="kern/drivers/ramdisk/ramdisk.c" name="kern/drivers/ramdisk/ramdisk.c">
+<area shape="rect" id="node2" href="$ramdisk_8h.html" title="kern/drivers/ramdisk\l/ramdisk.h" alt="" coords="1935,169,2087,211"/>
+<area shape="rect" id="node3" href="$common_8h.html" title="baseline/common.h" alt="" coords="1599,587,1747,613"/>
+<area shape="rect" id="node12" href="$memory__map_8h.html" title="kern/memory/memory\l_map.h" alt="" coords="1037,408,1203,449"/>
+<area shape="rect" id="node30" href="$router_8h.html" title="kern/io/router.h" alt="" coords="1529,95,1647,121"/>
+<area shape="rect" id="node33" href="$device_8h.html" title="device.h" alt="" coords="1313,177,1388,203"/>
+<area shape="rect" id="node8" href="$io__types_8h.html" title="kern/io/io_types.h" alt="" coords="1631,259,1766,285"/>
+<area shape="rect" id="node4" href="$types_8h.html" title="types.h" alt="" coords="1639,661,1708,688"/>
+<area shape="rect" id="node6" href="$ulib_8h.html" title="ulib.h" alt="" coords="1559,661,1615,688"/>
+<area shape="rect" id="node5" href="$stdint_8h.html" title="stdint.h" alt="" coords="605,915,675,941"/>
+<area shape="rect" id="node7" href="$stddef_8h.html" title="stddef.h" alt="" coords="1403,743,1477,770"/>
+<area shape="rect" id="node9" href="$string_8h.html" title="string.h" alt="" coords="1405,505,1475,531"/>
+<area shape="rect" id="node10" href="$prettyprinter_8h.html" title="baseline/prettyprinter.h" alt="" coords="1736,415,1907,442"/>
+<area shape="rect" id="node11" href="$memshim_8h.html" title="kern/io/memshim.h" alt="" coords="1515,333,1661,360"/>
+<area shape="rect" id="node13" href="$x86arch_8h.html" title="x86arch.h" alt="" coords="940,505,1025,531"/>
+<area shape="rect" id="node14" href="$c__io_8h.html" title="baseline/c_io.h" alt="" coords="681,505,797,531"/>
+<area shape="rect" id="node27" href="$klib_8h.html" title="baseline/klib.h" alt="" coords="1499,505,1611,531"/>
+<area shape="rect" id="node28" href="$support_8h.html" title="baseline/support.h" alt="" coords="1050,505,1190,531"/>
+<area shape="rect" id="node29" href="$memory__constants_8h.html" title="kern/memory/memory\l_constants.h" alt="" coords="1214,497,1381,539"/>
+<area shape="rect" id="node15" href="$VConCtrl_8h.html" title="kern/vconsole/VConCtrl.h" alt="" coords="613,587,795,613"/>
+<area shape="rect" id="node16" href="$VCon_8h.html" title="kern/vconsole/VCon.h" alt="" coords="624,661,784,688"/>
+<area shape="rect" id="node20" href="$VConMode_8h.html" title="kern/vconsole/VConMode.h" alt="" coords="808,661,1003,688"/>
+<area shape="rect" id="node21" href="$PaintContext_8h.html" title="kern/graphics/PaintContext.h" alt="" coords="392,661,597,688"/>
+<area shape="rect" id="node17" href="$VConBuf_8h.html" title="kern/vconsole/VConBuf.h" alt="" coords="795,743,975,770"/>
+<area shape="rect" id="node18" href="$VConChar_8h.html" title="kern/vconsole/VConChar.h" alt="" coords="736,833,925,859"/>
+<area shape="rect" id="node19" href="$VConLine_8h.html" title="kern/vconsole/VConLine.h" alt="" coords="949,833,1136,859"/>
+<area shape="rect" id="node22" href="$VideoCol_8h.html" title="kern/video/color/VideoCol.h" alt="" coords="408,833,603,859"/>
+<area shape="rect" id="node23" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="285,743,456,770"/>
+<area shape="rect" id="node26" href="$PSFont_8h.html" title="kern/graphics/text\l/PSFont.h" alt="" coords="531,736,669,777"/>
+<area shape="rect" id="node24" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="14,825,210,867"/>
+<area shape="rect" id="node25" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="5,915,219,941"/>
+<area shape="rect" id="node31" href="$filesystem_8h.html" title="filesystem.h" alt="" coords="1412,177,1511,203"/>
+<area shape="rect" id="node32" href="$middleware_8h.html" title="middleware.h" alt="" coords="1535,177,1641,203"/>
+<area shape="rect" id="node34" href="$mount_8h.html" title="mount.h" alt="" coords="1666,177,1742,203"/>
+<area shape="rect" id="node35" href="$message_8h.html" title="message.h" alt="" coords="1767,177,1860,203"/>
+</map>

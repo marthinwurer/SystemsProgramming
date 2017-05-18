@@ -1,0 +1,30 @@
+<map id="kern" name="kern">
+<area shape="rect" id="node2" href="dir_5762414076e0b7b7b52597b4b2759c67.html" title="drivers" alt="" coords="1197,27,1269,75"/>
+<area shape="rect" id="node15" href="dir_d44c64559bbebec7f509842c48db8b23.html" title="include" alt="" coords="611,123,683,171"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000026_000001.html" title="15" alt="" coords="693,144,710,158"/>
+<area shape="rect" id="node3" href="dir_a9e94d6366a10b72d52d6254ec0e1192.html" title="early" alt="" coords="1101,27,1173,75"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000030_000001.html" title="32" alt="" coords="693,147,710,162"/>
+<area shape="rect" id="node4" href="dir_094cf52e15973e554e08034971bed7ef.html" title="graphics" alt="" coords="1001,27,1077,75"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000032_000001.html" title="4" alt="" coords="697,144,706,158"/>
+<area shape="rect" id="node5" href="dir_181f515a53a68633e3dda94aa5b3fde8.html" title="io" alt="" coords="904,27,976,75"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000035_000001.html" title="7" alt="" coords="697,139,707,154"/>
+<area shape="rect" id="node6" href="dir_f58a9d40968c1f366c03190393465837.html" title="ioapi" alt="" coords="808,27,880,75"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000036_000001.html" title="4" alt="" coords="698,128,707,143"/>
+<area shape="rect" id="node7" href="dir_8ac5235c2b771519ceb12a2358109986.html" title="memory" alt="" coords="707,27,783,75"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000037_000001.html" title="3" alt="" coords="685,109,694,124"/>
+<area shape="rect" id="node8" href="dir_804a4a3221352c533819d4d9d069787f.html" title="net" alt="" coords="611,27,683,75"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000038_000001.html" title="15" alt="" coords="646,97,664,112"/>
+<area shape="rect" id="node9" href="dir_b5c9b4bf63dcc877a3e907c9725fd2d2.html" title="pci" alt="" coords="515,27,587,75"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000039_000001.html" title="3" alt="" coords="611,96,621,111"/>
+<area shape="rect" id="node10" href="dir_261a7f8775356cabae1976ad9440dba1.html" title="util" alt="" coords="419,27,491,75"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000040_000001.html" title="3" alt="" coords="592,111,601,126"/>
+<area shape="rect" id="node11" href="dir_45055c12e77710ca7b72e6bec573d022.html" title="vconsole" alt="" coords="315,27,394,75"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000041_000001.html" title="17" alt="" coords="585,121,603,136"/>
+<area shape="rect" id="node12" href="dir_f7d25a73bb9ae86b048ecfc095b973b4.html" title="vesa" alt="" coords="219,27,291,75"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000043_000001.html" title="9" alt="" coords="588,127,597,142"/>
+<area shape="rect" id="node13" href="dir_10cd6d00754b34ab974c4587b2c48dfe.html" title="vga13" alt="" coords="123,27,195,75"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000044_000001.html" title="3" alt="" coords="588,130,597,145"/>
+<area shape="rect" id="node14" href="dir_f9bed689d2e2f3c9419f4e346dfe5bb8.html" title="video" alt="" coords="27,27,99,75"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000031_000001.html" title="12" alt="" coords="584,127,602,142"/>
+<area shape="rect" id="clust1" href="dir_b3dad8e81b3f37b89b2bf0a8abb2d993.html" alt="" coords="16,16,1376,85"/>
+</map>

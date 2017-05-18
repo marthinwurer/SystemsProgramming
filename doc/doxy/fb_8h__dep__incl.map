@@ -1,0 +1,7 @@
+<map id="include/kern/video/fb/fb.h" name="include/kern/video/fb/fb.h">
+<area shape="rect" id="node2" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="5,102,137,129"/>
+<area shape="rect" id="node3" href="$rect_8c.html" title="kern/graphics/shapes\l/rect.c" alt="" coords="161,95,320,136"/>
+<area shape="rect" id="node4" href="$text_8c.html" title="kern/graphics/text\l/text.c" alt="" coords="344,95,481,136"/>
+<area shape="rect" id="node5" href="$fb_8c.html" title="kern/video/fb/fb.c" alt="" coords="506,102,637,129"/>
+<area shape="rect" id="node6" href="$video_2video_8c.html" title="kern/video/video.c" alt="" coords="661,102,799,129"/>
+</map>

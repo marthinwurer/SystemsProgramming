@@ -1,0 +1,8 @@
+<map id="include/kern/vesa/vbe.h" name="include/kern/vesa/vbe.h">
+<area shape="rect" id="node2" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="5,80,137,107"/>
+<area shape="rect" id="node3" href="$early_2video_8c.html" title="kern/early/video.c" alt="" coords="161,80,296,107"/>
+<area shape="rect" id="node4" href="$main_8c.html" title="kern/main.c" alt="" coords="320,80,417,107"/>
+<area shape="rect" id="node5" href="$edid_8c.html" title="kern/vesa/edid.c" alt="" coords="441,80,568,107"/>
+<area shape="rect" id="node6" href="$vbe_8c.html" title="kern/vesa/vbe.c" alt="" coords="593,80,715,107"/>
+<area shape="rect" id="node7" href="$video_2video_8c.html" title="kern/video/video.c" alt="" coords="740,80,877,107"/>
+</map>

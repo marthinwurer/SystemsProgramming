@@ -1,0 +1,4 @@
+<map id="VConBuf_s" name="VConBuf_s">
+<area shape="rect" id="node2" href="$structVConChar__s.html" title="Structure representing a cell in a virtual console buffer. " alt="" coords="5,5,105,32"/>
+<area shape="rect" id="node3" href="$structVConLine__s.html" title="Structure for an entry in the Line Information Table. " alt="" coords="130,5,226,32"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="include/kern/graphics/Point.h" name="include/kern/graphics/Point.h">
+<area shape="rect" id="node2" href="$Rect_8h.html" title="include/kern/graphics\l/Rect.h" alt="" coords="82,95,239,136"/>
+<area shape="rect" id="node6" href="$text_8h.html" title="include/kern/graphics\l/text/text.h" alt="" coords="283,95,441,136"/>
+<area shape="rect" id="node3" href="$rect_8h.html" title="include/kern/graphics\l/shapes/rect.h" alt="" coords="71,184,229,225"/>
+<area shape="rect" id="node4" href="$rect_8c.html" title="kern/graphics/shapes\l/rect.c" alt="" coords="5,273,164,315"/>
+<area shape="rect" id="node5" href="$draw_8c.html" title="kern/vconsole/render\l/draw.c" alt="" coords="188,273,344,315"/>
+<area shape="rect" id="node7" href="$text_8c.html" title="kern/graphics/text\l/text.c" alt="" coords="304,184,441,225"/>
+<area shape="rect" id="node8" href="$control_8c.html" title="kern/vconsole/control.c" alt="" coords="465,191,635,218"/>
+</map>

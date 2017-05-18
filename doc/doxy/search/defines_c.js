@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['n_5fexceptions',['N_EXCEPTIONS',['../x86arch_8h.html#af754715aee66d80438cd03b66271a137',1,'x86arch.h']]],
+  ['n_5fpcbs',['N_PCBS',['../process_8h.html#af3ae237e600fef6d2824b98fa1c55b5f',1,'process.h']]],
+  ['n_5fprios',['N_PRIOS',['../types_8h.html#a99d18ef5708cb20d4ba6241dc0fc1343',1,'types.h']]],
+  ['n_5fprocs',['N_PROCS',['../common_8h.html#a9f83ec3723ab59308ccf727dacc7cb75',1,'common.h']]],
+  ['n_5fqnodes',['N_QNODES',['../queue_8c.html#a318683c48e15c04cacadab7e36463ba8',1,'queue.c']]],
+  ['n_5fsafe_5ftimings',['N_SAFE_TIMINGS',['../early_2video_8c.html#ab78e10224f960a70b7a6d1276ac77093',1,'video.c']]],
+  ['n_5fstacks',['N_STACKS',['../stack_8h.html#a7b3355963c6542cc4e3fd26de83a481c',1,'stack.h']]],
+  ['n_5fsyscalls',['N_SYSCALLS',['../syscall_8h.html#a6b806830aa3d5a8148ce70145c9097e3',1,'syscall.h']]],
+  ['net_5fintel_5farp_5fhead_5flen',['NET_INTEL_ARP_HEAD_LEN',['../intel_8h.html#a3950f92c74a68906025566e7abe96e41',1,'intel.h']]],
+  ['net_5fintel_5fcfg_5flength',['NET_INTEL_CFG_LENGTH',['../intel_8h.html#a23bd683f430292051d90d91a878c5484',1,'intel.h']]],
+  ['net_5fintel_5fdsl_5fnic',['NET_INTEL_DSL_NIC',['../intel_8h.html#a572ddc9ccf8389e6f8ec869cb0249e91',1,'intel.h']]],
+  ['net_5fintel_5feth_5fhead_5flen',['NET_INTEL_ETH_HEAD_LEN',['../intel_8h.html#ad18eb53b2ea2350fed7024fdacf40683',1,'intel.h']]],
+  ['net_5fintel_5fint_5fvector',['NET_INTEL_INT_VECTOR',['../intel_8h.html#ae5c381a3f87ebccffd2fed2f29e8495c',1,'intel.h']]],
+  ['net_5fintel_5fmax_5feth_5flength',['NET_INTEL_MAX_ETH_LENGTH',['../intel_8h.html#ae78eeee2373e7bad1c3e18b0bb79a33b',1,'intel.h']]],
+  ['net_5fintel_5fmin_5feth_5flength',['NET_INTEL_MIN_ETH_LENGTH',['../intel_8h.html#a5b30241b80146819d2247dc6e5d157ae',1,'intel.h']]],
+  ['net_5fintel_5fqemu_5fnic',['NET_INTEL_QEMU_NIC',['../intel_8h.html#a8bcc5fdd8f185d90486d7643a50b2c07',1,'intel.h']]],
+  ['net_5fintel_5frfd_5fsize',['NET_INTEL_RFD_SIZE',['../intel_8h.html#a9e74ac17c425fe410d90f108b5a31f2b',1,'intel.h']]],
+  ['net_5fintel_5frx_5fbuf_5fmax_5flen',['NET_INTEL_RX_BUF_MAX_LEN',['../intel_8h.html#aff5cb0abde47d27ab7ca6687da7de02c',1,'intel.h']]],
+  ['net_5fintel_5ftcb_5fmax_5fdata_5flen',['NET_INTEL_TCB_MAX_DATA_LEN',['../intel_8h.html#acc72cfdf488e5ae13b1f87195b1d3a75',1,'intel.h']]],
+  ['net_5fintel_5fvendor',['NET_INTEL_VENDOR',['../intel_8h.html#a66ed0c80550230a1cbcbc7f0c0aa3c40',1,'intel.h']]],
+  ['npic',['NPIC',['../x86arch_8h.html#a6535cfbd4fdab19e81f2efc48fa81953',1,'x86arch.h']]],
+  ['null',['NULL',['../vga13_8c.html#a070d2ce7b6bb7e5c05602aa8c308d0c4',1,'NULL():&#160;vga13.c'],['../common_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4',1,'NULL():&#160;common.h'],['../stddef_8h.html#a070d2ce7b6bb7e5c05602aa8c308d0c4',1,'NULL():&#160;stddef.h']]]
+];

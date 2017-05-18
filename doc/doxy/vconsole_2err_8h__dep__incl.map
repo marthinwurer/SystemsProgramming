@@ -1,0 +1,12 @@
+<map id="include/kern/vconsole/err.h" name="include/kern/vconsole/err.h">
+<area shape="rect" id="node2" href="$buffer_8h.html" title="include/kern/vconsole\l/buffer.h" alt="" coords="163,95,321,136"/>
+<area shape="rect" id="node6" href="$console_8h.html" title="include/kern/vconsole\l/console.h" alt="" coords="345,95,504,136"/>
+<area shape="rect" id="node8" href="$control_8h.html" title="include/kern/vconsole\l/control.h" alt="" coords="528,95,687,136"/>
+<area shape="rect" id="node3" href="$c__io_8c.html" title="baseline/c_io.c" alt="" coords="191,184,306,211"/>
+<area shape="rect" id="node4" href="$buffer_8c.html" title="kern/vconsole/buffer.c" alt="" coords="5,184,167,211"/>
+<area shape="rect" id="node5" href="$console_8c.html" title="kern/vconsole/console.c" alt="" coords="331,184,505,211"/>
+<area shape="rect" id="node7" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="529,184,661,211"/>
+<area shape="rect" id="node9" href="$support_8c.html" title="baseline/support.c" alt="" coords="686,184,825,211"/>
+<area shape="rect" id="node10" href="$user_8c.html" title="baseline/user.c" alt="" coords="849,184,966,211"/>
+<area shape="rect" id="node11" href="$control_8c.html" title="kern/vconsole/control.c" alt="" coords="991,184,1160,211"/>
+</map>

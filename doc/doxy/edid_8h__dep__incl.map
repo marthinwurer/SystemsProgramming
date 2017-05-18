@@ -1,0 +1,5 @@
+<map id="include/kern/vesa/edid.h" name="include/kern/vesa/edid.h">
+<area shape="rect" id="node2" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="5,80,137,107"/>
+<area shape="rect" id="node3" href="$early_2video_8c.html" title="kern/early/video.c" alt="" coords="161,80,296,107"/>
+<area shape="rect" id="node4" href="$edid_8c.html" title="kern/vesa/edid.c" alt="" coords="320,80,447,107"/>
+</map>

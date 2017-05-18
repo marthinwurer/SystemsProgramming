@@ -1,0 +1,44 @@
+<map id="kern/drivers/fat32/pubfat.c" name="kern/drivers/fat32/pubfat.c">
+<area shape="rect" id="node2" href="$pubfat_8h.html" title="kern/drivers/fat32\l/pubfat.h" alt="" coords="507,95,642,136"/>
+<area shape="rect" id="node42" href="$libpath_8h.html" title="libpath.h" alt="" coords="911,415,988,442"/>
+<area shape="rect" id="node43" href="$device_8h.html" title="kern/io/device.h" alt="" coords="1080,102,1203,129"/>
+<area shape="rect" id="node3" href="$io__types_8h.html" title="kern/io/io_types.h" alt="" coords="958,259,1093,285"/>
+<area shape="rect" id="node30" href="$message_8h.html" title="kern/io/message.h" alt="" coords="963,184,1103,211"/>
+<area shape="rect" id="node31" href="$clusters_8h.html" title="clusters.h" alt="" coords="630,184,714,211"/>
+<area shape="rect" id="node32" href="$create_8h.html" title="create.h" alt="" coords="813,184,888,211"/>
+<area shape="rect" id="node33" href="$delete_8h.html" title="delete.h" alt="" coords="5,184,80,211"/>
+<area shape="rect" id="node34" href="$fat_8h.html" title="fat.h" alt="" coords="739,184,789,211"/>
+<area shape="rect" id="node36" href="$meta_8h.html" title="meta.h" alt="" coords="105,184,173,211"/>
+<area shape="rect" id="node37" href="$query_8h.html" title="query.h" alt="" coords="197,184,265,211"/>
+<area shape="rect" id="node38" href="$read_8h.html" title="read.h" alt="" coords="289,184,351,211"/>
+<area shape="rect" id="node39" href="$set_8h.html" title="set.h" alt="" coords="375,184,430,211"/>
+<area shape="rect" id="node40" href="$time_8h.html" title="time.h" alt="" coords="543,184,606,211"/>
+<area shape="rect" id="node41" href="$write_8h.html" title="write.h" alt="" coords="455,184,519,211"/>
+<area shape="rect" id="node4" href="$string_8h.html" title="string.h" alt="" coords="962,505,1033,531"/>
+<area shape="rect" id="node6" href="$common_8h.html" title="baseline/common.h" alt="" coords="786,587,934,613"/>
+<area shape="rect" id="node10" href="$prettyprinter_8h.html" title="baseline/prettyprinter.h" alt="" coords="687,333,857,360"/>
+<area shape="rect" id="node11" href="$memshim_8h.html" title="kern/io/memshim.h" alt="" coords="1063,333,1209,360"/>
+<area shape="rect" id="node5" href="$stddef_8h.html" title="stddef.h" alt="" coords="975,743,1049,770"/>
+<area shape="rect" id="node7" href="$types_8h.html" title="types.h" alt="" coords="825,661,895,688"/>
+<area shape="rect" id="node9" href="$ulib_8h.html" title="ulib.h" alt="" coords="919,661,975,688"/>
+<area shape="rect" id="node8" href="$stdint_8h.html" title="stdint.h" alt="" coords="1959,915,2030,941"/>
+<area shape="rect" id="node12" href="$memory__map_8h.html" title="kern/memory/memory\l_map.h" alt="" coords="1289,408,1455,449"/>
+<area shape="rect" id="node13" href="$x86arch_8h.html" title="x86arch.h" alt="" coords="1192,505,1277,531"/>
+<area shape="rect" id="node14" href="$c__io_8h.html" title="baseline/c_io.h" alt="" coords="1829,505,1945,531"/>
+<area shape="rect" id="node27" href="$klib_8h.html" title="baseline/klib.h" alt="" coords="1056,505,1168,531"/>
+<area shape="rect" id="node28" href="$support_8h.html" title="baseline/support.h" alt="" coords="1302,505,1442,531"/>
+<area shape="rect" id="node29" href="$memory__constants_8h.html" title="kern/memory/memory\l_constants.h" alt="" coords="1466,497,1633,539"/>
+<area shape="rect" id="node15" href="$VConCtrl_8h.html" title="kern/vconsole/VConCtrl.h" alt="" coords="1855,587,2038,613"/>
+<area shape="rect" id="node16" href="$VCon_8h.html" title="kern/vconsole/VCon.h" alt="" coords="1867,661,2027,688"/>
+<area shape="rect" id="node20" href="$VConMode_8h.html" title="kern/vconsole/VConMode.h" alt="" coords="1648,661,1843,688"/>
+<area shape="rect" id="node21" href="$PaintContext_8h.html" title="kern/graphics/PaintContext.h" alt="" coords="2053,661,2259,688"/>
+<area shape="rect" id="node17" href="$VConBuf_8h.html" title="kern/vconsole/VConBuf.h" alt="" coords="1723,743,1903,770"/>
+<area shape="rect" id="node18" href="$VConChar_8h.html" title="kern/vconsole/VConChar.h" alt="" coords="1507,833,1696,859"/>
+<area shape="rect" id="node19" href="$VConLine_8h.html" title="kern/vconsole/VConLine.h" alt="" coords="1720,833,1907,859"/>
+<area shape="rect" id="node22" href="$VideoCol_8h.html" title="kern/video/color/VideoCol.h" alt="" coords="2032,833,2227,859"/>
+<area shape="rect" id="node23" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="2195,743,2365,770"/>
+<area shape="rect" id="node26" href="$PSFont_8h.html" title="kern/graphics/text\l/PSFont.h" alt="" coords="1982,736,2119,777"/>
+<area shape="rect" id="node24" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="2302,825,2498,867"/>
+<area shape="rect" id="node25" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="2293,915,2507,941"/>
+<area shape="rect" id="node35" href="$fat__types_8h.html" title="types and structures used for representing fat32 info " alt="" coords="612,259,705,285"/>
+</map>

@@ -151,3 +151,19 @@ manager had mechanisms for handling incoming I/O request packets; I would have
 liked to explore the message_from_void -> IO manager -> clients flow to handle
 'unexpected' I/O. The IoCompletionPort mechanism in Windows NT and epoll in Linux
 could be modeled this way and would be interesting. 
+
+Ahead of working on filesystems, I spent a considerable amount of time setting up
+an automated build and deployment system with doxygen integration. The idea was to
+do continuous integration with unit tests but I settled for one-click build-and-run.
+I set up a jenkins instance in docker that would build each branch. For simple builds,
+the Doxygen was run and the resulting website was automatically published. A copy of
+one of those documentation sites is included in this file. For other builds, a qemu
+instance was started and accessible over the network via vnc. 
+
+Although I was very excited to get all of the build and deployment stuff working, it
+ended up being faster to just use qemu locally, and without unit tests, Jenkins didn't
+provide very much value. I would like to explore (someday in the future) getting 
+real unit tests done for operating system components; I could see some sort of run-time
+mocking for OS-components combined with careful dependency management being 
+a useful approach. 
+

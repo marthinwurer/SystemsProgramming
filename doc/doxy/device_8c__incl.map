@@ -1,0 +1,30 @@
+<map id="kern/io/device.c" name="kern/io/device.c">
+<area shape="rect" id="node2" href="$device_8h.html" title="kern/io/device.h" alt="" coords="1691,80,1813,107"/>
+<area shape="rect" id="node3" href="$io__types_8h.html" title="io_types.h" alt="" coords="1709,155,1795,181"/>
+<area shape="rect" id="node4" href="$string_8h.html" title="string.h" alt="" coords="1798,401,1869,427"/>
+<area shape="rect" id="node6" href="$common_8h.html" title="baseline/common.h" alt="" coords="1585,483,1733,509"/>
+<area shape="rect" id="node10" href="$prettyprinter_8h.html" title="baseline/prettyprinter.h" alt="" coords="1747,311,1917,338"/>
+<area shape="rect" id="node11" href="$memshim_8h.html" title="kern/io/memshim.h" alt="" coords="1525,229,1672,256"/>
+<area shape="rect" id="node5" href="$stddef_8h.html" title="stddef.h" alt="" coords="1622,639,1695,666"/>
+<area shape="rect" id="node7" href="$types_8h.html" title="types.h" alt="" coords="1537,557,1607,584"/>
+<area shape="rect" id="node9" href="$ulib_8h.html" title="ulib.h" alt="" coords="1631,557,1687,584"/>
+<area shape="rect" id="node8" href="$stdint_8h.html" title="stdint.h" alt="" coords="537,811,607,837"/>
+<area shape="rect" id="node12" href="$memory__map_8h.html" title="kern/memory/memory\l_map.h" alt="" coords="1209,304,1375,345"/>
+<area shape="rect" id="node13" href="$x86arch_8h.html" title="x86arch.h" alt="" coords="1400,401,1485,427"/>
+<area shape="rect" id="node14" href="$c__io_8h.html" title="baseline/c_io.h" alt="" coords="733,401,849,427"/>
+<area shape="rect" id="node27" href="$klib_8h.html" title="baseline/klib.h" alt="" coords="1509,401,1621,427"/>
+<area shape="rect" id="node28" href="$support_8h.html" title="baseline/support.h" alt="" coords="1045,401,1185,427"/>
+<area shape="rect" id="node29" href="$memory__constants_8h.html" title="kern/memory/memory\l_constants.h" alt="" coords="1209,393,1375,435"/>
+<area shape="rect" id="node15" href="$VConCtrl_8h.html" title="kern/vconsole/VConCtrl.h" alt="" coords="639,483,822,509"/>
+<area shape="rect" id="node16" href="$VCon_8h.html" title="kern/vconsole/VCon.h" alt="" coords="651,557,811,584"/>
+<area shape="rect" id="node20" href="$VConMode_8h.html" title="kern/vconsole/VConMode.h" alt="" coords="835,557,1029,584"/>
+<area shape="rect" id="node21" href="$PaintContext_8h.html" title="kern/graphics/PaintContext.h" alt="" coords="421,557,627,584"/>
+<area shape="rect" id="node17" href="$VConBuf_8h.html" title="kern/vconsole/VConBuf.h" alt="" coords="795,639,975,666"/>
+<area shape="rect" id="node18" href="$VConChar_8h.html" title="kern/vconsole/VConChar.h" alt="" coords="744,729,933,755"/>
+<area shape="rect" id="node19" href="$VConLine_8h.html" title="kern/vconsole/VConLine.h" alt="" coords="957,729,1144,755"/>
+<area shape="rect" id="node22" href="$VideoCol_8h.html" title="kern/video/color/VideoCol.h" alt="" coords="475,729,669,755"/>
+<area shape="rect" id="node23" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="285,639,456,666"/>
+<area shape="rect" id="node26" href="$PSFont_8h.html" title="kern/graphics/text\l/PSFont.h" alt="" coords="481,632,618,673"/>
+<area shape="rect" id="node24" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="14,721,210,763"/>
+<area shape="rect" id="node25" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="5,811,219,837"/>
+</map>

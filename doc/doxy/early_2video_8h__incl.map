@@ -1,0 +1,7 @@
+<map id="include/kern/early/video.h" name="include/kern/early/video.h">
+<area shape="rect" id="node2" href="$VideoMode_8h.html" title="kern/video/VideoMode.h" alt="" coords="123,95,298,121"/>
+<area shape="rect" id="node3" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="125,169,296,196"/>
+<area shape="rect" id="node4" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="45,244,241,285"/>
+<area shape="rect" id="node6" href="$stdint_8h.html" title="stdint.h" alt="" coords="243,333,314,360"/>
+<area shape="rect" id="node5" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="5,333,219,360"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="include/kern/drivers/fat32/time.h" name="include/kern/drivers/fat32/time.h">
+<area shape="rect" id="node2" href="$fat_8c.html" title="implements several support functions for the FAT32 File System " alt="" coords="5,95,140,136"/>
+<area shape="rect" id="node3" href="$time_8c.html" title="kern/drivers/fat32\l/time.c" alt="" coords="164,95,299,136"/>
+<area shape="rect" id="node4" href="$pubfat_8h.html" title="include/kern/drivers\l/fat32/pubfat.h" alt="" coords="323,95,470,136"/>
+<area shape="rect" id="node5" href="$pubfat_8c.html" title="public interface to FAT32 filesystem " alt="" coords="329,184,464,225"/>
+</map>

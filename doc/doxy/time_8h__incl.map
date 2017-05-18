@@ -1,0 +1,8 @@
+<map id="include/kern/drivers/fat32/time.h" name="include/kern/drivers/fat32/time.h">
+<area shape="rect" id="node2" href="$common_8h.html" title="baseline/common.h" alt="" coords="13,184,161,211"/>
+<area shape="rect" id="node7" href="$fat__types_8h.html" title="types and structures used for representing fat32 info " alt="" coords="73,95,208,136"/>
+<area shape="rect" id="node3" href="$types_8h.html" title="types.h" alt="" coords="10,259,79,285"/>
+<area shape="rect" id="node5" href="$ulib_8h.html" title="ulib.h" alt="" coords="103,259,159,285"/>
+<area shape="rect" id="node4" href="$stdint_8h.html" title="stdint.h" alt="" coords="5,333,76,360"/>
+<area shape="rect" id="node6" href="$stddef_8h.html" title="stddef.h" alt="" coords="100,333,173,360"/>
+</map>

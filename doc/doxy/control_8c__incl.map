@@ -1,0 +1,26 @@
+<map id="kern/vconsole/control.c" name="kern/vconsole/control.c">
+<area shape="rect" id="node2" href="$control_8h.html" title="kern/vconsole/control.h" alt="" coords="271,87,442,114"/>
+<area shape="rect" id="node17" href="$startup_8h.html" title="baseline/startup.h" alt="" coords="628,87,765,114"/>
+<area shape="rect" id="node18" href="$text_8h.html" title="kern/graphics/text\l/text.h" alt="" coords="466,80,604,121"/>
+<area shape="rect" id="node20" href="$string_8h.html" title="string.h" alt="" coords="789,87,860,114"/>
+<area shape="rect" id="node22" href="$VConDrawFunc_8h.html" title="render/VConDrawFunc.h" alt="" coords="42,169,217,196"/>
+<area shape="rect" id="node23" href="$VConScrollFunc_8h.html" title="render/VConScrollFunc.h" alt="" coords="894,169,1072,196"/>
+<area shape="rect" id="node24" href="$draw_8h.html" title="render/draw.h" alt="" coords="82,87,191,114"/>
+<area shape="rect" id="node25" href="$scroll_8h.html" title="render/scroll.h" alt="" coords="936,87,1049,114"/>
+<area shape="rect" id="node3" href="$vconsole_2err_8h.html" title="kern/vconsole/err.h" alt="" coords="241,169,384,196"/>
+<area shape="rect" id="node4" href="$VConCtrl_8h.html" title="kern/vconsole/VConCtrl.h" alt="" coords="274,244,457,271"/>
+<area shape="rect" id="node5" href="$VCon_8h.html" title="kern/vconsole/VCon.h" alt="" coords="208,319,368,345"/>
+<area shape="rect" id="node10" href="$VConMode_8h.html" title="kern/vconsole/VConMode.h" alt="" coords="392,319,587,345"/>
+<area shape="rect" id="node11" href="$PaintContext_8h.html" title="kern/graphics/PaintContext.h" alt="" coords="611,319,816,345"/>
+<area shape="rect" id="node6" href="$VConBuf_8h.html" title="kern/vconsole/VConBuf.h" alt="" coords="198,401,378,427"/>
+<area shape="rect" id="node7" href="$VConChar_8h.html" title="kern/vconsole/VConChar.h" alt="" coords="256,490,446,517"/>
+<area shape="rect" id="node8" href="$stdint_8h.html" title="stdint.h" alt="" coords="473,572,544,599"/>
+<area shape="rect" id="node9" href="$VConLine_8h.html" title="kern/vconsole/VConLine.h" alt="" coords="46,490,232,517"/>
+<area shape="rect" id="node12" href="$VideoCol_8h.html" title="kern/video/color/VideoCol.h" alt="" coords="571,490,766,517"/>
+<area shape="rect" id="node13" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="734,401,904,427"/>
+<area shape="rect" id="node16" href="$PSFont_8h.html" title="kern/graphics/text\l/PSFont.h" alt="" coords="521,393,658,435"/>
+<area shape="rect" id="node14" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="841,483,1037,524"/>
+<area shape="rect" id="node15" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="832,572,1046,599"/>
+<area shape="rect" id="node19" href="$Point_8h.html" title="kern/graphics/Point.h" alt="" coords="460,169,616,196"/>
+<area shape="rect" id="node21" href="$stddef_8h.html" title="stddef.h" alt="" coords="788,169,861,196"/>
+</map>

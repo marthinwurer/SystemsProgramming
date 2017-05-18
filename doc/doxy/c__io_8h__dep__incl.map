@@ -1,0 +1,51 @@
+<map id="include/baseline/c_io.h" name="include/baseline/c_io.h">
+<area shape="rect" id="node2" href="$c__io_8c.html" title="baseline/c_io.c" alt="" coords="626,87,741,114"/>
+<area shape="rect" id="node3" href="$support_8c.html" title="baseline/support.c" alt="" coords="765,87,903,114"/>
+<area shape="rect" id="node4" href="$user_8c.html" title="baseline/user.c" alt="" coords="1073,445,1190,471"/>
+<area shape="rect" id="node5" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="1920,623,2052,650"/>
+<area shape="rect" id="node6" href="$early_2video_8c.html" title="kern/early/video.c" alt="" coords="2325,87,2460,114"/>
+<area shape="rect" id="node7" href="$main_8c.html" title="kern/main.c" alt="" coords="979,177,1076,203"/>
+<area shape="rect" id="node8" href="$intel_8c.html" title="kern/net/intel.c" alt="" coords="2127,177,2245,203"/>
+<area shape="rect" id="node9" href="$net__test_8c.html" title="kern/net/net_test.c" alt="" coords="2268,177,2411,203"/>
+<area shape="rect" id="node10" href="$pci_8c.html" title="kern/pci/pci.c" alt="" coords="2484,87,2589,114"/>
+<area shape="rect" id="node11" href="$marquee_8c.html" title="kern/util/marquee.c" alt="" coords="2614,87,2761,114"/>
+<area shape="rect" id="node12" href="$video_2video_8c.html" title="kern/video/video.c" alt="" coords="2785,87,2923,114"/>
+<area shape="rect" id="node13" href="$memory__map_8h.html" title="include/kern/memory\l/memory_map.h" alt="" coords="1741,80,1898,121"/>
+<area shape="rect" id="node14" href="$system_8c.html" title="baseline/system.c" alt="" coords="1203,623,1340,650"/>
+<area shape="rect" id="node15" href="$ramdisk_8c.html" title="kern/drivers/ramdisk\l/ramdisk.c" alt="" coords="2679,527,2831,568"/>
+<area shape="rect" id="node16" href="$memory__map__setup_8c.html" title="kern/early/memory_map\l_setup.c" alt="" coords="1925,169,2103,211"/>
+<area shape="rect" id="node17" href="$memory__map_8c.html" title="kern/memory/memory\l_map.c" alt="" coords="5,616,172,657"/>
+<area shape="rect" id="node18" href="$process_8h.html" title="include/baseline/process.h" alt="" coords="671,445,861,471"/>
+<area shape="rect" id="node27" href="$memshim_8h.html" title="include/kern/io/memshim.h" alt="" coords="1655,177,1850,203"/>
+<area shape="rect" id="node19" href="$clock_8c.html" title="baseline/clock.c" alt="" coords="197,623,319,650"/>
+<area shape="rect" id="node20" href="$process_8c.html" title="baseline/process.c" alt="" coords="992,534,1132,561"/>
+<area shape="rect" id="node21" href="$scheduler_8c.html" title="baseline/scheduler.c" alt="" coords="532,623,683,650"/>
+<area shape="rect" id="node22" href="$sio_8c.html" title="baseline/sio.c" alt="" coords="344,623,452,650"/>
+<area shape="rect" id="node23" href="$syscall_8c.html" title="baseline/syscall.c" alt="" coords="763,623,895,650"/>
+<area shape="rect" id="node24" href="$stack_8h.html" title="include/baseline/stack.h" alt="" coords="741,534,916,561"/>
+<area shape="rect" id="node25" href="$scheduler_8h.html" title="include/baseline/scheduler.h" alt="" coords="253,534,455,561"/>
+<area shape="rect" id="node26" href="$system_8h.html" title="include/baseline/system.h" alt="" coords="479,534,666,561"/>
+<area shape="rect" id="node28" href="$memshim_8c.html" title="kern/io/memshim.c" alt="" coords="1607,266,1752,293"/>
+<area shape="rect" id="node29" href="$io__types_8h.html" title="include/kern/io/io\l_types.h" alt="" coords="1776,259,1905,300"/>
+<area shape="rect" id="node30" href="$pubfat_8h.html" title="include/kern/drivers\l/fat32/pubfat.h" alt="" coords="2217,437,2363,479"/>
+<area shape="rect" id="node32" href="$ramdisk_8h.html" title="include/kern/drivers\l/ramdisk/ramdisk.h" alt="" coords="2845,437,2991,479"/>
+<area shape="rect" id="node33" href="$raw_8h.html" title="include/kern/drivers\l/rawfs/raw.h" alt="" coords="1501,527,1647,568"/>
+<area shape="rect" id="node35" href="$device_8h.html" title="include/kern/io/device.h" alt="" coords="2373,355,2543,382"/>
+<area shape="rect" id="node38" href="$router_8h.html" title="include/kern/io/router.h" alt="" coords="1691,445,1859,471"/>
+<area shape="rect" id="node42" href="$filesystem_8h.html" title="include/kern/io/filesystem.h" alt="" coords="1841,355,2035,382"/>
+<area shape="rect" id="node44" href="$message_8h.html" title="include/kern/io/message.h" alt="" coords="2059,355,2249,382"/>
+<area shape="rect" id="node46" href="$middleware_8h.html" title="include/kern/io/middleware.h" alt="" coords="1366,355,1569,382"/>
+<area shape="rect" id="node48" href="$mount_8h.html" title="include/kern/io/mount.h" alt="" coords="1593,355,1765,382"/>
+<area shape="rect" id="node50" href="$file_8h.html" title="Definition of the File&#45;Oriented I/O API. This is intended for consumption by user&#45;mode apps..." alt="" coords="1158,348,1291,389"/>
+<area shape="rect" id="node31" href="$pubfat_8c.html" title="public interface to FAT32 filesystem " alt="" coords="2277,527,2412,568"/>
+<area shape="rect" id="node34" href="$raw_8c.html" title="kern/drivers/rawfs\l/raw.c" alt="" coords="1507,616,1641,657"/>
+<area shape="rect" id="node36" href="$fat_8c.html" title="implements several support functions for the FAT32 File System " alt="" coords="2439,437,2573,479"/>
+<area shape="rect" id="node37" href="$device_8c.html" title="kern/io/device.c" alt="" coords="2597,445,2719,471"/>
+<area shape="rect" id="node39" href="$router_8c.html" title="kern/io/router.c" alt="" coords="1672,534,1791,561"/>
+<area shape="rect" id="node40" href="$file_8c.html" title="Implements the File&#45;Oriented I/O API. This is intended for consumption by user&#45;mode apps..." alt="" coords="1309,534,1426,561"/>
+<area shape="rect" id="node41" href="$simple__mount_8h.html" title="include/kern/ioapi\l/simple_mount.h" alt="" coords="1815,527,1949,568"/>
+<area shape="rect" id="node43" href="$filesystem_8c.html" title="kern/io/filesystem.c" alt="" coords="1884,445,2029,471"/>
+<area shape="rect" id="node45" href="$message_8c.html" title="kern/io/message.c" alt="" coords="2054,445,2193,471"/>
+<area shape="rect" id="node47" href="$middleware_8c.html" title="kern/io/middleware.c" alt="" coords="1367,445,1520,471"/>
+<area shape="rect" id="node49" href="$mount_8c.html" title="kern/io/mount.c" alt="" coords="1545,445,1667,471"/>
+</map>

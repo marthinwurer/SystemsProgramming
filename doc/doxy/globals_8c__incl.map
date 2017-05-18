@@ -1,0 +1,11 @@
+<map id="kern/video/globals.c" name="kern/video/globals.c">
+<area shape="rect" id="node2" href="$globals_8h.html" title="kern/video/globals.h" alt="" coords="236,80,385,107"/>
+<area shape="rect" id="node3" href="$VideoInfo_8h.html" title="kern/video/VideoInfo.h" alt="" coords="32,155,195,181"/>
+<area shape="rect" id="node6" href="$VideoMode_8h.html" title="kern/video/VideoMode.h" alt="" coords="223,155,398,181"/>
+<area shape="rect" id="node10" href="$EDIDRecord_8h.html" title="kern/vesa/EDIDRecord.h" alt="" coords="422,155,597,181"/>
+<area shape="rect" id="node4" href="$stdint_8h.html" title="stdint.h" alt="" coords="121,393,191,420"/>
+<area shape="rect" id="node5" href="$VideoStatus_8h.html" title="kern/video/VideoStatus.h" alt="" coords="22,229,205,256"/>
+<area shape="rect" id="node7" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="229,229,400,256"/>
+<area shape="rect" id="node8" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="217,304,413,345"/>
+<area shape="rect" id="node9" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="216,393,429,420"/>
+</map>

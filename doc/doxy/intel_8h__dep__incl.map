@@ -1,0 +1,6 @@
+<map id="include/kern/net/intel.h" name="include/kern/net/intel.h">
+<area shape="rect" id="node2" href="$system_8c.html" title="baseline/system.c" alt="" coords="5,80,143,107"/>
+<area shape="rect" id="node3" href="$user_8c.html" title="baseline/user.c" alt="" coords="167,80,285,107"/>
+<area shape="rect" id="node4" href="$intel_8c.html" title="kern/net/intel.c" alt="" coords="309,80,426,107"/>
+<area shape="rect" id="node5" href="$net__test_8c.html" title="kern/net/net_test.c" alt="" coords="449,80,592,107"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="kern/video/fb/fb.c" name="kern/video/fb/fb.c">
+<area shape="rect" id="node2" href="$fb_8h.html" title="kern/video/fb/fb.h" alt="" coords="317,80,449,107"/>
+<area shape="rect" id="node6" href="$stdint_8h.html" title="stdint.h" alt="" coords="295,319,366,345"/>
+<area shape="rect" id="node8" href="$video_2err_8h.html" title="kern/video/err.h" alt="" coords="555,80,677,107"/>
+<area shape="rect" id="node9" href="$stddef_8h.html" title="stddef.h" alt="" coords="701,80,774,107"/>
+<area shape="rect" id="node3" href="$VideoFb_8h.html" title="kern/video/fb/VideoFb.h" alt="" coords="163,155,333,181"/>
+<area shape="rect" id="node7" href="$VideoCol_8h.html" title="kern/video/color/VideoCol.h" alt="" coords="285,237,480,263"/>
+<area shape="rect" id="node4" href="$VideoColorSpace_8h.html" title="kern/video/color/VideoColor\lSpace.h" alt="" coords="14,229,210,271"/>
+<area shape="rect" id="node5" href="$VideoComp_8h.html" title="kern/video/color/VideoComp.h" alt="" coords="5,319,219,345"/>
+</map>

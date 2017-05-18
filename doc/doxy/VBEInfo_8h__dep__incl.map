@@ -1,0 +1,11 @@
+<map id="include/kern/vesa/VBEInfo.h" name="include/kern/vesa/VBEInfo.h">
+<area shape="rect" id="node2" href="$main_8c.html" title="kern/main.c" alt="" coords="5,169,103,196"/>
+<area shape="rect" id="node3" href="$vbe_8h.html" title="include/kern/vesa/vbe.h" alt="" coords="317,87,489,114"/>
+<area shape="rect" id="node9" href="$video_2video_8h.html" title="include/kern/video\l/video.h" alt="" coords="580,80,717,121"/>
+<area shape="rect" id="node4" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="425,169,557,196"/>
+<area shape="rect" id="node5" href="$early_2video_8c.html" title="kern/early/video.c" alt="" coords="581,169,716,196"/>
+<area shape="rect" id="node6" href="$edid_8c.html" title="kern/vesa/edid.c" alt="" coords="275,169,401,196"/>
+<area shape="rect" id="node7" href="$vbe_8c.html" title="kern/vesa/vbe.c" alt="" coords="127,169,250,196"/>
+<area shape="rect" id="node8" href="$video_2video_8c.html" title="kern/video/video.c" alt="" coords="740,169,877,196"/>
+<area shape="rect" id="node10" href="$system_8c.html" title="baseline/system.c" alt="" coords="901,169,1039,196"/>
+</map>

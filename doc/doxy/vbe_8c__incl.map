@@ -1,0 +1,12 @@
+<map id="kern/vesa/vbe.c" name="kern/vesa/vbe.c">
+<area shape="rect" id="node2" href="$vbe_8h.html" title="kern/vesa/vbe.h" alt="" coords="285,80,408,107"/>
+<area shape="rect" id="node8" href="$vesa_2err_8h.html" title="kern/vesa/err.h" alt="" coords="463,155,580,181"/>
+<area shape="rect" id="node9" href="$early_2realmode_8h.html" title="kern/early/realmode.h" alt="" coords="5,80,168,107"/>
+<area shape="rect" id="node10" href="$string_8h.html" title="string.h" alt="" coords="575,80,646,107"/>
+<area shape="rect" id="node3" href="$VBEInfo_8h.html" title="kern/vesa/VBEInfo.h" alt="" coords="81,155,231,181"/>
+<area shape="rect" id="node4" href="$stdint_8h.html" title="stdint.h" alt="" coords="9,229,79,256"/>
+<area shape="rect" id="node5" href="$VBEModeInfo_8h.html" title="kern/vesa/VBEModeInfo.h" alt="" coords="255,155,439,181"/>
+<area shape="rect" id="node6" href="$VBE2ModeInfo_8h.html" title="kern/vesa/VBE2ModeInfo.h" alt="" coords="393,229,585,256"/>
+<area shape="rect" id="node7" href="$VBE3ModeInfo_8h.html" title="kern/vesa/VBE3ModeInfo.h" alt="" coords="177,229,369,256"/>
+<area shape="rect" id="node11" href="$stddef_8h.html" title="stddef.h" alt="" coords="605,155,678,181"/>
+</map>

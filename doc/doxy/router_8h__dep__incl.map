@@ -1,0 +1,11 @@
+<map id="include/kern/io/router.h" name="include/kern/io/router.h">
+<area shape="rect" id="node2" href="$system_8c.html" title="baseline/system.c" alt="" coords="220,177,357,203"/>
+<area shape="rect" id="node3" href="$ramdisk_8c.html" title="kern/drivers/ramdisk\l/ramdisk.c" alt="" coords="571,80,723,121"/>
+<area shape="rect" id="node4" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="381,177,513,203"/>
+<area shape="rect" id="node5" href="$router_8c.html" title="kern/io/router.c" alt="" coords="748,87,867,114"/>
+<area shape="rect" id="node6" href="$file_8c.html" title="Implements the File&#45;Oriented I/O API. This is intended for consumption by user&#45;mode apps..." alt="" coords="890,87,1007,114"/>
+<area shape="rect" id="node7" href="$raw_8h.html" title="include/kern/drivers\l/rawfs/raw.h" alt="" coords="350,80,497,121"/>
+<area shape="rect" id="node9" href="$simple__mount_8h.html" title="include/kern/ioapi\l/simple_mount.h" alt="" coords="142,80,275,121"/>
+<area shape="rect" id="node8" href="$raw_8c.html" title="kern/drivers/rawfs\l/raw.c" alt="" coords="537,169,672,211"/>
+<area shape="rect" id="node10" href="$simple__mount_8c.html" title="kern/ioapi/simple_mount.c" alt="" coords="5,177,196,203"/>
+</map>

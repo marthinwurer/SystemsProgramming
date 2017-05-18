@@ -1,0 +1,10 @@
+<map id="VConCtrl_s" name="VConCtrl_s">
+<area shape="rect" id="node2" href="$structVCon__s.html" title="VCon_s" alt="" coords="193,363,264,389"/>
+<area shape="rect" id="node3" href="$structVConBuf__s.html" title="Structure representing a virtual console buffer. " alt="" coords="127,273,218,300"/>
+<area shape="rect" id="node4" href="$structVConChar__s.html" title="Structure representing a cell in a virtual console buffer. " alt="" coords="5,184,105,211"/>
+<area shape="rect" id="node5" href="$structVConLine__s.html" title="Structure for an entry in the Line Information Table. " alt="" coords="130,184,226,211"/>
+<area shape="rect" id="node6" href="$structPaintContext__s.html" title="PaintContext_s" alt="" coords="261,184,378,211"/>
+<area shape="rect" id="node7" href="$structPSFont__s.html" title="PSFont_s" alt="" coords="236,95,317,121"/>
+<area shape="rect" id="node8" href="$structVideoFb__s.html" title="VideoFb_s" alt="" coords="341,95,428,121"/>
+<area shape="rect" id="node9" href="$structVideoColorConfig__s.html" title="VideoColorConfig_s" alt="" coords="312,5,457,32"/>
+</map>

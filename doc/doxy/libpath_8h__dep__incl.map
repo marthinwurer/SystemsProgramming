@@ -1,0 +1,10 @@
+<map id="include/libpath.h" name="include/libpath.h">
+<area shape="rect" id="node2" href="$fat_8c.html" title="implements several support functions for the FAT32 File System " alt="" coords="5,80,140,121"/>
+<area shape="rect" id="node3" href="$pubfat_8c.html" title="public interface to FAT32 filesystem " alt="" coords="164,80,299,121"/>
+<area shape="rect" id="node4" href="$file_8c.html" title="Implements the File&#45;Oriented I/O API. This is intended for consumption by user&#45;mode apps..." alt="" coords="323,87,441,114"/>
+<area shape="rect" id="node5" href="$raw_8h.html" title="include/kern/drivers\l/rawfs/raw.h" alt="" coords="465,80,611,121"/>
+<area shape="rect" id="node9" href="$libpath_8c.html" title="Implements run&#45;time IO path manipulation support. " alt="" coords="635,87,737,114"/>
+<area shape="rect" id="node6" href="$system_8c.html" title="baseline/system.c" alt="" coords="309,177,447,203"/>
+<area shape="rect" id="node7" href="$raw_8c.html" title="kern/drivers/rawfs\l/raw.c" alt="" coords="471,169,605,211"/>
+<area shape="rect" id="node8" href="$early_2main_8c.html" title="kern/early/main.c" alt="" coords="629,177,761,203"/>
+</map>
