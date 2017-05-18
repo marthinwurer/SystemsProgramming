@@ -75,9 +75,19 @@ $(BUILD_DIR)/usb.image: $(IMAGE_BOOTSTRAP) $(IMAGE_FILES) $(BUILDIMAGE) #prog.di
 	$(BUILDIMAGE_V) -d usb -o $@ -b $(IMAGE_BOOTSTRAP) $(IMAGE_SETUP)
 
 $(BUILD_DIR)/floppy.image: $(IMAGE_FILES) $(BUILDIMAGE) #prog.dis 
-	$(BUILDIMAGE_V) -d floppy -o $@ -b $(IMAGE_FILES) 0x10000
+	$(BUILDIMAGE_V) -d floppy -o $@ -b $(IMAGE_BOOTSTRAP) $(IMAGE_SETUP)
 
+#
+# Flash image to usb device, only works on DSL machines
+#
+usb: $(BUILD_DIR)/usb.image
+	/usr/local/dcs/bin/dcopy "$<"
 
+#
+# Write image to floppy device
+#
+floppy: $(BUILD_DIR)/floppy.image
+	dd if="$<" of=/dev/fd0
 
 
 #
