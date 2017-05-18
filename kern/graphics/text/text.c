@@ -1,3 +1,14 @@
+/*
+** File: kern/graphics/text/text.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for drawing string/char functions
+**
+*/
+
 #include <kern/graphics/text/text.h>
 
 #include <kern/video/fb/fb.h>

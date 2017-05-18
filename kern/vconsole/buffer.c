@@ -1,3 +1,14 @@
+/*
+** File: kern/vconsole/buffer.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for all vcon_buf_* functions
+**
+*/
+
 #include <kern/vconsole/buffer.h>
 
 #include <stddef.h>

@@ -1,3 +1,16 @@
+/*
+** File: kern/vconsole/render/draw.h
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Private header file
+**
+** Function prototypes for drawing a line in a VCon instance
+**
+*/
+
 #ifndef _KERN_VCONSOLE_RENDER_DRAW_PH
 #define _KERN_VCONSOLE_RENDER_DRAW_PH
 

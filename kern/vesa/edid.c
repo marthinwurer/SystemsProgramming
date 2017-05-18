@@ -1,3 +1,13 @@
+/*
+** File: kern/vesa/edid.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Functions for getting the EDID, as well as parsing it.
+**
+*/
 
 #include <kern/early/realmode.h>
 #include <kern/vesa/vbe.h>

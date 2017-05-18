@@ -1,3 +1,13 @@
+/*
+** File: kern/early/gdt_init.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Contains the gdt_init function. Initializes the kernel GDT
+**
+*/
 
 #include <baseline/bootstrap.h>
 #include <kern/gdt/GDTEntry.h>

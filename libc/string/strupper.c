@@ -1,3 +1,13 @@
+/*
+** File: libc/string/strupper.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Contains the strupper function implementation
+**
+*/
 
 #include <string.h>
 #include <ctype.h>

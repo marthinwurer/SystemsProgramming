@@ -1,3 +1,14 @@
+/*
+** File: kern/util/marquee.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for marquee functions
+**
+*/
+
 #include <kern/util/marquee.h>
 #include <baseline/c_io.h>
 #include <string.h>

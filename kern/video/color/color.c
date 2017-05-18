@@ -1,3 +1,13 @@
+/*
+** File: kern/video/color/color.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for all color_* functions
+**
+*/
 
 #include <kern/video/color/color.h>
 

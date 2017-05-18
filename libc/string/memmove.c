@@ -1,3 +1,14 @@
+/*
+** File: libc/string/memmove.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Contains the memmove function implementation
+**
+*/
+
 #include <string.h>
 
 

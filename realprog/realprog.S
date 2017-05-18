@@ -1,3 +1,16 @@
+/*
+** File: realprog/realprog.S
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Contains the actual implementation of the int32 support function. This
+** program is loaded at 0x3000. The int32 function jumps here and this program
+** will do the return.
+**
+*/
+
 #include <baseline/bootstrap.h>
 #define REALPROG_STACK_SIZE 44
 

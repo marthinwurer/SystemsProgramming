@@ -1,3 +1,16 @@
+/*
+** File: kern/vga13/vga13.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** DEPRECATED!
+** VGA mode 0x13 driver implementation.
+**
+*/
+
+
 #include <kern/vga13/vga13.h>
 #include <kern/vgacolor.h>
 #include <kern/vga13/err.h>

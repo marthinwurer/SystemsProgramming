@@ -1,3 +1,14 @@
+/*
+** File: kern/early/realmode.S
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementation for the int32 support function
+** Actual implementation of int32 is located in realprog/realprog.S
+**
+*/
 
 #include <baseline/bootstrap.h>
 

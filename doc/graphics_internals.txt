@@ -65,14 +65,14 @@ VIDEO_MODE (128 bytes located at 0x3B00)
 
 This global contains the VBE mode number that is in use, as well as a VideoFb
 struct that encapsulates the linear framebuffer and color settings. The mode
-that is in use is the "best" available and is determined by the video_bestMode
-function (kern/early/video.c). This is done by filtering the mode list stored
-in VIDEO_INFO to modes that support 24 or 32 bpp color, support a linear
-framebuffer and have a direct color memory model. This filtered list is then
-compared with the supported timings from the monitor (using EDID). If we are
-unable to match a mode to a timing the monitor supports (or EDID fails) then we
-fallback to a "safe" timing. After picking the best mode, we try to change to it
-using VBE function 0x4F02.
+that is in use is the "best" available and is determined by the
+video_early_bestMode function (kern/early/video.c). This is done by filtering
+the mode list stored in VIDEO_INFO to modes that support 24 or 32 bpp color,
+support a linear framebuffer and have a direct color memory model. This
+filtered list is then compared with the supported timings from the monitor
+(using EDID). If we are unable to match a mode to a timing the monitor supports
+(or EDID fails) then we fallback to a "safe" timing. After picking the best
+mode, we try to change to it using VBE function 0x4F02.
 
 VIDEO_FONTSET (4096 bytes located at 0x3C00)
 
@@ -115,14 +115,16 @@ text and filling rectangles have been implemented.
 Virtual Console
 ===============
 The virtual console emulates the VGA text-compatible mode that c_io uses. There
-are three parts to the virtual console: controller, console and buffer. The
+are three parts to the virtual console: control, console and buffer. The
 controller (VConCtrl), handles the redrawing of the current virtual console
 instance, as well as switching between console instances. The console (VCon)
 handles putting characters into the buffer, scrolling, and keeps track of the
-cursor. The buffer (VConBuf) handles the management and contents of a console
-instance.
+cursor. The buffer (VConBuf) handles the contents of a console instance.
 
-A VConBuf contains two tables, lineTable and charTable. The lineTable, or Line
+buffer
+------
+The buffer module contains functions for maintaining a VConBuf. A VConBuf
+contains two tables, lineTable and charTable. The lineTable, or Line
 Information Table, has an entry for each row of the console. A lineTable entry
 is a 32-bit integer that contains a 14-bit length, 2-bit flags and a 16-bit
 offset fields. The length field determines how long the line is in characters.
@@ -130,4 +132,36 @@ The flags determine if the line needs to be redrawn. The offset field is an
 index to the start of the line in the charTable. The charTable, or Character
 Table, is a linear buffer containing the character and color data for the
 console.
+
+console
+-------
+The console module contains function for modifying a VCon struct. A VCon struct
+contains a VConBuf, the number of rows and columns, the scroll region and the
+cursor x and y position. Similiar to the c_io module, the vconsole
+console module has functions for putchar, putcharAt, puts and putsAt. The
+console module also has functions for changing the cursor and scrolling text.
+
+control
+-------
+The control module contains functions for maintaining the currently displayed
+VCon instance, as well redrawing.
+
+redrawProcess
+-------------
+This is a system process function defined in baseline/user.c and is spawned by
+the init process. This process repeatedly calls vcon_redraw and then sleeps for
+10ms. Ideally the process should block until the VCon has been modified, but I
+did not have time to implement this. So this process wastes CPU time redrawing
+when it probably doesn't need to.
+
+Modifications to c_io
+=====================
+the c_io module has been modified to use the virtual console interface instead
+of just writing to VGA video memory. To do this, a global variable named
+CIO_CONTROLLER contains a VConCtrl struct which contains a VCon instance. A
+new function, c_flush(), was added to redraw to the current console buffer to
+the screen. Flushing is done manually or automatically. If the global variable
+CIO_AUTOFLUSH is nonzero, c_flush() will be called after each call to c_put*
+or c_printf. If CIO_AUTOFLUSH is zero, c_flush() must be called manually or
+nothing will be displayed on screen.
 

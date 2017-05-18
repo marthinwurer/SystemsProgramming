@@ -1,3 +1,13 @@
+/*
+** File: kern/video/fb/fb.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for all fb_* functions
+**
+*/
 
 #include <kern/video/fb/fb.h>
 #include <kern/video/err.h>

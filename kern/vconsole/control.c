@@ -1,3 +1,13 @@
+/*
+** File: kern/vconsole/control.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for functions that act on a VConCtrl instance
+**
+*/
 
 #include <kern/vconsole/control.h>
 #include <baseline/startup.h>
