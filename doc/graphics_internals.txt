@@ -1,0 +1,133 @@
+Module: Graphics
+Contributors: Brennan Ringey
+===============================================================================
+
+I implemented a graphics system for the kernel. I then used this system to
+improve the c_io module, allowing for larger console sizes.
+
+Overall Design
+==============
+I decided to use a layered approach when designing the graphics system. When
+implementing this system, I started from the bottom layer to the top. The
+following layers are used in this system (from bottom to top):
+ * Video
+ * Framebuffer
+ * Graphics
+ * Virtual Console
+
+The video layer contains functions for performing VBE functions as well as
+global variables containing graphics controller information, available video
+modes, etc. The framebuffer layer provides an interface for plotting pixels on
+the linear framebuffer that was setup in the video layer. The graphics layer 
+provides functions for drawing shapes and text using the framebuffer layer.
+Finally, the virtual console uses the graphics layer to emulate a console.
+
+Currently, the graphics system is only accessible by the kernel. No new system
+calls were introduced. Since we do not have an actual userspace, I decided to
+focus my time on the kernel.
+
+Video Layer
+===========
+The video layer makes use of VBE and EDID. VBE (VESA BIOS Extensions) is a
+hardware-independent method of getting graphics controller information, as well
+as switching to better-than-VGA video modes. All VBE functions are performed by
+the int 0x10 instruction with AH=0x4F and AL=<VBE function>. EDID (Extended
+Display Identification Data) is a supplemental VBE function that provides the
+supported video timings of the monitor. VBE functions can only be called in
+real mode. To do this, the utility function int32, allows for calling BIOS
+interrupts from protected mode. Also, this utility function can only be called
+during the early initialization phase. So the initialization of the video layer
+is done in the early main() function (kern/early/main.c).
+
+Globals
+-------
+
+VIDEO_INFO (512 bytes located at 0x3800)
+
+This global contains the information retrieved from the VBE Function 4F00 or
+Return VBE Controller Information (vbe_getInfo in kern/vesa/vbe.c). This
+function returns a structure of 256 or 512 bytes. This structure contains the
+amount of video memory, OEM and product name strings and others. The structure
+returned from vbe_getInfo has pointers that may or may not point within the
+structure. This is problematic when accessing these pointers as the data may
+have been overwritten. To solve this, the struct is converted to a safer and a
+more compact version. The video_convertVBEInfo function handles the conversion
+of a VBEInfo struct to a VideoInfo struct (located in kern/video/video.c).
+
+VIDEO_EDID (128 bytes located at 0x3A00)
+
+This global contains the EDID Record retrieved from the supplemental VBE
+function 4F15. If the status member in the VIDEO_INFO struct has the
+VIDEO_EDID_SUPPORT bit set, then this global variable is set properly and is
+junk data otherwise.
+
+VIDEO_MODE (128 bytes located at 0x3B00)
+
+This global contains the VBE mode number that is in use, as well as a VideoFb
+struct that encapsulates the linear framebuffer and color settings. The mode
+that is in use is the "best" available and is determined by the video_bestMode
+function (kern/early/video.c). This is done by filtering the mode list stored
+in VIDEO_INFO to modes that support 24 or 32 bpp color, support a linear
+framebuffer and have a direct color memory model. This filtered list is then
+compared with the supported timings from the monitor (using EDID). If we are
+unable to match a mode to a timing the monitor supports (or EDID fails) then we
+fallback to a "safe" timing. After picking the best mode, we try to change to it
+using VBE function 0x4F02.
+
+VIDEO_FONTSET (4096 bytes located at 0x3C00)
+
+This global contains the default fontset, the BIOS fontset. It is copied using
+BIOS interrupt 0x10 (AX=0x1130, BX=0x0600). This fontset is a bitmap font of
+8x16 cells, 256 glyphs and is 4096 bytes long.
+
+Framebuffer Layer
+=================
+The framebuffer layer encapsulates the video mode that was setup in the video 
+layer (VideoFb). This framebuffer instance is stored in the VIDEO_MODE global
+variable. The following functions are defined for modifying a framebuffer:
+ * fb_putpixel, fb_putpixelf
+ * fb_putcols, fb_putcolsf
+ * fb_putrow, fb_putrowf
+ * fb_clear
+
+Each function except for clear has an ‘f’ or fast variant. These functions take
+an offset value instead of an x and y coordinate pair. Calculating an offset
+value from an x and y coordinate can be slow, so the idea here is to calculate
+it once, and increment it by pixel width or increment it by pitch. The putpixel
+functions set one pixel in the framebuffer at an x and y coordinate/offset
+value to a specific color. The putcols functions set a buffer of pixels at and
+x and y coordinate/offset value. The putrow functions work the same as putcols,
+except they assume the buffer size is same as the width of the framebuffer.
+
+The layout of color components for a pixel depend on the video mode, so the
+function color_getColor handles packing the individual red, green and blue
+components into a 32-bit integer. This integer is then used by the fb_put*
+functions.
+
+Graphics Layer
+==============
+The graphics layer provides functions for drawing shapes, lines and text onto a
+framebuffer. This layer also defines typedefs like Point, Size, Rect, and
+PaintContext. All functions use a PaintContext struct which determines the font
+and colors to use and where to draw to. Currently, only functions for drawing
+text and filling rectangles have been implemented.
+
+Virtual Console
+===============
+The virtual console emulates the VGA text-compatible mode that c_io uses. There
+are three parts to the virtual console: controller, console and buffer. The
+controller (VConCtrl), handles the redrawing of the current virtual console
+instance, as well as switching between console instances. The console (VCon)
+handles putting characters into the buffer, scrolling, and keeps track of the
+cursor. The buffer (VConBuf) handles the management and contents of a console
+instance.
+
+A VConBuf contains two tables, lineTable and charTable. The lineTable, or Line
+Information Table, has an entry for each row of the console. A lineTable entry
+is a 32-bit integer that contains a 14-bit length, 2-bit flags and a 16-bit
+offset fields. The length field determines how long the line is in characters.
+The flags determine if the line needs to be redrawn. The offset field is an
+index to the start of the line in the charTable. The charTable, or Character
+Table, is a linear buffer containing the character and color data for the
+console.
+

@@ -1,0 +1,65 @@
+Module: Early Init
+Contributors: Brennan Ringey
+===============================================================================
+
+Early init, or the early initialization phase, is a routine that the bootstrap
+jumps to after switching to protected mode. This module is located in
+kern/early. Once this routine is done, it then jumps to _start, like the
+bootstrap did originally. This adds an extra step for initializing things that
+cannot be initialized in system.c's init. The GDT setup in the bootstrap is
+replaced by a simplier one, called Early GDT. The original GDT is later
+initialized separately (in C) when the early init finishes.
+
+Here are the steps the early routine does:
+ * Load segment registers with the 32-bit code and data entries
+ * Setup a stack (same as _start)
+ * Clear BSS (if CLEAR_BSS_SEGMENT is defined)
+ * Initialize c_io
+ * call the main function
+ * check if the return code of main is nonzero, if so halt
+ * Initialize the kernel GDT (call gdt_init)
+ * Load the IDT and GDT registers
+ * Jump to to _start with the GDT_CODE segment
+
+
+Early GDT
+=========
+The early GDT is located at 0x2D10 and contains 5 entries (40 bytes long).
+The following entries are defined:
+ 0: null entry
+ 1: 32-bit Code segment
+ 2: 32-bit Data segment
+ 3: 16-bit code segment
+ 4: 16-bit data segment
+
+When the bootstrap transfers control to early init, the cs register is loaded
+with the 1st entry. All other segment registers are set to the 2nd entry.
+Entries 3 and 4 are used by the int32 utility function.
+
+
+Early main
+==========
+This function defined in kern/early/main.c contains early initialization code.
+This is the only place int32 can be used. Any initialization that requires the
+use of int32 goes here. Everything else can be initialized in baseline/system.c
+If a non-recoverable error occurs here, it is expected that this function will
+return nonzero.
+
+gdt_init
+========
+This function initializes the kernel GDT. This GDT is the same as it was
+defined originally in the bootstrap, however, we can use C instead of
+assembly.
+
+
+int32
+=====
+This function is used for calling BIOS functions from protected mode. The
+function is implemented as a separate binary, named realprog, and is loaded
+by the bootstrap at address 0x3000. The int32 function just jumps to 0x3000
+and realprog handles everything else.
+
+Basic outline of realprog:
+ * 
+
+
