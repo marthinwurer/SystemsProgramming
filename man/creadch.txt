@@ -1,0 +1,11 @@
+NAME
+	creadch - read one character from the console
+
+SYNOPSIS
+	int32_t creadch();
+
+DESCRIPTION
+	reads one character from the console and return it
+
+RETURN
+	the character read, or an error code

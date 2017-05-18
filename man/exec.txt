@@ -1,0 +1,24 @@
+NAME
+	exec - replace this program with a different one
+
+SYNOPSIS
+	int32_t exec( int32_t (*entry)(void *), void *arg, prio_t prio )
+
+DESCRIPTION
+	Starts executing another process in a new memory space. 
+	This process is given a pointer to a structure of arguments.
+	
+
+OPTIONS
+	int32_t (*entry)(void *)
+		the function to start executing
+	void *arg
+		A pointer to the arguments of the new program
+	prio_t
+		The priority to run the new process at
+
+RETURN
+	on success, does not return
+	on failure, an error code
+
+

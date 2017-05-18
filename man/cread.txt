@@ -1,0 +1,17 @@
+NAME
+	cread - read into a buffer from the console
+
+SYNOPSIS
+	int32_t cread( char *buf, uint32_t size )
+
+DESCRIPTION
+	reads up to 'size' characters from the console into 'buf'
+
+OPTIONS
+
+	size
+		the maximum number of characters to read
+
+RETURN
+		 the count of characters read, or an error code
+

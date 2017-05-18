@@ -1,0 +1,24 @@
+NAME
+	mmap
+
+SYNOPSIS
+	state_t mmap(void * vmem_start, void * pmem_start, size_t length, int * status)
+
+DESCRIPTION
+	mmap maps a physical address range into the current vitual address space. 
+	It can either map a set physical address range or the next availible one.
+
+OPTIONS
+	void * vmem_start
+		The virtual memory address to start mapping from. This address must 
+		be 4KB aligned.
+	void * pmem_start
+		The physical memory address to start mapping from. This address must 
+		be 4KB aligned. If this is NULL, then instead of a set range, the next
+		availible page is mapped.
+	size_t length
+		The length (in bytes) to map. This should be a multiple of 4KB. If not, 
+		it is rounded up.
+	int * status
+		This field currently does nothing.
+

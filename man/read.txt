@@ -1,0 +1,21 @@
+NAME
+	read - read into a buffer from a channel
+
+SYNOPSIS
+	int32_t read( uint32_t chan, char *buf, uint32_t size )
+
+DESCRIPTION
+	reads characters from a channel into a buffer. 
+
+OPTIONS
+	uint32_t chan
+		the channel to read from
+	char * buf
+		the buffer to read to
+	uint32_t size
+		the maximum number of characters to read
+
+RETURNS
+	the number of characters transfered or an error code.
+
+

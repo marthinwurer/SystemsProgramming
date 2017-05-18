@@ -1,0 +1,20 @@
+NAME
+	write - write from a buffer to a channel
+
+SYNOPSIS
+	int32_t write( uint32_t chan, const char *buf, uint32_t size )
+
+DESCRIPTION
+	writes characters from a buffer to a channel.
+
+OPTIONS
+	uint32_t chan
+		the channel to read from
+	char * buf
+		the buffer to read to
+	uint32_t size
+		the maximum number of characters to read
+
+RETURNS
+	the number of characters transfered or an error code.
+

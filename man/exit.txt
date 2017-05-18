@@ -1,0 +1,14 @@
+NAME
+	exit - terminate the calling process
+
+SYNOPSIS
+	void exit( uint32_t status )
+
+DESCRIPTION
+	Terminates the calling process with the given status. 
+
+	Does not return.
+
+OPTIONS
+	uint32_t status
+		the exit status of the program

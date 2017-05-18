@@ -1,0 +1,13 @@
+NAME
+	fork - create a new process
+
+SYNOPSIS
+	int32_t fork( void )
+
+DESCRIPTION
+	creates a new process with the same memory space
+
+RETURN
+	parent - the PID of the spawned process or -1 on failure
+	child - 0
+

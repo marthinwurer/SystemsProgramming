@@ -1,0 +1,17 @@
+NAME
+	kill - terminate a process with extreme prejudice
+
+SYNOPSIS
+	status_t kill( pid_t pid )
+
+DESCRIPTION
+	terminates the given process
+
+OPTIONS
+	pid_t pid
+		the pid of the process to kill
+
+RETURN
+	the result of the termination attempt
+
+
