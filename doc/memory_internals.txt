@@ -22,14 +22,14 @@ the lower 1MB are set to being used in the PAT.
 
 get_next_page and free_page
 ------------------------------------------------------------------------------
-Once the PAT is set up, pages can be allocated and freed. The get_next_page 
+Once the PAT is set up, pages can be allocated and freed. The get_next_page()
 function finds the next available page in the PAT and returns its address. 
 Performance is improved by caching the location in the table of the last 
 available page and starting the search from its location. The page is zero'd before it is 
 returned. If the search reaches around to the end of the PAT, the search loops
 back to the start. If no pages are found, then the kernel will panic. 
 
-The other main function for working with pages is the free_page function. It 
+The other main function for working with pages is the free_page() function. It 
 takes an aligned memory address as an argument and returns the success. It 
 will only fail if the memory addres that is given is not aligned. 
 
@@ -37,4 +37,30 @@ These two functions are at the core of the dynamic memory management.
 
 Identity Mapped Page Table
 ------------------------------------------------------------------------------
-After the PAT is set up, the 
+After the PAT is set up, the actual page tables can be set up. x86 paging is 
+set up with two levels of indirection. A Page Directory (PDE) points to a Page
+Table (PDE), which points to the physical address where the page starts. For
+kernel processes and interupt handling, an indentity mapped page table was
+used. An identity mapped page table maps virtual addresses 1:1 with physical 
+memory. 
+
+When setting up paging, the first step is to build the PDE. A new page is 
+obtained with the get_next_page() function. Next, new PTEs are added to the 
+PDE, and made to point to the correct addresses with the correct flags set. 
+
+Once the new page directory is set, the page fault ISR (which will be 
+triggered if any virtual memory is accessed that is not mapped) is installed,
+and the identity mapped page table is set to the current one.
+
+Seting the Current PDE
+------------------------------------------------------------------------------
+The process to set the current PDE is rather simple. First, the address of the
+PDE must be loaded into the control register %cr3. Then, the paging and 
+protection bits of the %cr0 register must be set. Once these are set, you are 
+now runing on virtual memory. 
+
+
+
+
+
+
