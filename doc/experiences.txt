@@ -52,7 +52,27 @@ Benjamin Maitland
 
 Brennan Ringey
 --------------------------------------------------------------------------------
+The int32 support function was almost scrapped since I had to rewrite it 3 times
+as it was always breaking. I spent at least 3 days trying to fix it before I got
+the idea for the early init routine. The int32 works, but it's not the best
+solution for calling BIOS functions from protected mode.
 
+We had quite a few problems with memory. We used a wiki page on github that
+contains a memory map of lower memory (0x0-0xFFFFF). This way we can keep track
+of who's using what. This helped somewhat, except for when a macro did not
+match up with the table and then the Ben's memory map got overwritten by my
+VIDEO_INFO block and things just broke. I also had an issue with my
+edid_getRecord function. There is not much documentation on the supplemental
+DDC VBE function other than it exists. I copied an example from osdev, that did
+not set the si:edi register pair. This register pair is a segment:offset pointer
+for where to store the EDID block. Since this was not set, it was junk, which
+strangely worked for me just fine but for others not so much. This combined
+with the incorrect macro became an annoying bug for everyone else.
+
+Drawing fonts in software without hardware acceleration is very slow as opposed
+to just writing a character in memory. The virtual console redraw implementation
+had to be rewritten since the first implementation was too slow. Output became
+garbled as each process spent most of its time drawing text.
 
 Nathan Castle
 --------------------------------------------------------------------------------
