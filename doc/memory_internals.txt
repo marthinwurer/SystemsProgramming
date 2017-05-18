@@ -1,0 +1,40 @@
+Memory Internals
+================
+
+Benjamin Maitland
+
+Memory Map
+-------------------------------------------------------------------------------
+The first part of setting up memory is getting the memory map of the system. 
+This is done in the early initialization, immediately after the bootloader is
+finished. I used Brennan's early initialization function to call the BIOS 
+interrupt 0x15 with argument 0xE820. This got me a list of all memory segments.
+
+Page Availibilty Table
+-------------------------------------------------------------------------------
+Once in the regular kernel, memory initialization can begin. First, the page
+availability table (PAT) is set up. The PAT is a bitmap with a bit for every 
+page. If the bit is set, then the page is in use. To set it up, the memory map 
+is walked, and the first usable memory segment that is not in the lower 1MB is
+selected to be used as the PAT. The memory segment is then zero'd. After this
+initial setup, the unusable parts of memory, the memory used in the PAT, and
+the lower 1MB are set to being used in the PAT. 
+
+get_next_page and free_page
+------------------------------------------------------------------------------
+Once the PAT is set up, pages can be allocated and freed. The get_next_page 
+function finds the next available page in the PAT and returns its address. 
+Performance is improved by caching the location in the table of the last 
+available page and starting the search from its location. The page is zero'd before it is 
+returned. If the search reaches around to the end of the PAT, the search loops
+back to the start. If no pages are found, then the kernel will panic. 
+
+The other main function for working with pages is the free_page function. It 
+takes an aligned memory address as an argument and returns the success. It 
+will only fail if the memory addres that is given is not aligned. 
+
+These two functions are at the core of the dynamic memory management.
+
+Identity Mapped Page Table
+------------------------------------------------------------------------------
+After the PAT is set up, the 
