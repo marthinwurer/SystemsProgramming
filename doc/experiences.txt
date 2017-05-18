@@ -108,7 +108,13 @@ interesting until there is something for the API to manipulate. I got a basic
 in-memory backing store working and a basic raw filesystem working, but these
 are uninteresting because they implement comparatively few operations. 
 
-To make things interesting, I decided to implement FAT32. I reviewed the 
+One challenge with building a large object-oriented I/O framework before building
+the corresponding filesystems and drivers is that it is difficult to do
+incremental testing. This bit me because I had to stop to fix a lot of bugs
+in a lot of code that I had written without testing. Most bug fixing was done
+with paper-and-pen analysis. I wish I had time to do that for my FAT32 implementation.
+
+Speaking of which, I decided to implement FAT32. I reviewed the 
 documentation, built an implementation plan, and figured out how it would
 work with my I/O framework. While this task seemed reasonable ahead of the 
 presentation on Thursday, in the context of having to finish a comparch project,
