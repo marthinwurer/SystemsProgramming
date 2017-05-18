@@ -1,3 +1,15 @@
+/*
+** File: kern/early/main.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**    Benjamin Maitland
+**
+** Contains the main function called by the early init routine.
+**
+*/
+
 #include <kern/early/realmode.h>
 #include <kern/early/video.h>
 #include <kern/vesa/vbe.h>

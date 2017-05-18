@@ -1,3 +1,14 @@
+/*
+** File: kern/vconsole/render/draw.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Function implementations for redrawing a line of a VCon for
+** VCON_VGATEXT and VCON_GRAPHICS modes.
+**
+*/
 
 #include "draw.h"
 

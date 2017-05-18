@@ -1,3 +1,13 @@
+/*
+** File: kern/video/video.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for all video_* functions
+**
+*/
 
 #include <kern/vesa/vbe.h>
 #include <kern/video/video.h>

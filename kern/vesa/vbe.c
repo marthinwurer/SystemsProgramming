@@ -1,3 +1,13 @@
+/*
+** File: kern/vesa/vbe.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Functions for performing all VBE functions
+**
+*/
 
 #include <kern/vesa/vbe.h>
 #include <kern/vesa/err.h>

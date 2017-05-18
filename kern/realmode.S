@@ -1,3 +1,15 @@
+/*
+** File: kern/realmode.S
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** DEPRECATED!
+** This is the old int32 utility function. File does not get compiled.
+** Do not use.
+**
+*/
 
 	.arch i386
 	.globl __init_int32, __int32

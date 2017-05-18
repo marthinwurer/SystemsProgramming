@@ -1,3 +1,14 @@
+/*
+** File: kern/graphics/shapes/rect.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for rect draw/fill functions
+**
+*/
+
 #include <kern/graphics/shapes/rect.h>
 
 #include <kern/video/fb/fb.h>

@@ -1,3 +1,13 @@
+/*
+** File: libc/string/strpos.c
+**
+** Author: Nathan Castle (nxc4524)
+**
+** Contributors:
+**
+** Contains the strpos function implementation
+**
+*/
 
 #include <string.h>
 #include <ctype.h>

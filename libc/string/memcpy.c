@@ -1,3 +1,14 @@
+/*
+** File: libc/string/memcpy.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Contains the memcpy function implementation
+**
+*/
+
 #include <string.h>
 
 void* memcpy(void *restrict destptr, const void *restrict srcptr, size_t n) {

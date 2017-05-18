@@ -1,3 +1,14 @@
+/*
+** File: libc/string/memcmp.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Contains the memcmp implementation
+**
+*/
+
 #include <string.h>
 
 int memcmp(const void *leftPtr, const void *rightPtr, size_t n) {

@@ -1,3 +1,13 @@
+/*
+** File: kern/vconsole/console.c
+**
+** Author: Brennan Ringey (bjr1251)
+**
+** Contributors:
+**
+** Implementations for functions that modify a VCon instance
+**
+*/
 
 #include <kern/vconsole/console.h>
 #include <kern/vconsole/control.h>

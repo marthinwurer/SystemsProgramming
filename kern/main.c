@@ -8,6 +8,7 @@
 ** Contributor:	Warren R. Carithers
 **
 ** Description:	Dummy main program
+** DEPRECATED
 */
 
 #include <baseline/support.h>
