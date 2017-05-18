@@ -26,7 +26,28 @@ limited.
 
 Benjamin Maitland
 --------------------------------------------------------------------------------
+My role in the project was team leader. There wasn't too much to do as team 
+lead; pretty much the only thing that fell upon me was the submission and 
+setting up the git repo. Most important decisions were arrived at through group
+consensus. 
 
+Most of my issues were with not fully reading the documentation, missing things
+fully explained there, and bashing my head against the wall trying to fix the 
+problems that I created for myself. There's not too much to improve here beyond
+reading it more throughly. 
+
+My other big problem was time management. Balancing this class with my others 
+and a new eboard role was very difficult, especially with the rear-loaded class
+schedule. I feel like I got much less done than I wanted to, and that it was 
+mainly my fault. A lot of the things that I wanted to do would have helped my
+team out, like a real malloc, and getting user mode and mmap done sooner would 
+have enabled them to make programs that interacted better with each other.
+
+Another large challenge was when I dd'd my laptop hard drive instead of the
+flash drive that I intended, which wiped my boot sector. This took away a bunch
+of time as well as a lost me a bit of code that hadn't been pushed to the remote
+repository. It was definitely a learning experience, and at least I got to demo
+our code on laptop hardware. 
 
 Brennan Ringey
 --------------------------------------------------------------------------------
